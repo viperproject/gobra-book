@@ -4,3 +4,16 @@ language = "en"
 multilingual = false
 src = "src"
 title = "Practical Program Verification in Go with Gobra"
+
+[output.html]
+theme = "theme"
+additional-js = [
+              "editor.js",
+              "mode-golang.js",
+              "mode-gobra.js",
+              ]
+mathjax-support = true
+
+[output.html.playground]
+editable = true
+copy-js = true
