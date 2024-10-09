@@ -21,7 +21,7 @@
 - [Ghost Code](./basic-ghost.md)
 
 # Memory: Permissions and the Heap
-
+- [Permission](./permission.md)
 # Abstraction and Information Hiding
 
 # Interfaces
@@ -31,6 +31,6 @@
 # Advanced topics
 
 ---
-
+[Playground](./playground.md)
 [Test Page (to be removed later)](./test-page.md)
 [References](./references.md)
