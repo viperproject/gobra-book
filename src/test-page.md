@@ -1,5 +1,5 @@
 # Test Page
-
+![gobra logo](assets/gobra.svg)
 ## Go block
 ```go,editable
 package tutorial
