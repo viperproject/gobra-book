@@ -8,9 +8,8 @@
 # Installation 
 - [Installation](./install.md)
 
-# Getting Started with Specifications and Verification
-- [Getting started](./getting-started.md)
-- [Basic specifications](./spec.md)
+# Basic Specifications and Verification
+- [Basic specifications](./basic-specs.md)
     - [Pre and Post-conditions]()
     - [Clients and Assert]()
 - [Array Operations](./basic-array.md)

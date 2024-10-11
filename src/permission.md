@@ -60,4 +60,17 @@ func topup(a *Account, amount int) {
 [//]: # ( for pure functions (side effect free) returned implicitly)
 
 
-## Abstracting access to unbounded datastructures with predicates
+## Abstracting access to unbounded Datastructures with predicates
+
+```go
+type Node struct {
+	value int
+	next  *Node
+}
+```
+
+```gobra
+pred llist(ptr *Node) {
+  acc(&ptr.value) && acc(&ptr.next) && (ptr.next != nil ==> llist(ptr.next))
+}
+```

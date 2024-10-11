@@ -1,6 +1,14 @@
 [book]
-authors = ["João Pereira"]
+authors = ["Ali Gottschall", "João Pereira"]
 language = "en"
 multilingual = false
 src = "src"
-title = "Practical Program Verification in Go with Gobra"
+title = "The Gobra Book"
+description = "Formally Verifying Go Programs with Gobra"
+
+[output.html]
+mathjax-support = true
+
+[output.html.code.hidelines]
+gobra = "~"
+go    = "~"
