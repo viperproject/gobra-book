@@ -9,20 +9,20 @@ Goals
 -->
 
 In this section we introduce the verification of functions with preconditions and postconditions and how we can specify them in Gobra with `requires` and `ensures`.
-First we give an abstract overview and then make look at examples with Newton's Method.
+First, we give an abstract overview and then take look at examples with Newton's Method.
 
 
 In simple terms, we want to be sure that our functions compute what they should do.
 But how can we differentiate between a correct and faulty implementation?
-One persons feature may be another persons bug.
-First we need to formalize the idea of *compute what they should do*.
-For this purpose we introduce specifications.
+One person's feature may be another person's bug.
+We need to formalize the idea of *computing what they should do*.
+For this purpose, we introduce specifications.
 Looking at functions, they come in the form of **preconditions** and **postconditions**.
 
 
-It is the programmers job to write the specification and the Gobra's job to prove whether a function satisfies its specification.
+It is the programmers job to write the specification, and it is Gobra's job to prove whether a function satisfies its specification.
 
-1. A precondition of a function must be satisfied whenever the function is called.
+1. A function's precondition must be satisfied whenever the function is called.
 2. Assuming the precondition, the verifier must be able to deduce that the postcondition of a function holds whenever it returns.
 
 If the first two points hold, the caller can assume that the precondition holds.
@@ -33,8 +33,8 @@ Postcondition might not hold.
 -->
 
 We can view it as a contract between the caller and the callee:
-It is an obligation of the caller to satisfy the precondition.
-Likewise it is an obligation of the callee to satisfy the postcondition.
+The caller must satisfy the precondition.
+Likewise, the callee must satisfy the postcondition.
 
 
 
@@ -55,7 +55,7 @@ func newton(x, y int) int {
 	return x/2 + y / 2 / x
 }
 ```
-Note that for now we use `int` instead of floating-point numbers.
+Note that for now, we use `int` instead of floating-point numbers.
 ```go
 // we can use x=y as an initial guess
 newton(4, 4) // 2
@@ -78,10 +78,10 @@ func newton(x, y int) (res int) {
 
 <!-- panic: runtime error: integer divide by zero -->
 Parsing the comment we extract the following assumptions
-- For `x==0` we run in to a divide by zero error and the program `panics`
+- For `x==0` we run into a divide by zero error and the program `panics`
 - The square root is only defined for positive numbers so we require `y>0` 
 
-Of course we could add checks for these conditions and add error handling.
+Of course, we could add checks for these conditions and add error handling.
 ```go
 ~import (
 	~"errors"
@@ -97,18 +97,18 @@ Of course we could add checks for these conditions and add error handling.
 	~return x/2 + y / 2 / x
 ~}
 ```
-These checks happen at dynamically (at runtime).
-Next we show how Gobra can verify that we never run into a situation where the checks would trigger.
+These checks happen dynamically (at runtime).
+Next, we show how Gobra can verify that we never run into a situation where the checks would trigger.
 
 ## Precondition and Postconditions in Gobra
-Go conveniently allows named returned values that allow us to document them and also use them in specifications.
+Go conveniently has named returned values that allow us to document them and also use them in specifications.
 In Gobra we can add preconditions with the keyword `requires`
 
 ```go
 //@ requires x != 0 && y > 0
 func newton(x, y int) int
 ```
-Instead of combining both assertions with the and operator we can equivalently write them on two lines:
+Instead of combining both assertions with the logical and operator, we can equivalently write them on two lines:
 ```go
 //@ requires x != 0
 //@ requires y > 0
@@ -124,7 +124,7 @@ newton(0, 4)  // error: Assertion x != 0 might not hold.
 ```
 <!-- TODO talk about only first error reported -->
 For constant values this is easy to check.
-But we what if we have an `arg` we know nothing about?
+But what if we have an `arg` we know nothing about?
 
 ```go
 func client(arg int) {
@@ -140,9 +140,9 @@ func square(x int) (res int) {
 }
 ```
 Gobra has to check, that for an arbitrary integer `x`, the result is always non-negative.
-In this case it succeeds, but in general this can be a hard problem and the verifier may  [time out](./basic-specs.md#verifier-timeout)
+In this case, it succeeds, but in general, this can be a hard problem and the verifier may  [time out](./basic-specs.md#verifier-timeout)
 
-In the comments we write informally what we know about the variables at that point.
+In the comments, we write informally what we know about the variables at that point.
 ```go
 func client(arg int) {
 	// {arg: ?}
@@ -190,7 +190,7 @@ func foo(n int)
 ```
 
 <!-- strength of conditions -->
-<!--  strenghten pre, weaken post -->
+<!--  strengthen pre, weaken post -->
 <!--  Overconstraining e.g. if they imply false -->
 <!-- talk about default assertions -->
 
