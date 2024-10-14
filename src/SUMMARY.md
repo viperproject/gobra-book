@@ -31,5 +31,4 @@
 
 ---
 [Playground](./playground.md)
-[Test Page (to be removed later)](./test-page.md)
 [References](./references.md)
