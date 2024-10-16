@@ -1,1 +1,1 @@
-# Formally Verifying Go Programs with Gobra
+# Practical Program Verification in Go with Gobra
