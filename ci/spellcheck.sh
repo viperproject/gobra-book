@@ -51,6 +51,15 @@ if [[ "$mode" == "list" && ! -f "$dict_filename" ]]; then
     exit 1
 fi
 
+remove_math() {
+    sed 's/\\\\\[[^]]*\\\\\]//g; s/\\\\([^)]*\\\\)//g' "$1"
+}
+
+remove_code() {
+    # [[^`]*/
+    sed '/^```/,/```/d; s/`[^`]*`//g' "$1"
+}
+
 if [[ ! -f "$dict_filename" ]]; then
     # Pre-check mode: generates dictionary of words aspell consider typos.
     # After user validates that this file contains only valid words, we can
@@ -58,8 +67,8 @@ if [[ ! -f "$dict_filename" ]]; then
     echo "Scanning files to generate dictionary file '$dict_filename'."
     echo "Please check that it doesn't contain any misspellings."
 
-    echo "personal_ws-1.1 en 0 utf-8" > "$dict_filename"
-    cat "${markdown_sources[@]}" | aspell --ignore 3 list | sort -u >> "$dict_filename"
+    echo "personal_ws-1.1 en 0 utf-8" >"$dict_filename"
+    cat "${markdown_sources[@]}" | aspell --ignore 3 list | sort -u >>"$dict_filename"
 elif [[ "$mode" == "list" ]]; then
     # List (default) mode: scan all files, report errors.
     declare -i retval=0
@@ -72,7 +81,7 @@ elif [[ "$mode" == "list" ]]; then
     fi
 
     for fname in "${markdown_sources[@]}"; do
-        command=$(aspell --ignore 3 --personal="$dict_path" "$mode" < "$fname")
+        command=$(remove_code "$fname" | remove_math - | aspell --ignore 3 --personal="$dict_path" "$mode")
         if [[ -n "$command" ]]; then
             for error in $command; do
                 echo "$error"
