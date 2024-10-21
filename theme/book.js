@@ -198,12 +198,6 @@ window.onunload = function () {};
   });
 
   function addButtonHidden(block, buttons) {
-    const lines = Array.from(block.querySelectorAll(".boring"));
-    if (!lines.length) {
-      return;
-    }
-    block.classList.add("hide-boring");
-
     const button = document.createElement("button");
     button.className = "fa fa-eye";
     button.title = "Show hidden lines";
@@ -211,9 +205,10 @@ window.onunload = function () {};
 
     buttons.insertBefore(button, buttons.firstChild);
 
-    fdl;
+    let editor = ace.edit(block);
     function toggler() {
       let hidden = true;
+      toggleCommentedLines(editor);
       return function (e) {
         const t = e.target;
         t.setAttribute("aria-label", t.title);
