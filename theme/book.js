@@ -4,11 +4,54 @@
 window.onunload = function () { };
 
 (function codeSnippets() {
-    function fetch_with_timeout(url, options, timeout = 6000) {
+    function fetch_with_timeout(url, options, timeout = 20000) {
         return Promise.race([
             fetch(url, options),
             new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout))
         ]);
+    }
+
+    function verify_gobra_code(code_block) {
+        let result_block = code_block.querySelector(".result");
+        if (!result_block) {
+            result_block = document.createElement('code');
+            result_block.className = 'result hljs language-bash';
+            code_block.append(result_block);
+        }
+        result_block.innerText = "Verifying...";
+
+        fetch_with_timeout("https://gobra.void.gschall.ch/verify", {
+            "headers": {
+                "Accept": "application/json, text/javascript, */*; q=0.01",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            },
+            "body": new URLSearchParams({body: playground_text(code_block)}),
+            "method": "POST",
+        })
+        .then(response => response.json())
+        .then(({
+            verified,
+            timeout,
+            errors,
+            duration
+        }) => {
+            duration = Number(duration).toFixed(2) + " seconds"
+            if (verified) {
+                result_block.innerHTML = `<i class="fa fa-check-circle-o" aria-hidden="true"></i>`
+                result_block.innerHTML += `<span> Verified successfully in ${duration}</span>`
+            } else if (timeout){
+                result_block.innerHTML = `<i class="fa fa-clock-o" aria-hidden="true"></i>`
+                result_block.innerHTML += `<span> Timeout after ${duration}</span>`
+            } else {
+                result_block.innerHTML = `<i class="fa fa-times" aria-hidden="true"></i>`
+                result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`
+                result_block.innerHTML += errors.map((err, i) => {
+                        // let position = `(${err.Position.line}, ${err.Position.char})`
+                        // TODO highlight in editor
+                        return `<p>ERROR: ${err.message}</p>`
+                    }).join("")
+            }
+        }).catch(error => result_block.innerText = "Playground Communication: " + error.message);
     }
 
     function run_go_code(code_block) {
@@ -20,29 +63,17 @@ window.onunload = function () { };
         }
         result_block.innerText = "Running...";
 
-        let text = playground_text(code_block);
-
-        const body = new URLSearchParams({
-            version: 2,
-            body: text,
-            withVet: true
-        })
-
-        // CORS error
-        // go_playground = "https://go.dev/_/compile?backend="
-        // TODO
-        // verify
-        fetch_with_timeout("http://localhost:8090/compile", {
-            "credentials": "include",
+        fetch_with_timeout("https://gobra.void.gschall.ch/run", {
             "headers": {
                 "Accept": "application/json, text/javascript, */*; q=0.01",
                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "Pragma": "no-cache",
-                "Cache-Control": "no-cache"
             },
-            body,
+            "body": new URLSearchParams({
+                version: 2,
+                body: playground_text(code_block),
+                withVet: true,
+            }),
             "method": "POST",
-            "mode": "cors"
         })
         .then(response => response.json())
         .then(response => {
@@ -149,6 +180,7 @@ window.onunload = function () { };
         addButtonHidden(block, buttons)
         addButtonClipboard(block, buttons)
         addButtonRun(block, buttons)
+        addButtonVerify(block, buttons)
         addButtonUndo(block, buttons)
     })
 
@@ -200,6 +232,9 @@ window.onunload = function () { };
         if (block.classList.contains("no_run")) {
             return
         }
+        if (block.classList.contains("language-gobra")) {
+            return
+        }
         const button = document.createElement('button');
         button.className = 'fa fa-play play-button';
         button.title = 'Run this code';
@@ -218,6 +253,31 @@ window.onunload = function () { };
                     },
                     exec: _editor => run_go_code(block)
             });
+        }
+    }
+
+    function addButtonVerify(block, buttons) {
+        if (block.classList.contains("no_run")) {
+            return
+        }
+        const button = document.createElement('button');
+        button.className = 'fa fa-check-circle-o verify-button';
+        button.title = 'Verify this code';
+        button.setAttribute('aria-label', button.title);
+        button.addEventListener('click', (e) => verify_gobra_code(buttons.parentNode))
+
+        buttons.insertBefore(button, buttons.firstChild);
+
+        if (block.classList.contains("editable")) {
+            let editor = window.ace.edit(block);
+            // editor.commands.addCommand({
+            //         name: "run",
+            //         bindKey: {
+            //             win: "Ctrl-Enter",
+            //             mac: "Ctrl-Enter"
+            //         },
+            //         exec: _editor => run_go_code(block)
+            // });
         }
     }
 
