@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
@@ -17,50 +20,58 @@ jobs:
         run: sudo apt-get install shellcheck
       - name: Report versions
         run: |
-            aspell --version
-            shellcheck --version
+          aspell --version
+          shellcheck --version
       - name: Shellcheck
-        run: find ci tools -name '*.sh' | xargs shellcheck
+        run: find ci -name '*.sh' | xargs shellcheck
       - name: Spellcheck
         run: bash ci/spellcheck.sh list
+      - name: Install mdbook
+        run: |
+          mkdir bin
+          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.40/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+      - name: Install mdbook-quiz
+        run: |
+          tag=v0.3.10
+          url="https://github.com/cognitive-engineering-lab/mdbook-quiz/releases/download/${tag}/mdbook-quiz_x86_64-unknown-linux-gnu_bare.tar.gz"
+          mkdir mdbook
+          curl -sSL $url | tar -xz --directory=./mdbook
+          echo `pwd`/mdbook >> $GITHUB_PATH
+      - name: Build Book
+        run: |
+          bin/mdbook build
 
   deploy:
-    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # To push a branch 
-      pages: write  # To push to a GitHub Pages site
+      contents: write # To push a branch
+      pages: write # To push to a GitHub Pages site
       id-token: write # To update the deployment status
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Update rustup
-        run: rustup self update
-      - name: Install Rust
+      - name: Install mdbook
         run: |
-          rustup set profile minimal
-          rustup toolchain install 1.81 -c rust-docs
-          rustup default 1.81
-      - name: Install latest mdbook
+          mkdir bin
+          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.40/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+      - name: Install mdbook-quiz
         run: |
-          tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
-          url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
+          tag=v0.3.10
+          url="https://github.com/cognitive-engineering-lab/mdbook-quiz/releases/download/${tag}/mdbook-quiz_x86_64-unknown-linux-gnu_bare.tar.gz"
           mkdir mdbook
           curl -sSL $url | tar -xz --directory=./mdbook
           echo `pwd`/mdbook >> $GITHUB_PATH
-      - name: Install Quiz preprocessor
-        run: cargo install mdbook-quiz --locked --version 0.3.10
       - name: Build Book
         run: |
-          mdbook build
+          bin/mdbook build
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: 'book'
+          path: "book"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

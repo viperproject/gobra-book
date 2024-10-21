@@ -43,7 +43,6 @@ mode=${1:-"check"}
 # so we should use a copy of our dictionary.
 dict_path="/tmp/dictionary.txt"
 
-
 # Error if running in list (CI) mode and there isn't a dictionary file;
 # creating one in CI won't do any good :(
 if [[ "$mode" == "list" && ! -f "$dict_filename" ]]; then
@@ -51,12 +50,14 @@ if [[ "$mode" == "list" && ! -f "$dict_filename" ]]; then
     exit 1
 fi
 
+# ignore math for spellchecking
 remove_math() {
     sed 's/\\\\\[[^]]*\\\\\]//g; s/\\\\([^)]*\\\\)//g' "$1"
 }
 
+# ignore markdown code blocks for spellchecking
 remove_code() {
-    # [[^`]*/
+    # shellcheck disable=SC2016
     sed '/^```/,/```/d; s/`[^`]*`//g' "$1"
 }
 
