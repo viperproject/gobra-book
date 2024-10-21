@@ -44,12 +44,14 @@ var DocCommentHighlightRules = require("./doc_comment_highlight_rules").DocComme
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 var GobraHighlightRules = function () {
     // TODO: incomplete list of keywords (look at the Antlr4 grammar or the treesitter-gobra project)
+    var gobra_keywords = "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|assume|apply|inhale|exhale|assert|ghost|implements|unfolding|let|fold|unfold|decreases"
+    var gobra_operators = "=>|<==>|<==|::|in|===|!=="
     var keywords = (
-        "ensures|requires|invariant|forall|exists|pure|ghost|" +
         "else|break|case|return|goto|if|const|select|" +
         "continue|struct|default|switch|for|range|" +
         "func|import|package|chan|defer|fallthrough|go|interface|map|range|" +
-        "select|type|var");
+        "select|type|var|"+gobra_keywords);
+
     var builtinTypes = ("string|uint8|uint16|uint32|uint64|int8|int16|int32|int64|float32|" +
         "float64|complex64|complex128|byte|rune|uint|int|uintptr|bool|error");
     var builtinFunctions = ("new|close|cap|copy|panic|panicln|print|println|len|make|delete|real|recover|imag|append|acc");
@@ -63,6 +65,11 @@ var GobraHighlightRules = function () {
     var stringEscapeRe = "\\\\(?:[0-7]{3}|x\\h{2}|u{4}|U\\h{6}|[abfnrtv'\"\\\\])".replace(/\\h/g, "[a-fA-F\\d]");
     this.$rules = {
         "start": [
+                {
+                    token : "assertion",
+                    regex : /\/\/\s*@/
+                    // TODO could add new group like for comments (especially for the go mode)
+                 },
             {
                 token: "comment",
                 regex: "\\/\\/.*$"
@@ -107,7 +114,7 @@ var GobraHighlightRules = function () {
                 regex: "[a-zA-Z_$][a-zA-Z0-9_$]*\\b\\(?"
             }, {
                 token: "keyword.operator",
-                regex: "!|\\$|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|==|=|!=|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|==>"
+                regex: "!|\\$|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|==|=|!=|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|"+gobra_operators
             }, {
                 token: "punctuation.operator",
                 regex: "\\?|\\:|\\,|\\;|\\."

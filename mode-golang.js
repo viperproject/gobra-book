@@ -43,10 +43,12 @@ ace.define("ace/mode/golang_highlight_rules",["require","exports","module","ace/
 var DocCommentHighlightRules = require("./doc_comment_highlight_rules").DocCommentHighlightRules;
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 var GolangHighlightRules = function () {
+    var gobra_keywords = "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|assume|apply|inhale|exhale|assert|ghost|implements|unfolding|let|fold|unfold|decreases"
+    var gobra_operators = "=>|<==>|<==|::|in|===|!=="
     var keywords = ("else|break|case|return|goto|if|const|select|" +
         "continue|struct|default|switch|for|range|" +
         "func|import|package|chan|defer|fallthrough|go|interface|map|range|" +
-        "select|type|var");
+        "select|type|var|"+ gobra_keywords);
     var builtinTypes = ("string|uint8|uint16|uint32|uint64|int8|int16|int32|int64|float32|" +
         "float64|complex64|complex128|byte|rune|uint|int|uintptr|bool|error");
     var builtinFunctions = ("new|close|cap|copy|panic|panicln|print|println|len|make|delete|real|recover|imag|append");
@@ -60,9 +62,15 @@ var GolangHighlightRules = function () {
     var stringEscapeRe = "\\\\(?:[0-7]{3}|x\\h{2}|u{4}|U\\h{6}|[abfnrtv'\"\\\\])".replace(/\\h/g, "[a-fA-F\\d]");
     this.$rules = {
         "start": [
+
+            {
+                token: "assertion",  // Treat lines starting with "// @" as regular text (non-comment)
+                regex: /\/\/\s*@/
+            },
             {
                 token: "comment",
-                regex: "\\/\\/.*$"
+                regex: /\/\/.*$/
+                // regex: "\\/\\/(?!\s*@).*"
             },
             DocCommentHighlightRules.getStartRule("doc-start"),
             {
@@ -104,7 +112,7 @@ var GolangHighlightRules = function () {
                 regex: "[a-zA-Z_$][a-zA-Z0-9_$]*\\b\\(?"
             }, {
                 token: "keyword.operator",
-                regex: "!|\\$|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|==|=|!=|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^="
+                regex: "!|\\$|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|==|=|!=|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|"+gobra_operators
             }, {
                 token: "punctuation.operator",
                 regex: "\\?|\\:|\\,|\\;|\\."
@@ -303,7 +311,7 @@ var Mode = function () {
 };
 oop.inherits(Mode, TextMode);
 (function () {
-    this.lineCommentStart = "//";
+    this.lineCommentStart = "ungabung"; // TODO
     this.blockComment = { start: "/*", end: "*/" };
     this.getNextLineIndent = function (state, line, tab) {
         var indent = this.$getIndent(line);
@@ -338,4 +346,3 @@ exports.Mode = Mode;
                         }
                     });
                 })();
-            
