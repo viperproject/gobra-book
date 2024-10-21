@@ -31,4 +31,5 @@
 
 ---
 [Playground](./playground.md)
+[Debug](./debug.md)
 [References](./references.md)
