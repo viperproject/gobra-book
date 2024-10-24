@@ -108,7 +108,9 @@ h6:target::before {
 .page {
     outline: 0;
     padding: 0 var(--page-padding);
-    margin-block-start: calc(0px - var(--menu-bar-height)); /* Compensate for the #menu-bar-hover-placeholder */
+    margin-block-start: calc(
+        0px - var(--menu-bar-height)
+    ); /* Compensate for the #menu-bar-hover-placeholder */
 }
 .page-wrapper {
     box-sizing: border-box;
@@ -116,10 +118,14 @@ h6:target::before {
 }
 .no-js .page-wrapper,
 .js:not(.sidebar-resizing) .page-wrapper {
-    transition: margin-left 0.3s ease, transform 0.3s ease; /* Animation: slide away */
+    transition:
+        margin-left 0.3s ease,
+        transform 0.3s ease; /* Animation: slide away */
 }
-[dir=rtl] .js:not(.sidebar-resizing) .page-wrapper {
-    transition: margin-right 0.3s ease, transform 0.3s ease; /* Animation: slide away */
+[dir="rtl"] .js:not(.sidebar-resizing) .page-wrapper {
+    transition:
+        margin-right 0.3s ease,
+        transform 0.3s ease; /* Animation: slide away */
 }
 
 .content {
@@ -131,12 +137,25 @@ h6:target::before {
     margin-inline-end: auto;
     max-width: var(--content-max-width);
 }
-.content p { line-height: 1.45em; }
-.content ol { line-height: 1.45em; }
-.content ul { line-height: 1.45em; }
-.content a { text-decoration: none; }
-.content a:hover { text-decoration: underline; }
-.content img, .content video { max-width: 100%; }
+.content p {
+    line-height: 1.45em;
+}
+.content ol {
+    line-height: 1.45em;
+}
+.content ul {
+    line-height: 1.45em;
+}
+.content a {
+    text-decoration: none;
+}
+.content a:hover {
+    text-decoration: underline;
+}
+.content img,
+.content video {
+    max-width: 100%;
+}
 .content .header:link,
 .content .header:visited {
     color: var(--fg);
@@ -172,14 +191,13 @@ table tbody tr:nth-child(2n) {
     background: var(--table-alternate-bg);
 }
 
-
 blockquote {
     margin: 20px 0;
     padding: 0 20px;
     color: var(--fg);
     background-color: var(--quote-bg);
-    border-block-start: .1em solid var(--quote-border);
-    border-block-end: .1em solid var(--quote-border);
+    border-block-start: 0.1em solid var(--quote-border);
+    border-block-end: 0.1em solid var(--quote-border);
 }
 
 .warning {
@@ -235,7 +253,9 @@ kbd {
     visibility: hidden;
     color: #fff;
     background-color: #333;
-    transform: translateX(-50%); /* Center by moving tooltip 50% of its width left */
+    transform: translateX(
+        -50%
+    ); /* Center by moving tooltip 50% of its width left */
     left: -8px; /* Half of the width of the icon */
     top: -35px;
     font-size: 0.8em;
