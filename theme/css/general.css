@@ -37,18 +37,46 @@ main {
 }
 
 /* Don't change font size in headers. */
-h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
     font-size: unset;
 }
 
-.left { float: left; }
-.right { float: right; }
-.boring { opacity: 0.6; }
-.hide-boring .boring { display: none; }
-.hidden { display: none !important; }
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+.boring {
+    opacity: 0.6;
+}
+.hide-boring .boring {
+    display: none;
+}
+.hidden {
+    display: none !important;
+}
+.ace_hidden-line {
+    display: none;
+}
 
-h2, h3 { margin-block-start: 2.5em; }
-h4, h5 { margin-block-start: 2em; }
+.ace_hide-line {
+    opacity: 0.5; /* Optional: dim gutter lines when hidden */
+}
+
+h2,
+h3 {
+    margin-block-start: 2.5em;
+}
+h4,
+h5 {
+    margin-block-start: 2em;
+}
 
 .header + .header h3,
 .header + .header h4,
