@@ -2,6 +2,7 @@
 window.editors = [];
 
 var language_default = "gobra";
+var Range = ace.require("ace/range").Range;
 
 function language_of(block) {
   let languages = Array(...block.classList)
@@ -57,7 +58,7 @@ function language_of(block) {
     editor.commands.addCommand({
       name: "toggleCommentedLines",
       bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
-      exec: toggleCommentedLines,
+      exec: specsToggler(),
     });
 
     editors.push(editor);
@@ -69,37 +70,51 @@ var GOBRA_COMMENT = "//@";
 // Toggle the display of Gobra annotations within Go files
 // Handle line comments starting with //@
 // and inline comments of the form /*@ ... @*/
-function toggleCommentedLines(editor) {
-  console.log("Toggling hidden lines");
-  var Range = ace.require("ace/range").Range;
+function specsToggler() {
   var hidden = false;
-  var session = editor.getSession();
-  // session.clearDecorations();
-  hidden = !hidden;
-  if (!hidden) {
-    return;
-  }
-  var doc = session.getDocument();
-  var lines = doc.getAllLines();
-  // TODO should remove the markers again editor.getSession().removeMarker(erroneousLine);
-  lines.forEach((line, line_number) => {
-    if (line.trim().startsWith(GOBRA_COMMENT)) {
-      console.debug("Found gobra line: ", line);
-      session.addGutterDecoration(line_number, "hide-line");
-      session.addMarker(
-        new Range(line_number, 0, line_number, line.length),
-        "ace_hidden_line",
-        "text",
-      );
+  var markers = [];
+  return (editor) => {
+    console.log("Toggling hidden lines");
+    var session = editor.getSession();
+    hidden = !hidden;
+    markers.forEach((marker) => editor.getSession().removeMarker(marker));
+    markers = [];
+    if (!hidden) {
+      return;
     }
-    Array(...line.matchAll(GOBRA_INLINE)).forEach(([match, start, _]) => {
-      console.debug("Found gobra annotation: ", match);
-      let end = start + match.length;
-      session.addMarker(
-        new Range(line_number, start, line_number, end),
-        "hidden-inline",
-        "errorHighlight",
-      );
+    var doc = session.getDocument();
+    var lines = doc.getAllLines();
+    // TODO should remove the markers again editor.getSession().removeMarker(erroneousLine);
+    lines.forEach((line, line_number) => {
+      if (line.trim().startsWith(GOBRA_COMMENT)) {
+        console.debug("Found gobra line: ", line);
+        // session.addGutterDecoration(line_number, "hide-line");
+        markers.push(
+          session.addMarker(
+            new Range(line_number, 0, line_number, line.length + 1),
+            "errorHighlight",
+            "background",
+          ),
+        );
+      }
+      Array(...line.matchAll(GOBRA_INLINE)).forEach((match) => {
+        let start = match.index;
+        let end = start + match[0].length;
+        console.debug(
+          "Found gobra annotation: ",
+          match[0],
+          line_number,
+          start,
+          end,
+        );
+        markers.push(
+          session.addMarker(
+            new Range(line_number, start, line_number, end),
+            "errorHighlight",
+            "background",
+          ),
+        );
+      });
     });
-  });
+  };
 }

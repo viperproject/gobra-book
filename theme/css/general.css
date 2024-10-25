@@ -61,11 +61,17 @@ h6 code {
 .hidden {
     display: none !important;
 }
-.ace_hidden-line {
+.ace_hidden_line {
     display: none;
 }
 
-.ace_hide-line {
+.errorHighlight {
+    position: absolute;
+    z-index: 20;
+    background-color: red;
+}
+
+.ace_hide_line {
     opacity: 0.5; /* Optional: dim gutter lines when hidden */
 }
 
