@@ -204,13 +204,12 @@ window.onunload = function () {};
     button.setAttribute("aria-label", button.title);
 
     buttons.insertBefore(button, buttons.firstChild);
-
-    let editor = ace.edit(block);
+    var editor = ace.edit(block);
     function toggler() {
       let hidden = true;
-      toggleCommentedLines(editor);
       return function (e) {
         const t = e.target;
+        editor.commands.exec("toggleCommentedLines", editor);
         t.setAttribute("aria-label", t.title);
         if (hidden) {
           t.classList.replace("fa-eye", "fa-eye-slash");
