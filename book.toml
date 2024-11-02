@@ -11,3 +11,5 @@ mathjax-support = true
 [output.html.code.hidelines]
 gobra = "~"
 go    = "~"
+
+[preprocessor.quiz]

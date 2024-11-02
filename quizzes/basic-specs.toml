@@ -1,0 +1,71 @@
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """
+**Program 1:**
+```go
+//@ ensures res >= 0
+func square(x int) (res int) {
+	return x * x
+}
+r := square(a)
+//@ assert r == a*a
+```
+What is the verification result of **Program 1**?
+"""
+prompt.distractors = [
+	"Verification Succeeds. `square` has no side ffects and always returns `a*a`. Hence the assertion passes.",
+	"Timeout. This is a hard problem and can not be solved in reasonable time.",
+]
+answer.answer = "Verification Fails. `r==a*a` can not be established from the post condition."
+context = "Verification is modular and Gobra does not peek into function definitions."
+
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """
+**Program 2:**
+```go
+//@ requires false
+func dontCallMe()  {}
+```
+Which of the following programs including a function with precondition `false` verify?
+"""
+prompt.distractors = [
+    """
+```go
+//@ requires false
+func dontCallMe()  {}
+
+func client() {
+     dontCallMe()
+}
+```
+"""
+]
+answer.answer = ["""
+```go
+//@ requires false
+func dontCallMe()  {}
+
+//@ requires x % 2 == 1
+func callMeNeither(x int) {
+    if x % 2 == 0 {
+        dontCallMe()
+    }
+}
+```
+""",
+"""
+```go
+//@ requires false
+func dontCallMe()  {}
+```
+"""
+]
+context = """
+if we never call `dontCallMe` we are fine.
+
+A caller needs to establish `false` in order to call `dontCallMe`
+This is the case for `callMeNeither` since the precondition `x % 2 == 1` and the condition `x % 2 == 0` imply `false`.
+
+The default precondition of `client` is `true`, from which `false` cannot be deduced.
+"""

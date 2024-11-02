@@ -10,14 +10,15 @@
 
 # Basic Specifications and Verification
 - [Basic specifications](./basic-specs.md)
-    - [Pre and Post-conditions]()
-    - [Clients and Assert]()
 - [Array Operations](./basic-array.md)
-- [Loops](./loops.md)
-  - [Invariants]()
-  - [Termination]()
   - [Quantifiers]()
+- [Loops](./loops.md)
+  - [Invariants](./loops-invariant.md)
+  - [Binary Search](./loops-binarysearch.md)
+  - [Range](./loops-range.md)
+- [Termination](./termination.md)
 - [Ghost Code](./basic-ghost.md)
+- [Overflow Checking](./overflow.md)
 
 # Memory: Permissions and the Heap
 - [Permission](./permission.md)
