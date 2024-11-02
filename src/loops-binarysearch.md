@@ -62,7 +62,7 @@ So our first invariant is, that `mid` remains a valid index for `arr`:
 	// @ invariant 0 <= mid && mid < N
 ```
 Let's check manually if this invariant works.
-1. Before the first iteration `mid` is initalized to `N / 2` hence `0 <= N / 2 && N / 2 < N` trivially holds.
+1. Before the first iteration `mid` is initialized to `N / 2` hence `0 <= N / 2 && N / 2 < N` trivially holds.
 2. For an arbitrary iteration, we assume that before this iteration `0 <= mid && mid < N` was true. Now we need to show that after updating `mid = (low + high) / 2`  the invariant is still true (the rest of the body does not influence mid). But we fail to do so as the invariant does not capture the values `low` and `high`.
 
 So let us add what we know about `low` and `high` to help the verifier.
@@ -70,7 +70,7 @@ So let us add what we know about `low` and `high` to help the verifier.
 	// @ invariant 0 <= low && low < high && high < N
 	// @ invariant 0 <= mid && mid < N
 ```
-With this change we fixed the *IndexError* but are confronted with a new error.
+With this change we fixed the *Index-Error* but are confronted with a new error.
 ``` text
 Loop invariant might not be preserved. 
 Assertion low < high might not hold.

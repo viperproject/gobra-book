@@ -68,7 +68,7 @@ Unfortunately, we can not chain the comparisons and `0 <= i < len(a)` is not a v
 Let us try to write an assertion that states than an array is sorted.
 As a first attempt we might write
 `requires arr[0] <= arr[1] <= arr[2] <= ... <= arr[N-1]`
-Of course, we do not want to write specifications like this since this does not scale and would not work for if we have different lenghts `N`.
+Of course, we do not want to write specifications like this since this does not scale and would not work for if we have different lengths `N`.
 Quantifiers allow us to be more precise.
 
 ## Quantifiers

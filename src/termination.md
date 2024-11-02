@@ -190,7 +190,7 @@ Then assertion verifies since the postcondition of `infiniteRecursion` establish
 
 
 Use of the wildcard measure can be justified when termination is proved by other means, for example leveraging a different tool.
-Another usecase is *Gradual Verification*.
+Another use case is *Gradual Verification*.
 
 ## Full Syntax
 `"decreases" [expressionList] ["if" expression]`
