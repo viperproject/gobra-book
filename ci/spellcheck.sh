@@ -16,10 +16,6 @@ echo "LANG=$LANG"
 # positive after source modification, new valid word should be added
 # to dictionary file.
 
-# Default mode of this script is interactive. Each source file is scanned for
-# typos. aspell opens window, suggesting fixes for each found typo. Original
-# files with errors will be backed up to files with format "filename.md.bak".
-
 # When running in CI, this script should be run in "list" mode (pass "list"
 # as first argument). In this mode script scans all files and reports found
 # errors. Exit code in this case depends on scan result:
@@ -97,14 +93,13 @@ elif [[ "$mode" == "list" ]]; then
     exit "$retval"
 elif [[ "$mode" == "check" ]]; then
     # Interactive mode: fix typos.
-    cp "$dict_filename" "$dict_path"
 
-    if [ ! -f $dict_path ]; then
+    if [ ! -f $dict_filename ]; then
         retval=1
         exit "$retval"
     fi
 
     for fname in "${markdown_sources[@]}"; do
-        aspell --ignore 3 --dont-backup --personal="$dict_path" "$mode" "$fname"
+        aspell --ignore 3 --dont-backup --personal="$dict_filename" "$mode" "$fname"
     done
 fi
