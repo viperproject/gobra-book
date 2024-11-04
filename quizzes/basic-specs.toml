@@ -18,6 +18,7 @@ prompt.distractors = [
 ]
 answer.answer = "Verification Fails. `r==a*a` can not be established from the post condition."
 context = "Verification is modular and Gobra does not peek into function definitions."
+id = "d929ba84-7da1-499d-a4fb-6073b811ee66"
 
 [[questions]]
 type = "MultipleChoice"
@@ -69,3 +70,4 @@ This is the case for `callMeNeither` since the precondition `x % 2 == 1` and the
 
 The default precondition of `client` is `true`, from which `false` cannot be deduced.
 """
+id = "aa8a36cf-74bb-4ef1-a718-7c104ae9ef74"

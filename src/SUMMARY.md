@@ -17,7 +17,7 @@
   - [Binary Search](./loops-binarysearch.md)
   - [Range](./loops-range.md)
 - [Termination](./termination.md)
-- [Ghost Code](./basic-ghost.md)
+- [Ghost Code and Pure Functions](./basic-ghost-pure.md)
 - [Overflow Checking](./overflow.md)
 
 # Memory: Permissions and the Heap

@@ -127,7 +127,7 @@ exists i int :: 0 <= i && i < len(arr) ==> arr[i] == 0
 
 `exists` should be used sparingly.
 It can be a heavy burden for the verifier to find a witness among many possible values.
-We show later how we can often use `ghost` code instead.
+We show later how we could use a `ghost` return value instead.
 
 
 [^1]: 
