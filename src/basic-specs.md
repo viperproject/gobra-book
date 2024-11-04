@@ -200,4 +200,4 @@ unless `false` is already established.
 
 
 ## Quiz
-{{quiz ../quizzes/basic-specs.toml}}
+{{#quiz ../quizzes/basic-specs.toml}}
