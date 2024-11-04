@@ -8,9 +8,11 @@ For the loop to verified, the invariant must hold...
 3. when exiting the loop
 
 In Gobra we can specify it with the `invariant` keyword before a loop.
-```gobra
-preserves ASSERTION
-for ...
+``` go
+//@ invariant ASSERTION
+for condition {
+	// ..
+}
 ```
 
 Similarly to `requires` and `ensures` you can split an `invariant` on multiple lines.
