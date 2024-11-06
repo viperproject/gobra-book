@@ -99,7 +99,7 @@ func isSorted(arr [N]int) bool {
 }
 ```
 But `forall` is not valid in Go code.
-We can make the function `ghost` by prepending the `ghost` keyword before the other specifications:
+We can make the function `ghost` by inserting the `ghost` keyword before the other specifications:
 ``` go
 /*@ 
 ghost
