@@ -2,11 +2,11 @@
 <!--
 explain preconditions of an indexing operation, make it clear that accesses out of bounds are excluded statically -->
 
-In this chapter we operate with arrays of fixed size `N`.
+In this section, we operate with arrays of fixed size `N`.
 Later we will also look at slices.
 Note that the array `arr` is passed by value and therefore copied.
 
-Go can find out of bounds indices for constant values when compiling a program.
+Go can find out-of-bounds indices for constant values when compiling a program.
 ``` go
 package main
 import "fmt"
@@ -22,7 +22,7 @@ func main() {
 ./array.go:8:16: invalid argument: index -1 (constant of type int) must not be negative
 ./array.go:10:16: invalid argument: index 10 out of bounds [0:5]
 ```
-But when we wrap the access in a function, Go no longer statically detects the out of bounds index.
+But when we wrap the access in a function, Go no longer statically detects the out-of-bounds index.
 
 ``` go
 package main
@@ -65,14 +65,14 @@ Unfortunately, we can not chain the comparisons and `0 <= i < len(a)` is not a v
 
 <!-- this is also checked in specs (e.g. not well defined) -->
 
-Let us try to write an assertion that states than an array is sorted.
+Let us try to write an assertion that states that an array is sorted.
 As a first attempt we might write
 `requires arr[0] <= arr[1] <= arr[2] <= ... <= arr[N-1]`
 Of course, we do not want to write specifications like this since this does not scale and would not work for if we have different lengths `N`.
-Quantifiers allow us to be more precise.
+Quantifiers allow us to be more concise.
 
 ## Quantifiers
-Another way of specifying that an array is sorted,
+Another way of specifying that an array is sorted
 is that for any two elements of the array,
 the first element must be less than or equal to the second element.
 
@@ -86,15 +86,15 @@ Note that we can quantify `i` and `j` at the same time,
 `requires forall i int :: forall j int :: arr[i] <= arr[j]`
 
 Array indices must also be in bounds for specifications.
-We need to constrain that `i` and `j` are valid indices, otherwise we see errors like:
+We need to constrain that `i` and `j` are valid indices, otherwise, we see errors like:
 ``` text
 Method contract is not well-formed. 
 Index i into arr[i] might be negative.
 ```
 
 ### Implication `==>`
-In Gobra the operator for the implication  *if P then Q* is `==>`.
-This gives our final version for the precondition
+In Gobra the operator for the implication[^2]  *if P then Q* is `==>`.
+This gives our final version for the precondition:
 
 ```gobra
 requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
@@ -102,22 +102,17 @@ func search(arr [N]int)
 ```
 
 <!-- conceptual:
-the assertion `forall i int :: P` is true
-iff P is true when all free occurrences of i can be substituted with arbitrary values of type int (or T in general)
 Note that this is very powerful:
 For example for `forall i int64 :: P`
 P has to hold for all of the \\(2^64\\) possible values for i
 Testing all of those values is already infeasible.
  -->
 <!--
-In general, the syntax (could have different types?)
+In general, the syntax
 `forall IDENTIFIER [,IDENTIFIER]* T :: ASSERTION` -->
-<!-- the forall assertion is true if T holds for all possible values -->
-<!-- can we shadow identifiers? -->
 
-<!-- make it clear it is powerful and makes it hard for the verifier -->
 ### Existential Quantifier `exists`
-The other quantifier is `exists` and uses the same syntax.
+The existential quantifier `exists` uses the same syntax (`exists IDENTIFIER [,IDENTIFIER]* T :: ASSERTION`).
 As the name suggests, `exists` requires the assertion to be true for *at least one* value.
 
 For example, we could state `arr` contains the value `0` as
@@ -130,8 +125,8 @@ It can be a heavy burden for the verifier to find a witness among many possible 
 We show later how we could use a `ghost` return value instead.
 
 
-[^1]: 
-Before accessing the element, the index is compared (`CMPQ`) to the length of the array (`$5`).
+## Footnotes
+[^1]: Before accessing the element, the index is compared (`CMPQ`) to the length of the array (`$5`).
 ``` assembly
 CMPQ    AX, $5
 JCC     main_getItem_pc92
@@ -153,8 +148,10 @@ int main(int argc, char *argv[]) {
 Note that the `1` is not from the array `a` but in this case actually the `argc` that is stored on the stack before the array.
 
 
-<!-- [^1]: The truth table of `P==>Q`. -->
-<!-- | P ==> Q | Q=false | Q=true | -->
-<!-- |:-------:|:-------:|:------:| -->
-<!-- | P=false | 1       | 1      | -->
-<!-- | P=true  | 0       | 1      | -->
+[^2]: The implication operator has the following truth table:
+
+| `P ==> Q` | `Q=false` | `Q=true` |
+|-----------|-----------|----------|
+| `P=false` | 1         | 1        |
+| `P=true`  | 0         | 1        |
+

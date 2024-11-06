@@ -13,10 +13,10 @@ r := square(a)
 What is the verification result of **Program 1**?
 """
 prompt.distractors = [
-	"Verification Succeeds. `square` has no side ffects and always returns `a*a`. Hence the assertion passes.",
+	"Verification Succeeds. `square` has no side effects and always returns `a*a`. Hence the assertion passes.",
 	"Timeout. This is a hard problem and can not be solved in reasonable time.",
 ]
-answer.answer = "Verification Fails. `r==a*a` can not be established from the post condition."
+answer.answer = "Verification Fails. `r==a*a` cannot be established from the postcondition."
 context = "Verification is modular and Gobra does not peek into function definitions."
 id = "d929ba84-7da1-499d-a4fb-6073b811ee66"
 
@@ -28,7 +28,7 @@ prompt.prompt = """
 //@ requires false
 func dontCallMe()  {}
 ```
-Which of the following programs including a function with precondition `false` verify?
+Which of the following programs containing a function with precondition `false` verify?
 """
 prompt.distractors = [
     """

@@ -2,7 +2,7 @@
 
 An invariant is an assertion that is preserved by the loop across iterations.
 
-For the loop to verified, the invariant must hold...
+The loop invariant is valid if it holds...
 1. before the first iteration after performing the initialization statement
 2. after every iteration
 3. when exiting the loop
@@ -19,30 +19,20 @@ Similarly to `requires` and `ensures` you can split an `invariant` on multiple l
 
 <!--
 ``` gobra
-decreases
-pure func isSorted(arr [N]int) (ghost res bool) {
-	return forall j, k int :: 0 <= j && j < k && k < N ==> arr[j] <= arr[k]
-}
-const N = 100
 func client() {
-	var arr [N]int
-	{
-		i := 0
+	{ // to limit the scope
+		i := 0 // hoisted initialization
 
-		assert forall j int :: 0 <= j && j < i ==> arr[j] == j
+		assert INV
 
-		invariant 0 <= i && i <= len(arr)
-		invariant forall j int :: 0 <= j && j < i ==> arr[j] == j
+		invariant INV
 		for ; i < N; i++ {
-			// arr[i] = 2*i + 1 // Expression may cause integer overflow.
-			arr[i] = i
-			assert forall j int :: 0 <= j && j < i ==> arr[j] == j
+			BODY	// assuming no jumps outside
+			assert INV
 		}
-		assert forall j int :: 0 <= j && j < i ==> arr[j] == j
-		assert i == len(arr)
+		assert INV
 	}
-	assert forall j int :: 0 <= j && j < len(arr) ==> arr[j] == j
-	assert isSorted(arr)
+	// assert INV // may fail here, could depend on i that is out of scope
 }
 ``` 
 -->

@@ -6,13 +6,13 @@ If you want to see the final code only you can skip to the end of this chapter.
 
 Let us begin by writing the specification.
 First, we must require the `arr` to be sorted.
-We have already seen how we can write this as precondition:
+We have already seen how we can write this as a precondition:
 ``` gobra
 requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 ```
 
 To understand the the behavior we want to achieve we can look at a small example.
-Note that for values like `1` that are contained in `arr` we want the index just after the last occurrence of that value to be returned.
+Note that for values like `1` contained in `arr` we want the index just after the last occurrence of that value to be returned.
 ``` gobra
 arr := [7]int{0, 1, 1, 2, 3, 5, 8}
 binarySearch(arr, -1) == 0
@@ -24,14 +24,14 @@ binarySearch(arr, 9) == 7
 <!-- we can't assert them with our version...  -->
 
 All values to the left of `idx` should compare less or equal to `value`
-and all values to from `idx` to the end of the array should be strictly greater than `value`.
+and all values from `idx` to the end of the array should be strictly greater than `value`.
 ``` gobra
 ensures forall i int :: 0 <= i && i < idx ==> arr[i] <= value
 ensures forall j int :: idx <= j && j < len(arr) ==> value < arr[j]
 ```
 Something is still missing.
 An issue is that the `Index j into arr[j] might be negative` since we only have `idx <= j` and no lower bound for `idx`.
-Similarly the `Index i into arr[i] might exceed sequence length`.
+Similarly, the `Index i into arr[i] might exceed sequence length`.
 After constraining `idx` to be between `0` and `N` we are ready to implement `binarySearch`:
 ``` gobra
 // @ requires forall i, j int :: 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
@@ -53,7 +53,7 @@ func binarySearch(arr [N]int, value int) (idx int) {
 	return low
 }
 ```
-We will have to add a number of invariants until we can verify the function.
+We will have to add several invariants until we can verify the function.
 
 First Gobra complains that the `Index mid into arr[mid] might be negative.`
 
@@ -78,7 +78,7 @@ Assertion low < high might not hold.
 While `low < high` is true before the first iteration (assuming `N>0`)
 and holds by the loop condition at the beginning of every except the last iteration.
 But an invariant must hold after every iteration, including the last.
-So we have to change `low < high` to `low <= high`.
+This is achieved by changing `low < high` to `low <= high`.
 
 Note that after exiting the loop we know `!(low < high)` because the loop condition must have failed and `low <= high` from the invariant.
 Together this implies `low == high`.
@@ -92,7 +92,7 @@ Assertion forall i int :: 0 <= i && i < idx ==> arr[i] <= value might not hold.
 So we need to find assertions that describe which parts of the array we have already searched.
 The goal is that after the last iteration the invariants together with `low == high` should be able prove the postconditions.
 
-For this step it useful to think about how binary search works.
+For this step it is useful to think about how binary search works.
 The slice `arr[low:high]` denotes the part of the array we still have to search for and which is halved every iteration.
 In the prefix `arr[:low]` are no elements larger than `value`
 and in the suffix `arr[high:]` no elements smaller or equal than `value`.
