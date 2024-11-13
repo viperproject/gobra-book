@@ -9,6 +9,7 @@
 - [Basic specifications](./spec.md)
   - [`assert` and `assume`](./assert-assume.md)
   - [requires, ensures, and preserves](./requires-ensures.md)
+- [Overflow Checking](./overflow.md)
 - [Ghost code](./ghost.md)
 
 # Advanced topics
