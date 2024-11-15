@@ -9,6 +9,6 @@
 - [Basic specifications](./spec.md)
   - [`assert` and `assume`](./assert-assume.md)
   - [requires, ensures, and preserves](./requires-ensures.md)
-- [Ghost code](./ghost.md)
+- [Ghost Code and Pure Functions](./basic-ghost-pure.md)
 
 # Advanced topics
