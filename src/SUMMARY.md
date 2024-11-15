@@ -9,6 +9,7 @@
 - [Basic specifications](./spec.md)
   - [`assert` and `assume`](./assert-assume.md)
   - [requires, ensures, and preserves](./requires-ensures.md)
+- [Array Operations](./basic-array.md)
 - [Ghost code](./ghost.md)
 
 # Advanced topics
