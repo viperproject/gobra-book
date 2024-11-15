@@ -1,0 +1,19 @@
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """How many termination measure exist for the following loop? You may assume that the array `arr` is of lenght `N` and all other variables are predeclared.
+```go
+for i:=0; i<N; i++ {
+    if arr[i] > res {
+        res = arr[i]
+        idx = i
+    }
+}
+```
+"""
+prompt.distractors = [
+    "`decreases len(arr)-i` is the only termination measure",
+    "no termination measure exists",
+]
+answer.answer = "more than one termination measure exists"
+context = "For example `len(arr)-i+k` is a termination measure for any natural number `k`"
+id = "c0f14e8a-f302-4964-ad81-8546095b782c"

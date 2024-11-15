@@ -1,4 +1,4 @@
-personal_ws-1.1 en 0 utf-8
+personal_ws-1.1 en 100 utf-8
 Collatz
 Datatypes
 Errorf
@@ -85,6 +85,7 @@ sqrt
 strconv
 struct
 structs
+subarray
 subtype
 sumPair
 testPred
