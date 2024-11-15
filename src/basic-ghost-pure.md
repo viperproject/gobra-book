@@ -179,7 +179,7 @@ func fibIterative(n int) (res int)
 Ghost code must not affect actual code.
 The behavior of a program with ghost code, and with ghost code erased must be the same.
 For example, if we try to modify a variable `x` with a ghost statement.
-A ghost statement simply has `ghost` prepended.
+To make a statement ghost, add `ghost` before it.
 ``` go
 	var x int
 	//@ ghost x = 1
