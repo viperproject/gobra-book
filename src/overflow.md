@@ -54,14 +54,6 @@ This is because by two's complement arithmetic there is one more negative intege
 <!-- result is actually MinInt64 -->
 The program verifies when we add the precondition
 ``` gobra
-requires x > MinInt64 + 1
+requires x > MinInt64
 ```
 
-<!--
-requires x != MinInt64  DOES NOT WORK
-also
-requires x > MinInt64
-somehow we need the + 1
-but abs(MinInt64 + 1) works as expected
-Off-by-one error somewhere?
--->
