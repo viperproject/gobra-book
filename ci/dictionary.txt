@@ -9,6 +9,7 @@ Init
 Isqrt
 LockInv
 LockP
+Mergesorts
 Mutex
 Overconstraining
 PredTrue
