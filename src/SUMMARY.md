@@ -11,4 +11,7 @@
   - [requires, ensures, and preserves](./requires-ensures.md)
 - [Ghost code](./ghost.md)
 
+# Reasoning about Memory Accesses with Permissions
+- [Fractional Permissions](./fractional-permissions.md)
+
 # Advanced topics
