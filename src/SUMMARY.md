@@ -12,6 +12,6 @@
 - [Ghost code](./ghost.md)
 
 # Reasoning about Memory Accesses with Permissions
-- [Permission and swapping pointers](./basic-permissions.md)
+- [Fractional Permissions](./fractional-permissions.md)
 
 # Advanced topics
