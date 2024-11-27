@@ -1,13 +1,4 @@
 # Basic Specifications
-<!--
-Goals
-- Specification by precondition and postcondition
-- View them as contracts between the caller and callee
-  - where the errors occur
-- what the verifier checks
-- syntax to write basic contracts in Gobra
-- Default pre and postconditions
--->
 In this section, we introduce the verification of functions with preconditions and postconditions and show how we can specify them in Gobra with `requires` and `ensures`.
 First, we give an abstract overview and then take a look at examples.
 
