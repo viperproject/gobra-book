@@ -11,4 +11,7 @@
   - [requires, ensures, and preserves](./requires-ensures.md)
 - [Ghost code](./ghost.md)
 
+# Reasoning about Memory Accesses with Permissions
+- [Permission and swapping pointers](./basic-permissions.md)
+
 # Advanced topics
