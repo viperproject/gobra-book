@@ -156,33 +156,33 @@ window.onunload = function () {};
   });
 
   // Syntax highlighting Configuration
-  hljs.configure({
-    tabReplace: "    ", // 4 spaces
-    languages: [], // Languages used for auto-detection
-  });
+  // hljs.configure({
+  //   tabReplace: "    ", // 4 spaces
+  //   languages: [], // Languages used for auto-detection
+  // });
 
   // Don't highlight `inline code` blocks in headers.
   let code_nodes = Array.from(document.querySelectorAll("code")).filter(
     (n) => n.parentElement.tagName == "PRE",
   );
 
-  code_nodes.forEach((node) => {
-    if (window.ace && node.classList.contains("editable")) {
-      // language-rust class needs to be removed for editable
-      // blocks or highlightjs will capture events
-      node.classList.remove("language-rust");
-      node.classList.remove("language-gobra");
-      node.classList.remove("language-go");
-    } else {
-      hljs.highlightBlock(node);
-    }
-  });
+  // code_nodes.forEach((node) => {
+  //   if (window.ace && node.classList.contains("editable")) {
+  //     // language-rust class needs to be removed for editable
+  //     // blocks or highlightjs will capture events
+  //     node.classList.remove("language-rust");
+  //     node.classList.remove("language-gobra");
+  //     node.classList.remove("language-go");
+  //   } else {
+  //     hljs.highlightBlock(node);
+  //   }
+  // });
 
-  code_nodes.forEach((block) => {
-    // Adding the hljs class gives code blocks the color css
-    // even if highlighting doesn't apply
-    block.classList.add("hljs");
-  });
+  // code_nodes.forEach((block) => {
+  //   // Adding the hljs class gives code blocks the color css
+  //   // even if highlighting doesn't apply
+  //   // block.classList.add("hljs");
+  // });
 
   code_nodes.forEach((block) => {
     const pre_block = block.parentNode;
@@ -209,7 +209,12 @@ window.onunload = function () {};
       let hidden = true;
       return function (e) {
         const t = e.target;
+
+        let temp = editor.getReadOnly();
+        editor.setReadOnly(false);
         editor.commands.exec("toggleCommentedLines", editor);
+        editor.setReadOnly(temp);
+
         t.setAttribute("aria-label", t.title);
         if (hidden) {
           t.classList.replace("fa-eye", "fa-eye-slash");
@@ -313,8 +318,7 @@ window.onunload = function () {};
 // Global variable, shared between modules
 function playground_text(playground, hidden = true) {
   let code_block = playground.querySelector("code");
-
-  if (window.ace && code_block.classList.contains("editable")) {
+  if (window.ace) {
     let editor = window.ace.edit(code_block);
     return editor.getValue();
   } else if (hidden) {

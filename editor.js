@@ -29,9 +29,10 @@ function language_of(block) {
 
   code_nodes.forEach(function (code_block) {
     let language = language_of(code_block);
-    let readonly = code_block.classList.contains("noedit");
+    let readonly = !code_block.classList.contains("editable");
 
     let editor = ace.edit(code_block);
+    let session = editor.getSession();
     let display_line_numbers = window.playground_line_numbers || false;
 
     editor.setOptions({
@@ -49,18 +50,43 @@ function language_of(block) {
 
     editor.$blockScrolling = Infinity;
 
+    if (readonly) {
+      let code = session.getValue();
+      let hiddenCode = code
+        .split("\n")
+        .filter((line) => !/^\s*~/.test(line))
+        .join("\n");
+      let fullCode = code.replaceAll("~", "");
+      session.setValue(hiddenCode);
+      let hidden = true;
+      editor.commands.addCommand({
+        name: "toggleCommentedLines",
+        bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
+        exec: (editor) => {
+          console.log("Toggling hidden lines");
+          if (hidden) {
+            session.setValue(fullCode);
+          } else {
+            session.setValue(hiddenCode);
+          }
+          hidden = !hidden;
+        },
+      });
+    } else {
+      editor.commands.addCommand({
+        name: "toggleCommentedLines",
+        bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
+        exec: specsToggler(),
+      });
+    }
+
     if (language === "go") {
       language = "golang";
     }
-    editor.getSession().setMode(`ace/mode/${language}`);
-
-    editor.originalCode = editor.getValue();
-    editor.commands.addCommand({
-      name: "toggleCommentedLines",
-      bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
-      exec: specsToggler(),
-    });
-
+    session.setMode(`ace/mode/${language}`);
+    // TODO this should not be done here
+    editor.setTheme("ace/theme/tomorrow_night");
+    editor.originalCode = session.getValue();
     editors.push(editor);
   });
 })(window.editors);
@@ -74,7 +100,7 @@ function specsToggler() {
   var hidden = false;
   var markers = [];
   return (editor) => {
-    console.log("Toggling hidden lines");
+    console.log("Toggling specs display");
     var session = editor.getSession();
     hidden = !hidden;
     markers.forEach((marker) => editor.getSession().removeMarker(marker));

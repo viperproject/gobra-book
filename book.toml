@@ -14,10 +14,6 @@ additional-js = [
               ]
 mathjax-support = true
 
-[output.html.code.hidelines]
-gobra = "~"
-go    = "~"
-
 [output.html.playground]
 editable = true
 copy-js = true
