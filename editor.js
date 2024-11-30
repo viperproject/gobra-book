@@ -86,12 +86,13 @@ function specsToggler() {
     var lines = doc.getAllLines();
     // TODO should remove the markers again editor.getSession().removeMarker(erroneousLine);
     lines.forEach((line, line_number) => {
-      if (line.trim().startsWith(GOBRA_COMMENT)) {
+      let match = line.match(GOBRA_COMMENT);
+      if (match) {
         console.debug("Found gobra line: ", line);
         // session.addGutterDecoration(line_number, "hide-line");
         markers.push(
           session.addMarker(
-            new Range(line_number, 0, line_number, line.length + 1),
+            new Range(line_number, match.index, line_number, line.length + 1),
             "errorHighlight",
             "background",
           ),
