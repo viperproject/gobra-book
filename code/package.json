@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@types/ace": "^0.0.52"
+  }
+}
