@@ -89,32 +89,6 @@ window.onunload = function () {};
   //   // block.classList.add("hljs");
   // });
 
-  code_nodes.forEach((block) => {
-    const pre_block = block.parentNode;
-    const buttons = document.createElement("div");
-    buttons.className = "buttons";
-    pre_block.insertBefore(buttons, pre_block.firstChild);
-
-    addButtonUndo(block, buttons);
-  });
-
-  function addButtonUndo(block, buttons) {
-    if (!window.ace || !block.classList.contains("editable")) {
-      return;
-    }
-    const button = document.createElement("button");
-    button.className = "fa fa-history reset-button";
-    button.title = "Undo changes";
-    button.setAttribute("aria-label", button.title);
-    buttons.insertBefore(button, buttons.firstChild);
-
-    button.addEventListener("click", () => {
-      let editor = window.ace.edit(block);
-      editor.setValue(editor.originalCode);
-      editor.clearSelection();
-    });
-  }
-})();
 
 (function themes() {
   var html = document.querySelector("html");

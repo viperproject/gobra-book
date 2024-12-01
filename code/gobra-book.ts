@@ -132,6 +132,14 @@ const clipboardButton = (id: string) => simpleButton("fa-copy", "Copy to clipboa
   id
 )
 
+const resetButton = (id: string) => simpleButton("fa-history", "Reset to initial example",
+  (ctxt: Context) => {
+    const code = ctxt.originalCode
+    ctxt.editor.getSession().setValue(code)
+  },
+  id
+)
+
 interface GoPlaygroundResult {
   Errors: string,
   Events: {
@@ -322,6 +330,8 @@ function initializeCodeBlocks() {
     buttons.appendChild(clipboardButton(uuid))
     buttons.appendChild(runButton(uuid))
     buttons.appendChild(verifyButton(uuid))
+    buttons.appendChild(resetButton(uuid))
+
 
 
   });
