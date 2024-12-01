@@ -190,25 +190,10 @@ window.onunload = function () {};
     buttons.className = "buttons";
     pre_block.insertBefore(buttons, pre_block.firstChild);
 
-    addButtonClipboard(block, buttons);
     addButtonRun(block, buttons);
     addButtonVerify(block, buttons);
     addButtonUndo(block, buttons);
   });
-
-
-  function addButtonClipboard(block, buttons) {
-    if (!window.playground_copyable) {
-      return;
-    }
-    const button = document.createElement("button");
-    button.className = "fa fa-copy clip-button";
-    button.title = "Copy to clipboard";
-    button.setAttribute("aria-label", button.title);
-    button.innerHTML = '<i class="tooltiptext"></i>';
-
-    buttons.insertBefore(button, buttons.firstChild);
-  }
 
   function addButtonRun(block, buttons) {
     if (block.classList.contains("no_run")) {
@@ -642,42 +627,6 @@ function playground_text(playground, hidden = true) {
   });
 })();
 
-(function clipboard() {
-  var clipButtons = document.querySelectorAll(".clip-button");
-
-  function hideTooltip(elem) {
-    elem.firstChild.innerText = "";
-    elem.className = "fa fa-copy clip-button";
-  }
-
-  function showTooltip(elem, msg) {
-    elem.firstChild.innerText = msg;
-    elem.className = "fa fa-copy tooltipped";
-  }
-
-  var clipboardSnippets = new ClipboardJS(".clip-button", {
-    text: function (trigger) {
-      hideTooltip(trigger);
-      let playground = trigger.closest("pre");
-      return playground_text(playground, false);
-    },
-  });
-
-  Array.from(clipButtons).forEach(function (clipButton) {
-    clipButton.addEventListener("mouseout", function (e) {
-      hideTooltip(e.currentTarget);
-    });
-  });
-
-  clipboardSnippets.on("success", function (e) {
-    e.clearSelection();
-    showTooltip(e.trigger, "Copied!");
-  });
-
-  clipboardSnippets.on("error", function (e) {
-    showTooltip(e.trigger, "Clipboard error!");
-  });
-})();
 
 (function scrollToTop() {
   var menuTitle = document.querySelector(".menu-title");

@@ -88,6 +88,14 @@ const hiddenLinesToggler = (id: string) => toggleButton("fa-eye", "fa-eye-slash"
   id
 )
 
+const clipboardButton = (id : string) => simpleButton("fa-copy", "Copy to clipboard",
+  (ctxt: Context) => {
+    const code = ctxt.editor.getSession().getValue()
+    navigator.clipboard.writeText(code)
+  },
+  id
+)
+
 function initializeCodeBlocks() {
   if (typeof ace === "undefined" || !ace) {
     return;
@@ -158,6 +166,7 @@ function initializeCodeBlocks() {
     pre_block.insertBefore(buttons, pre_block.firstChild);
 
     buttons.appendChild(hiddenLinesToggler(uuid))
+    buttons.appendChild(clipboardButton(uuid))
 
   });
 
