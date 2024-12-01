@@ -1,7 +1,5 @@
 "use strict";
 
-
-import { edit, type Range } from "ace-builds";
 import type { Ace } from "ace-builds";
 
 const AceRange = ace.require("ace/range").Range;
@@ -167,25 +165,25 @@ const runButton = (id: string) => simpleButton("fa-play", "Run this Go code",
     result_block.innerText = "Running...";
 
     runGo(code)
-    .then((response) => response.json())
-    .then((response: GoPlaygroundResult) => {
-      if (response.Errors) {
-        throw new Error(response.Errors);
-      } else if (!response.Events.length) {
-        result_block.innerText = "No output";
-        result_block.classList.add("result-no-output");
-      } else {
-        result_block.innerText = response.Events.map((e) => e.Message).join(
-          "\n",
-        );
-        result_block.classList.remove("result-no-output");
-      }
-    })
-    .catch(
-      (error) =>
-      (result_block.innerText =
-        "Playground Communication: " + error.message),
-    );
+      .then((response) => response.json())
+      .then((response: GoPlaygroundResult) => {
+        if (response.Errors) {
+          throw new Error(response.Errors);
+        } else if (!response.Events.length) {
+          result_block.innerText = "No output";
+          result_block.classList.add("result-no-output");
+        } else {
+          result_block.innerText = response.Events.map((e) => e.Message).join(
+            "\n",
+          );
+          result_block.classList.remove("result-no-output");
+        }
+      })
+      .catch(
+        (error) =>
+        (result_block.innerText =
+          "Playground Communication: " + error.message),
+      );
   },
   id
 )
@@ -240,8 +238,100 @@ const verifyButton = (id: string) => simpleButton("fa-check-circle-o", "Verify w
   id
 )
 
+function initBlock(code_block: HTMLElement) {
+  let uuid = crypto.randomUUID();
+  code_block.id = uuid;
+
+  let language = language_of(code_block);
+  let readonly = !code_block.classList.contains("editable");
+
+  let editor = ace.edit(code_block);
+  let session = editor.getSession();
+  let display_line_numbers = window.playground_line_numbers || false;
+
+
+  // Configure the editor
+  editor.setOptions({
+    readOnly: readonly,
+    highlightGutterLine: readonly,
+    showPrintMargin: false,
+    showLineNumbers: display_line_numbers,
+    showGutter: display_line_numbers,
+    maxLines: Infinity,
+    fontSize: "0.875em", // please adjust the font size of the code in general.css
+  });
+  if (readonly) {
+    editor.renderer.$cursorLayer.element.style.opacity = 0;
+  }
+
+  editor.$blockScrolling = Infinity;
+
+  // Preprocess the source code
+  const [fullCode, hiddenCode] = preprocessHidden(session.getValue())
+  if (readonly) {
+    session.setValue(hiddenCode);
+  }
+  // TODO extract error information
+
+  // Bind Commands to keybindings
+  editor.commands.addCommand({
+    name: "highlightSpecs",
+    bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
+    exec: specsToggler(),
+  });
+  editor.commands.addCommand({
+    name: "runGo",
+    bindKey: {
+      win: "Ctrl-Shift-Enter",
+      mac: "Ctrl-Shift-Enter",
+    },
+    exec: (editor: Ace.Editor) => runGo(editor.getSession().getValue()),
+  });
+  editor.commands.addCommand({
+    name: "verifyGobra",
+    bindKey: {
+      win: "Ctrl-Enter",
+      mac: "Ctrl-Enter",
+    },
+    exec: (editor: Ace.Editor) => verifyGobra(editor.getSession().getValue()),
+  });
+
+
+  if (language === "go") {
+    language = "golang";
+  }
+  session.setMode(`ace/mode/${language}`);
+  // TODO this should not be done here
+  editor.setTheme("ace/theme/tomorrow_night");
+
+  // Update the context mapping
+  window.gobraBookEditorContext.set(uuid, {
+    editor,
+    originalCode: fullCode,
+    hiddenCode,
+    language,
+    readonly,
+  });
+
+  // Add buttons
+  const pre_block = code_block.parentNode!;
+  const buttons = document.createElement("div");
+  buttons.className = "buttons";
+  pre_block.insertBefore(buttons, pre_block.firstChild);
+
+  buttons.appendChild(clipboardButton(uuid))
+  if (readonly) {
+    buttons.appendChild(hiddenLinesToggler(uuid))
+  } else {
+    buttons.appendChild(runButton(uuid))
+    buttons.appendChild(verifyButton(uuid))
+    buttons.appendChild(resetButton(uuid))
+  }
+}
+
 function initializeCodeBlocks() {
   if (typeof ace === "undefined" || !ace) {
+    console.warn("Ace editor is not avaible!")
     return;
   }
 
@@ -249,93 +339,7 @@ function initializeCodeBlocks() {
     (n) => n.parentElement !== null && n.parentElement.tagName == "PRE",
   );
 
-  code_nodes.forEach(function (code_block) {
-    let uuid = crypto.randomUUID();
-    code_block.id = uuid;
-
-    let language = language_of(code_block);
-    let readonly = !code_block.classList.contains("editable");
-
-    let editor = ace.edit(code_block);
-    let session = editor.getSession();
-    let display_line_numbers = window.playground_line_numbers || false;
-
-
-
-    editor.setOptions({
-      readOnly: readonly,
-      highlightGutterLine: readonly,
-      showPrintMargin: false,
-      showLineNumbers: display_line_numbers,
-      showGutter: display_line_numbers,
-      maxLines: Infinity,
-      fontSize: "0.875em", // please adjust the font size of the code in general.css
-    });
-    if (readonly) {
-      editor.renderer.$cursorLayer.element.style.opacity = 0;
-    }
-
-    editor.$blockScrolling = Infinity;
-    const [fullCode, hiddenCode] =
-      preprocessHidden(session.getValue())
-    if (readonly) {
-      session.setValue(hiddenCode);
-    }
-
-    editor.commands.addCommand({
-      name: "highlightSpecs",
-      bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
-      exec: specsToggler(),
-    });
-    editor.commands.addCommand({
-      name: "runGo",
-      bindKey: {
-        win: "Ctrl-Shift-Enter",
-        mac: "Ctrl-Shift-Enter",
-      },
-      exec: (editor: Ace.Editor) => runGo(editor.getSession().getValue()),
-    });
-    editor.commands.addCommand({
-      name: "verifyGobra",
-      bindKey: {
-        win: "Ctrl-Enter",
-        mac: "Ctrl-Enter",
-      },
-      exec: (editor: Ace.Editor) => verifyGobra(editor.getSession().getValue()),
-    });
-
-
-    if (language === "go") {
-      language = "golang";
-    }
-    session.setMode(`ace/mode/${language}`);
-    // TODO this should not be done here
-    editor.setTheme("ace/theme/tomorrow_night");
-
-    window.gobraBookEditorContext.set(uuid, {
-      editor,
-      originalCode: fullCode,
-      hiddenCode,
-      language,
-      readonly,
-    });
-
-    // Button Container
-    const pre_block = code_block.parentNode!;
-    const buttons = document.createElement("div");
-    buttons.className = "buttons";
-    pre_block.insertBefore(buttons, pre_block.firstChild);
-
-    buttons.appendChild(hiddenLinesToggler(uuid))
-    buttons.appendChild(clipboardButton(uuid))
-    buttons.appendChild(runButton(uuid))
-    buttons.appendChild(verifyButton(uuid))
-    buttons.appendChild(resetButton(uuid))
-
-
-
-  });
-
+  code_nodes.forEach(initBlock)
 }
 
 addEventListener("DOMContentLoaded", () => {
@@ -343,7 +347,8 @@ addEventListener("DOMContentLoaded", () => {
 });
 
 
-
+// Showcases the use of Marker and Range,
+// in the following form this wont be a useful functionality
 // Toggle the display of Gobra annotations within Go files
 // Handle line comments starting with //@
 // and inline comments of the form /*@ ... @*/
@@ -361,12 +366,10 @@ function specsToggler() {
     }
     var doc = session.getDocument();
     var lines = doc.getAllLines();
-    // TODO should remove the markers again editor.getSession().removeMarker(erroneousLine);
     lines.forEach((line: string, line_number: number) => {
       let match = line.match(GOBRA_COMMENT);
       if (match) {
         console.debug("Found gobra line: ", line);
-        // session.addGutterDecoration(line_number, "hide-line");
         markers.push(
           session.addMarker(
             new AceRange(line_number, match.index, line_number, line.length + 1),
