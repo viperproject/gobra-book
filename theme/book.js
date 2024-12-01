@@ -4,102 +4,7 @@
 window.onunload = function () {};
 
 (function codeSnippets() {
-  function fetch_with_timeout(url, options, timeout = 20000) {
-    return Promise.race([
-      fetch(url, options),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("timeout")), timeout),
-      ),
-    ]);
-  }
-
-  function verify_gobra_code(code_block) {
-    let result_block = code_block.querySelector(".result");
-    if (!result_block) {
-      result_block = document.createElement("code");
-      result_block.className = "result hljs language-bash";
-      code_block.append(result_block);
-    }
-    result_block.innerText = "Verifying...";
-
-    fetch_with_timeout("https://gobra.void.gschall.ch/verify", {
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      },
-      body: new URLSearchParams({ body: playground_text(code_block) }),
-      method: "POST",
-    })
-      .then((response) => response.json())
-      .then(({ verified, timeout, errors, duration }) => {
-        duration = Number(duration).toFixed(2) + " seconds";
-        if (verified) {
-          result_block.innerHTML = `<i class="fa fa-check-circle-o" aria-hidden="true"></i>`;
-          result_block.innerHTML += `<span> Verified successfully in ${duration}</span>`;
-        } else if (timeout) {
-          result_block.innerHTML = `<i class="fa fa-clock-o" aria-hidden="true"></i>`;
-          result_block.innerHTML += `<span> Timeout after ${duration}</span>`;
-        } else {
-          result_block.innerHTML = `<i class="fa fa-times" aria-hidden="true"></i>`;
-          result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`;
-          result_block.innerHTML += errors
-            .map((err, i) => {
-              // let position = `(${err.Position.line}, ${err.Position.char})`
-              // TODO highlight in editor
-              return `<p>ERROR: ${err.message}</p>`;
-            })
-            .join("");
-        }
-      })
-      .catch(
-        (error) =>
-          (result_block.innerText =
-            "Playground Communication: " + error.message),
-      );
-  }
-
-  function run_go_code(code_block) {
-    let result_block = code_block.querySelector(".result");
-    if (!result_block) {
-      result_block = document.createElement("code");
-      result_block.className = "result hljs language-bash";
-      code_block.append(result_block);
-    }
-    result_block.innerText = "Running...";
-
-    fetch_with_timeout("https://gobra.void.gschall.ch/run", {
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      },
-      body: new URLSearchParams({
-        version: 2,
-        body: playground_text(code_block),
-        withVet: true,
-      }),
-      method: "POST",
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        // {"Errors":"","Events":[{"Message":"Hello, 世界\n","Kind":"stdout","Delay":0}],"Status":0,"IsTest":false,"TestsFailed":0,"VetOK":true}
-        if (response.Errors) {
-          throw new Error(response.Errors);
-        } else if (!response.Events.length) {
-          result_block.innerText = "No output";
-          result_block.classList.add("result-no-output");
-        } else {
-          result_block.innerText = response.Events.map((e) => e.Message).join(
-            "\n",
-          );
-          result_block.classList.remove("result-no-output");
-        }
-      })
-      .catch(
-        (error) =>
-          (result_block.innerText =
-            "Playground Communication: " + error.message),
-      );
-  }
+  
 
   hljs.registerLanguage("gobra", function (hljs) {
     var gobra_keywords =
@@ -190,65 +95,8 @@ window.onunload = function () {};
     buttons.className = "buttons";
     pre_block.insertBefore(buttons, pre_block.firstChild);
 
-    addButtonRun(block, buttons);
-    addButtonVerify(block, buttons);
     addButtonUndo(block, buttons);
   });
-
-  function addButtonRun(block, buttons) {
-    if (block.classList.contains("no_run")) {
-      return;
-    }
-    if (block.classList.contains("language-gobra")) {
-      return;
-    }
-    const button = document.createElement("button");
-    button.className = "fa fa-play play-button";
-    button.title = "Run this code";
-    button.setAttribute("aria-label", button.title);
-    button.addEventListener("click", (e) => run_go_code(buttons.parentNode));
-
-    buttons.insertBefore(button, buttons.firstChild);
-
-    if (block.classList.contains("editable")) {
-      let editor = window.ace.edit(block);
-      editor.commands.addCommand({
-        name: "run",
-        bindKey: {
-          win: "Ctrl-Enter",
-          mac: "Ctrl-Enter",
-        },
-        exec: (_editor) => run_go_code(block),
-      });
-    }
-  }
-
-  function addButtonVerify(block, buttons) {
-    if (block.classList.contains("no_run")) {
-      return;
-    }
-    const button = document.createElement("button");
-    button.className = "fa fa-check-circle-o verify-button";
-    button.title = "Verify this code";
-    button.setAttribute("aria-label", button.title);
-    button.addEventListener("click", (e) =>
-      verify_gobra_code(buttons.parentNode),
-    );
-
-    buttons.insertBefore(button, buttons.firstChild);
-
-    if (block.classList.contains("editable")) {
-      let editor = window.ace.edit(block);
-      // editor.commands.addCommand({
-      //         name: "run",
-      //         bindKey: {
-      //             win: "Ctrl-Enter",
-      //             mac: "Ctrl-Enter"
-      //         },
-      //         exec: _editor => run_go_code(block)
-      // });
-    }
-  }
 
   function addButtonUndo(block, buttons) {
     if (!window.ace || !block.classList.contains("editable")) {
@@ -267,19 +115,6 @@ window.onunload = function () {};
     });
   }
 })();
-
-// Global variable, shared between modules
-function playground_text(playground, hidden = true) {
-  let code_block = playground.querySelector("code");
-  if (window.ace) {
-    let editor = window.ace.edit(code_block);
-    return editor.getValue();
-  } else if (hidden) {
-    return code_block.textContent;
-  } else {
-    return code_block.innerText;
-  }
-}
 
 (function themes() {
   var html = document.querySelector("html");

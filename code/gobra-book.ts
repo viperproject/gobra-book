@@ -1,17 +1,53 @@
 "use strict";
 
 
-import type { Range } from "ace-builds";
+import { edit, type Range } from "ace-builds";
 import type { Ace } from "ace-builds";
 
 const AceRange = ace.require("ace/range").Range;
 
 window.gobraBookEditorContext = new Map<string, Context>();
 
-var language_default = "gobra";
-var GOBRA_INLINE = /\/\*@.*@\*\//g;
-var GOBRA_COMMENT = "//@";
+const DEFAULT_LANGUAGE = "gobra";
+const GOBRA_INLINE = /\/\*@.*@\*\//g;
+const GOBRA_COMMENT = "//@";
+const GOBRA_PLAYGROUND = new URL("https://gobra.void.gschall.ch/verify")
+const GO_PLAYGROUND = new URL("https://gobra.void.gschall.ch/run")
 
+function fetch_with_timeout(url: URL, options: RequestInit, timeout = 20000): Promise<any> {
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), timeout),
+    ),
+  ]);
+}
+
+function verifyGobra(code: string): Promise<any> {
+  return fetch_with_timeout(GOBRA_PLAYGROUND, {
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    },
+    body: new URLSearchParams({ body: code }),
+    method: "POST",
+  })
+}
+
+function runGo(code: string): Promise<any> {
+  return fetch_with_timeout(GO_PLAYGROUND, {
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    },
+    body: new URLSearchParams({
+      version: "2",
+      body: code,
+      withVet: "true",
+    }),
+    method: "POST",
+  })
+}
 
 function language_of(block: HTMLElement) {
   let languages = Array.from(block.classList)
@@ -19,9 +55,9 @@ function language_of(block: HTMLElement) {
     .map((cls) => cls.replace("language-", ""));
   if (languages.length == 0) {
     console.warn(
-      "no language detected for code block. using default " + language_default,
+      "no language detected for code block. using default " + DEFAULT_LANGUAGE,
     );
-    return language_default;
+    return DEFAULT_LANGUAGE;
   } else {
     return languages[0];
   }
@@ -39,15 +75,15 @@ function preprocessHidden(code: string): [string, string] {
 function simpleButton(class1: string, title: string,
   callback: (ctxt: Context) => any,
   id: string) {
-    const button = document.createElement("button");
-    button.className = "fa " + class1;
-    button.title = title;
-    button.setAttribute("aria-label", title);
-    button.addEventListener("click", () => {
-      callback(window.gobraBookEditorContext.get(id)!)
-    });
-    return button
-  }
+  const button = document.createElement("button");
+  button.className = "fa " + class1;
+  button.title = title;
+  button.setAttribute("aria-label", title);
+  button.addEventListener("click", () => {
+    callback(window.gobraBookEditorContext.get(id)!)
+  });
+  return button
+}
 
 function toggleButton(class1: string, class2: string, title: string,
   callback1: (ctxt: Context) => any,
@@ -88,10 +124,110 @@ const hiddenLinesToggler = (id: string) => toggleButton("fa-eye", "fa-eye-slash"
   id
 )
 
-const clipboardButton = (id : string) => simpleButton("fa-copy", "Copy to clipboard",
+const clipboardButton = (id: string) => simpleButton("fa-copy", "Copy to clipboard",
   (ctxt: Context) => {
     const code = ctxt.editor.getSession().getValue()
     navigator.clipboard.writeText(code)
+  },
+  id
+)
+
+interface GoPlaygroundResult {
+  Errors: string,
+  Events: {
+    Message: string,
+    Kind: string,
+    Delay: number,
+  }[],
+  Status: number,
+  IsTest: boolean,
+  TestsFailed: number,
+  VetOK: boolean,
+}
+
+const runButton = (id: string) => simpleButton("fa-play", "Run this Go code",
+  (ctxt: Context) => {
+    const code = ctxt.editor.getSession().getValue()
+
+    const container = ctxt.editor.container.parentNode
+    let result_block = container.querySelector(".result");
+    if (!result_block) {
+      result_block = document.createElement("code");
+      result_block.className = "result hljs language-bash";
+      container.append(result_block);
+    }
+    result_block.innerText = "Running...";
+
+    runGo(code)
+    .then((response) => response.json())
+    .then((response: GoPlaygroundResult) => {
+      if (response.Errors) {
+        throw new Error(response.Errors);
+      } else if (!response.Events.length) {
+        result_block.innerText = "No output";
+        result_block.classList.add("result-no-output");
+      } else {
+        result_block.innerText = response.Events.map((e) => e.Message).join(
+          "\n",
+        );
+        result_block.classList.remove("result-no-output");
+      }
+    })
+    .catch(
+      (error) =>
+      (result_block.innerText =
+        "Playground Communication: " + error.message),
+    );
+  },
+  id
+)
+interface VerificationError {
+  message: string,
+  position: {
+    line: number,
+    char: number,
+  }
+}
+const verifyButton = (id: string) => simpleButton("fa-check-circle-o", "Verify with Gobra",
+  (ctxt: Context) => {
+    const code = ctxt.editor.getSession().getValue()
+
+    const container = ctxt.editor.container.parentNode
+    let result_block = container.querySelector(".result");
+    if (!result_block) {
+      result_block = document.createElement("code");
+      result_block.className = "result hljs language-bash";
+      container.append(result_block);
+    }
+    result_block.innerText = "Verifying...";
+
+    verifyGobra(code)
+      .then((response) => response.json())
+      .then(({ verified, timeout, errors, duration }) => {
+        duration = Number(duration).toFixed(2) + " seconds";
+        if (verified) {
+          result_block.innerHTML = `<i class="fa fa-check-circle-o" aria-hidden="true"></i>`;
+          result_block.innerHTML += `<span> Verified successfully in ${duration}</span>`;
+        } else if (timeout) {
+          result_block.innerHTML = `<i class="fa fa-clock-o" aria-hidden="true"></i>`;
+          result_block.innerHTML += `<span> Timeout after ${duration}</span>`;
+        } else {
+          result_block.innerHTML = `<i class="fa fa-times" aria-hidden="true"></i>`;
+          result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`;
+          result_block.innerHTML += errors
+            .map((err: VerificationError) => {
+              // let position = `(${err.Position.line}, ${err.Position.char})`
+              // TODO highlight in editor
+              return `<p>ERROR: ${err.message}</p>`;
+            })
+            .join("");
+        }
+      })
+      .catch(
+        (error) =>
+        (result_block.innerText =
+          "Playground Communication: " + error.message),
+      );
   },
   id
 )
@@ -143,6 +279,23 @@ function initializeCodeBlocks() {
       bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
       exec: specsToggler(),
     });
+    editor.commands.addCommand({
+      name: "runGo",
+      bindKey: {
+        win: "Ctrl-Shift-Enter",
+        mac: "Ctrl-Shift-Enter",
+      },
+      exec: (editor: Ace.Editor) => runGo(editor.getSession().getValue()),
+    });
+    editor.commands.addCommand({
+      name: "verifyGobra",
+      bindKey: {
+        win: "Ctrl-Enter",
+        mac: "Ctrl-Enter",
+      },
+      exec: (editor: Ace.Editor) => verifyGobra(editor.getSession().getValue()),
+    });
+
 
     if (language === "go") {
       language = "golang";
@@ -167,6 +320,9 @@ function initializeCodeBlocks() {
 
     buttons.appendChild(hiddenLinesToggler(uuid))
     buttons.appendChild(clipboardButton(uuid))
+    buttons.appendChild(runButton(uuid))
+    buttons.appendChild(verifyButton(uuid))
+
 
   });
 
