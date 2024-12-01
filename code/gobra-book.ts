@@ -36,6 +36,18 @@ function preprocessHidden(code: string): [string, string] {
   return [hiddenCode, fullCode]
 }
 
+function simpleButton(class1: string, title: string,
+  callback: (ctxt: Context) => any,
+  id: string) {
+    const button = document.createElement("button");
+    button.className = "fa " + class1;
+    button.title = title;
+    button.setAttribute("aria-label", title);
+    button.addEventListener("click", () => {
+      callback(window.gobraBookEditorContext.get(id)!)
+    });
+    return button
+  }
 
 function toggleButton(class1: string, class2: string, title: string,
   callback1: (ctxt: Context) => any,
@@ -50,8 +62,6 @@ function toggleButton(class1: string, class2: string, title: string,
     let toggled = true;
     return function (e: Event) {
       const t = e.target as HTMLButtonElement
-      t.title = title
-      t.setAttribute("aria-label", title);
       if (toggled) {
         t.classList.replace(class1, class2);
         callback1(window.gobraBookEditorContext.get(id)!)
