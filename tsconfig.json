@@ -6,7 +6,8 @@
     "target": "es2016" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
 
     /* Modules */
-    "module": "commonjs" /* Specify what module code is generated. */,
+    "module": "ESNext" /* Specify what module code is generated. */,
+    "moduleResolution": "node",
     "rootDir": "./" /* Specify the root folder within your source files. */,
 
     /* JavaScript Support */
