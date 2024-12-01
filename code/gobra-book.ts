@@ -1,5 +1,18 @@
 "use strict";
-window.editors = [];
+
+
+interface Context {
+  editor: any;
+  language: string;
+  readonly: boolean;
+}
+interface Window {
+  contexts: Map<string, Context>;
+}
+
+window.contexts = new Map<string, Context>();
+
+
 
 var language_default = "gobra";
 var Range = ace.require("ace/range").Range;
@@ -28,6 +41,9 @@ function language_of(block) {
   );
 
   code_nodes.forEach(function (code_block) {
+    let uuid = crypto.randomUUID();
+    code_block.id = uuid;
+  
     let language = language_of(code_block);
     let readonly = !code_block.classList.contains("editable");
 
@@ -87,9 +103,15 @@ function language_of(block) {
     // TODO this should not be done here
     editor.setTheme("ace/theme/tomorrow_night");
     editor.originalCode = session.getValue();
-    editors.push(editor);
+
+    window.contexts.set(uuid, {
+      editor,
+      language: language_of(code_block),
+      readonly: readonly,
+    });
   });
-})(window.editors);
+
+})();
 
 var GOBRA_INLINE = /\/\*@.*@\*\//g;
 var GOBRA_COMMENT = "//@";
