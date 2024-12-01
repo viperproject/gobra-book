@@ -3,6 +3,8 @@ declare const ace: any
 interface Context {
     editor: any;
     language: string;
+    originalCode: string;
+    hiddenCode: string;
     readonly: boolean;
 }
 interface Window {

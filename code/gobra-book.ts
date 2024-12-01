@@ -14,7 +14,7 @@ var GOBRA_COMMENT = "//@";
 
 
 function language_of(block: HTMLElement) {
-  let languages = Array(...block.classList)
+  let languages = Array.from(block.classList)
     .filter((cls) => cls.startsWith("language-"))
     .map((cls) => cls.replace("language-", ""));
   if (languages.length == 0) {
@@ -26,6 +26,57 @@ function language_of(block: HTMLElement) {
     return languages[0];
   }
 }
+
+function preprocessHidden(code: string): [string, string] {
+  let hiddenCode = code
+    .split("\n")
+    .filter((line: string) => !/^\s*~/.test(line))
+    .join("\n");
+  let fullCode = code.replaceAll("~", "");
+  return [hiddenCode, fullCode]
+}
+
+
+function toggleButton(class1: string, class2: string, title: string,
+  callback1: (ctxt: Context) => any,
+  callback2: (ctxt: Context) => any,
+  id: string): HTMLButtonElement {
+  const button = document.createElement("button");
+  button.className = "fa " + class1;
+  button.title = title;
+  button.setAttribute("aria-label", title);
+
+  function toggler() {
+    let toggled = true;
+    return function (e: Event) {
+      const t = e.target as HTMLButtonElement
+      t.title = title
+      t.setAttribute("aria-label", title);
+      if (toggled) {
+        t.classList.replace(class1, class2);
+        callback1(window.gobraBookEditorContext.get(id)!)
+      } else {
+        t.classList.replace(class2, class1);
+        callback2(window.gobraBookEditorContext.get(id)!)
+      }
+      toggled = !toggled;
+    };
+  }
+  button.addEventListener("click", toggler());
+  return button
+}
+
+const hiddenLinesToggler = (id: string) => toggleButton("fa-eye", "fa-eye-slash", "Show hidden lines",
+  (ctxt: Context) => {
+    let session = ctxt.editor.getSession()
+    session.setValue(ctxt.originalCode);
+  },
+  (ctxt: Context) => {
+    let session = ctxt.editor.getSession()
+    session.setValue(ctxt.hiddenCode);
+  },
+  id
+)
 
 function initializeCodeBlocks() {
   if (typeof ace === "undefined" || !ace) {
@@ -47,6 +98,8 @@ function initializeCodeBlocks() {
     let session = editor.getSession();
     let display_line_numbers = window.playground_line_numbers || false;
 
+
+
     editor.setOptions({
       readOnly: readonly,
       highlightGutterLine: readonly,
@@ -61,36 +114,17 @@ function initializeCodeBlocks() {
     }
 
     editor.$blockScrolling = Infinity;
-
+    const [fullCode, hiddenCode] =
+      preprocessHidden(session.getValue())
     if (readonly) {
-      let code = session.getValue();
-      let hiddenCode = code
-        .split("\n")
-        .filter((line: string) => !/^\s*~/.test(line))
-        .join("\n");
-      let fullCode = code.replaceAll("~", "");
       session.setValue(hiddenCode);
-      let hidden = true;
-      editor.commands.addCommand({
-        name: "toggleCommentedLines",
-        bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
-        exec: () => {
-          console.log("Toggling hidden lines");
-          if (hidden) {
-            session.setValue(fullCode);
-          } else {
-            session.setValue(hiddenCode);
-          }
-          hidden = !hidden;
-        },
-      }); AceRange
-    } else {
-      editor.commands.addCommand({
-        name: "toggleCommentedLines",
-        bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
-        exec: specsToggler(),
-      });
     }
+
+    editor.commands.addCommand({
+      name: "highlightSpecs",
+      bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
+      exec: specsToggler(),
+    });
 
     if (language === "go") {
       language = "golang";
@@ -98,18 +132,30 @@ function initializeCodeBlocks() {
     session.setMode(`ace/mode/${language}`);
     // TODO this should not be done here
     editor.setTheme("ace/theme/tomorrow_night");
-    editor.originalCode = session.getValue();
 
     window.gobraBookEditorContext.set(uuid, {
       editor,
-      language: language_of(code_block),
-      readonly: readonly,
+      originalCode: fullCode,
+      hiddenCode,
+      language,
+      readonly,
     });
+
+    // Button Container
+    const pre_block = code_block.parentNode!;
+    const buttons = document.createElement("div");
+    buttons.className = "buttons";
+    pre_block.insertBefore(buttons, pre_block.firstChild);
+
+    buttons.appendChild(hiddenLinesToggler(uuid))
+
   });
 
 }
 
 initializeCodeBlocks();
+
+
 
 
 // Toggle the display of Gobra annotations within Go files

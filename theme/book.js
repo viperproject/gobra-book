@@ -190,44 +190,12 @@ window.onunload = function () {};
     buttons.className = "buttons";
     pre_block.insertBefore(buttons, pre_block.firstChild);
 
-    addButtonHidden(block, buttons);
     addButtonClipboard(block, buttons);
     addButtonRun(block, buttons);
     addButtonVerify(block, buttons);
     addButtonUndo(block, buttons);
   });
 
-  function addButtonHidden(block, buttons) {
-    const button = document.createElement("button");
-    button.className = "fa fa-eye";
-    button.title = "Show hidden lines";
-    button.setAttribute("aria-label", button.title);
-
-    buttons.insertBefore(button, buttons.firstChild);
-    var editor = ace.edit(block);
-    function toggler() {
-      let hidden = true;
-      return function (e) {
-        const t = e.target;
-
-        let temp = editor.getReadOnly();
-        editor.setReadOnly(false);
-        editor.commands.exec("toggleCommentedLines", editor);
-        editor.setReadOnly(temp);
-
-        t.setAttribute("aria-label", t.title);
-        if (hidden) {
-          t.classList.replace("fa-eye", "fa-eye-slash");
-          block.classList.remove("hide-boring");
-        } else {
-          t.classList.replace("fa-eye-slash", "fa-eye");
-          block.classList.add("hide-boring");
-        }
-        hidden = !hidden;
-      };
-    }
-    button.addEventListener("click", toggler());
-  }
 
   function addButtonClipboard(block, buttons) {
     if (!window.playground_copyable) {
