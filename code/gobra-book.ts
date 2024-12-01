@@ -338,8 +338,9 @@ function initializeCodeBlocks() {
 
 }
 
-initializeCodeBlocks();
-
+addEventListener("DOMContentLoaded", () => {
+  initializeCodeBlocks();
+});
 
 
 

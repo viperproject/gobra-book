@@ -1,94 +1,7 @@
 "use strict";
 
-// Fix back button cache problem
-window.onunload = function () {};
-
-(function codeSnippets() {
-  
-
-  hljs.registerLanguage("gobra", function (hljs) {
-    var gobra_keywords =
-      "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|assume|apply|inhale|exhale|assert|ghost|implements|unfolding|let|fold|unfold|decreases";
-    var GO_KEYWORDS = {
-      keyword:
-        "package import func var const type struct interface map chan go defer return break continue for range if else switch case default select fallthrough " +
-        gobra_keywords.split("|").join(" "),
-      literal: "true false iota nil",
-      built_in:
-        "append cap close complex copy delete imag len make new panic print println real recover",
-    };
-
-    // Extend the Go language rules
-    return {
-      name: "Gobra",
-      aliases: ["gobra"],
-      keywords: GO_KEYWORDS,
-      contains: [
-        // Special line comment: //@
-        {
-          className: "comment",
-          begin: "//@", // Start with //@
-          end: "$", // End of the line
-        },
-
-        // Special inline comment: /*@ ... @*/
-        {
-          className: "comment",
-          begin: "/\\*@", // Start with /*@
-          end: "@\\*/", // End with @*/
-        },
-        {
-          className: "string",
-          begin: '"',
-          end: '"',
-          illegal: "\\n",
-          contains: [hljs.BACKSLASH_ESCAPE],
-        },
-        {
-          className: "number",
-          begin: hljs.C_NUMBER_RE,
-          relevance: 0,
-        },
-        {
-          className: "operator",
-          begin: /:=|\+\+|--|&&|\|\||<-|=>|<==>|<==|::|in|===|!==/,
-        },
-        hljs.HASH_COMMENT_MODE, // Example for an additional comment style if needed
-        hljs.C_LINE_COMMENT_MODE,
-        hljs.C_BLOCK_COMMENT_MODE,
-      ],
-    };
-  });
-
-  // Syntax highlighting Configuration
-  // hljs.configure({
-  //   tabReplace: "    ", // 4 spaces
-  //   languages: [], // Languages used for auto-detection
-  // });
-
-  // Don't highlight `inline code` blocks in headers.
-  let code_nodes = Array.from(document.querySelectorAll("code")).filter(
-    (n) => n.parentElement.tagName == "PRE",
-  );
-
-  // code_nodes.forEach((node) => {
-  //   if (window.ace && node.classList.contains("editable")) {
-  //     // language-rust class needs to be removed for editable
-  //     // blocks or highlightjs will capture events
-  //     node.classList.remove("language-rust");
-  //     node.classList.remove("language-gobra");
-  //     node.classList.remove("language-go");
-  //   } else {
-  //     hljs.highlightBlock(node);
-  //   }
-  // });
-
-  // code_nodes.forEach((block) => {
-  //   // Adding the hljs class gives code blocks the color css
-  //   // even if highlighting doesn't apply
-  //   // block.classList.add("hljs");
-  // });
-
+// Everything related to code blocks and code editor
+// is handled by gobra-book.js
 
 (function themes() {
   var html = document.querySelector("html");
@@ -100,6 +13,7 @@ window.onunload = function () {};
     tomorrowNight: document.querySelector("[href$='tomorrow-night.css']"),
     highlight: document.querySelector("[href$='highlight.css']"),
   };
+  var default_theme = "ace/theme/tomorrow_night"
 
   function showThemes() {
     themePopup.style.display = "block";
@@ -161,11 +75,12 @@ window.onunload = function () {};
       ).backgroundColor;
     }, 1);
 
-    if (window.ace && window.editors) {
-      window.editors.forEach(function (editor) {
-        editor.setTheme(ace_theme);
-      });
+    if (window.gobraBookEditorContext) {
+      window.gobraBookEditorContext.forEach(ctxt => {
+        ctxt.editor.setTheme(ace_theme)
+      })
     }
+    
 
     var previousTheme = get_theme();
 
