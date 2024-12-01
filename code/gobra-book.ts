@@ -1,23 +1,19 @@
 "use strict";
 
 
-interface Context {
-  editor: any;
-  language: string;
-  readonly: boolean;
-}
-interface Window {
-  contexts: Map<string, Context>;
-}
+import type { Range } from "ace-builds";
+import type { Ace } from "ace-builds";
 
-window.contexts = new Map<string, Context>();
+const AceRange = ace.require("ace/range").Range;
 
-
+window.gobraBookEditorContext = new Map<string, Context>();
 
 var language_default = "gobra";
-var Range = ace.require("ace/range").Range;
+var GOBRA_INLINE = /\/\*@.*@\*\//g;
+var GOBRA_COMMENT = "//@";
 
-function language_of(block) {
+
+function language_of(block: HTMLElement) {
   let languages = Array(...block.classList)
     .filter((cls) => cls.startsWith("language-"))
     .map((cls) => cls.replace("language-", ""));
@@ -31,19 +27,19 @@ function language_of(block) {
   }
 }
 
-(function (editors) {
+function initializeCodeBlocks() {
   if (typeof ace === "undefined" || !ace) {
     return;
   }
 
-  let code_nodes = Array.from(document.querySelectorAll("code")).filter(
-    (n) => n.parentElement.tagName == "PRE",
+  let code_nodes: HTMLElement[] = Array.from(document.querySelectorAll("code")).filter(
+    (n) => n.parentElement !== null && n.parentElement.tagName == "PRE",
   );
 
   code_nodes.forEach(function (code_block) {
     let uuid = crypto.randomUUID();
     code_block.id = uuid;
-  
+
     let language = language_of(code_block);
     let readonly = !code_block.classList.contains("editable");
 
@@ -70,7 +66,7 @@ function language_of(block) {
       let code = session.getValue();
       let hiddenCode = code
         .split("\n")
-        .filter((line) => !/^\s*~/.test(line))
+        .filter((line: string) => !/^\s*~/.test(line))
         .join("\n");
       let fullCode = code.replaceAll("~", "");
       session.setValue(hiddenCode);
@@ -78,7 +74,7 @@ function language_of(block) {
       editor.commands.addCommand({
         name: "toggleCommentedLines",
         bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
-        exec: (editor) => {
+        exec: () => {
           console.log("Toggling hidden lines");
           if (hidden) {
             session.setValue(fullCode);
@@ -87,7 +83,7 @@ function language_of(block) {
           }
           hidden = !hidden;
         },
-      });
+      }); AceRange
     } else {
       editor.commands.addCommand({
         name: "toggleCommentedLines",
@@ -104,24 +100,25 @@ function language_of(block) {
     editor.setTheme("ace/theme/tomorrow_night");
     editor.originalCode = session.getValue();
 
-    window.contexts.set(uuid, {
+    window.gobraBookEditorContext.set(uuid, {
       editor,
       language: language_of(code_block),
       readonly: readonly,
     });
   });
 
-})();
+}
 
-var GOBRA_INLINE = /\/\*@.*@\*\//g;
-var GOBRA_COMMENT = "//@";
+initializeCodeBlocks();
+
+
 // Toggle the display of Gobra annotations within Go files
 // Handle line comments starting with //@
 // and inline comments of the form /*@ ... @*/
 function specsToggler() {
   var hidden = false;
-  var markers = [];
-  return (editor) => {
+  var markers: number[] = [];
+  return (editor: Ace.Editor) => {
     console.log("Toggling specs display");
     var session = editor.getSession();
     hidden = !hidden;
@@ -133,37 +130,40 @@ function specsToggler() {
     var doc = session.getDocument();
     var lines = doc.getAllLines();
     // TODO should remove the markers again editor.getSession().removeMarker(erroneousLine);
-    lines.forEach((line, line_number) => {
+    lines.forEach((line: string, line_number: number) => {
       let match = line.match(GOBRA_COMMENT);
       if (match) {
         console.debug("Found gobra line: ", line);
         // session.addGutterDecoration(line_number, "hide-line");
         markers.push(
           session.addMarker(
-            new Range(line_number, match.index, line_number, line.length + 1),
+            new AceRange(line_number, match.index, line_number, line.length + 1),
             "errorHighlight",
-            "background",
+            "fullLine",
           ),
         );
       }
-      Array(...line.matchAll(GOBRA_INLINE)).forEach((match) => {
-        let start = match.index;
-        let end = start + match[0].length;
-        console.debug(
-          "Found gobra annotation: ",
-          match[0],
-          line_number,
-          start,
-          end,
-        );
-        markers.push(
-          session.addMarker(
-            new Range(line_number, start, line_number, end),
-            "errorHighlight",
-            "background",
-          ),
-        );
-      });
+      let matches = line.match(GOBRA_INLINE);
+      if (matches) {
+        matches.forEach((match) => {
+          let start = line.indexOf(match);
+          let end = start + match.length;
+          console.debug(
+            "Found gobra annotation: ",
+            match,
+            line_number,
+            start,
+            end,
+          );
+          markers.push(
+            session.addMarker(
+              new AceRange(line_number, start, line_number, end),
+              "errorHighlight",
+              "text",
+            ),
+          );
+        });
+      }
     });
   };
 }
