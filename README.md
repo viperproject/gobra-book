@@ -2,7 +2,7 @@
 
 <img align="right" width="100" height="100" src="./theme/favicon.svg">
 
-This repository contains the source of the *Gobra Book*, an online learning resource for the Go verifier [Gobra](https://github.com/viperproject/gobra).
+This repository contains the source of the *Gobra Book*, an online learning resource for [Gobra](https://github.com/viperproject/gobra), a verifier for the Go programming language.
 
 🚧 Work in progress - we are in the process of writing the core chapters 🚧
 

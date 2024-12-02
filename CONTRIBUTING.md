@@ -33,8 +33,6 @@ mdbook build # generates the files in the book directory
 mdbook serve # Serve the site and rebuild on changes
 ```
 
-## Chapter Structure
-TODO(define a consistent naming scheme)
 
 ## Source Code
 Source code can be included in either in markdown code blocks
@@ -52,8 +50,7 @@ or included
 {{#include examples/dutchflag.gobra}}
 ```
 
-For `.go` files write Gobra specifications in line comments `//@ ` or inline with `/*@ @*/`. The program should be a syntactically valid Go file.
-For `.gobra` files write all specifications directly.
+The source files used in this project have the extensions `.go` or `.gobra`. `.go` files consist of compilable Go files with specifications written in comments: `//@ ` signals a single line of specification, whereas comments within delimiters`/*@` and `@*/` signal multi-line specifications.
 
 
 ### Code Block Attributes
@@ -69,11 +66,12 @@ Source blocks can be tagged with attributes like `editable` or `runnable`:
 For `runnable` code
 
 ### Style
-- [go fmt your code](https://go.dev/blog/gofmt)
-- write idiomatic Go
-- adhere to standard naming conventions (e.g. use camelCase or CamelCase naming)
+Before proposing extensions to the book, please make sure that your examples satisfy the following conditions:
+1. It is syntactically correct
+2. It was formatted with [go fmt](https://go.dev/blog/gofmt)
+3. It is written in idiomatic Go, e.g., it adheres to standard naming conventions
 
-### Hiding
+### Hiding boilerplate
 Lines starting with `~` are hidden and can be toggled with a button. Currently the `hide-boring` attribute must be given to the block.
 ````markdown
 ```go,hide-boring
@@ -118,18 +116,14 @@ For the full description of the schema please refer to <https://github.com/cogni
 
 ## Spellchecking
 Please spell check locally for spelling errors before pushing.
-The check will be run as a CI action as well.
-This is a simple syntactic check and does not find grammatical mistakes.
-All markdown files in `src` are considered and we assume `LANG=en_US.UTF-8`.
-You need to have `aspell` installed.
-Check for errors and fix them interactively with
-``` sh
+We provide a simple spellchecker in our CI to detect obvious typos, but it does not find grammatical mistakes.
+All markdown files in `src` are  assumed to be written in and spellchecked against `LANG=en_US.UTF-8` using `aspell`.
+You may run the spellchecker using one of the following commands:
+```sh
+# check for errors and fix them interactively
 bash ci/spellcheck.sh check
-```
-or to list all errors (note that false positives may be reported due to a limitation)
-``` sh
+# List all errors (may report false positives)
 bash ci/spellcheck.sh list
-```
 
 Custom words can be added to [dictionary.txt](ci/dictionary.txt) (it must remain sorted).
 Note that code blocks are ignored, so you are responsible to check for typos in comments and identifiers.
