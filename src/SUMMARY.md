@@ -11,4 +11,10 @@
   - [requires, ensures, and preserves](./requires-ensures.md)
 - [Ghost code](./ghost.md)
 
+# Reasoning about Memory Accesses with Permissions
+- [Permission and swapping pointers](./basic-permissions.md)
+- [Fractional Permissions](./fractional-permissions.md)
+- [Quantified Permissions](./quantified-permission.md)
+- [Slices](./slices.md)
+
 # Advanced topics
