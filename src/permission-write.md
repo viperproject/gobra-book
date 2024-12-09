@@ -95,18 +95,12 @@ Note that the outer `@`s belong to the annotation, so the equivalent in Gobra is
 }
 ```
 
-Permissions are transferred to a function when the function is called and transferred back when the function returns.
 In our example, permissions `acc(x)` and `acc(y)` are obtained in `client` when initializing `x` and `y`,
-then transferred to `swap(x, y)`.
-Since `swap`'s postcondition does not mention any permissions, `acc(x)` and `acc(y)` are lost and not transferred back to the caller.
-The assertions require access as well since they read `x` and `y`:
-``` text
-Assert might fail. 
-Permission to *x might not suffice.
-```
+then transferred when calling `swap(x, y)`.
+We add the postcondition `acc(x) && acc(y)` to transfer the permissions back to the caller when the function returns.
+Otherwise the permissions are leaked (lost).
 
-Let us fix this by adding postconditions.
-With `old(*y)` we can use the value of `*y` from the old state before the function.
+With `old(*y)` we can use the value of `*y` from the state at the beginning of the function call before any modifications.
 ``` go
 //@ requires acc(x) && acc(y)
 //@ ensures acc(x) && acc(y)

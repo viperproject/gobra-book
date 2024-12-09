@@ -13,5 +13,6 @@
 
 # Reasoning about Memory Accesses with Permissions
 - [Permission to write](./permission-write.md)
+- [Self-Framing Assertions](./self-framing.md)
 
 # Advanced topics
