@@ -156,12 +156,12 @@ ERROR Precondition of call copy(s, s1 , perm(1/2) ) might not hold.
 Permission to copy(s0, s1 , perm(1/2) ) might not suffice.
 ```
 
-## TODO Range
-<!-- WAIT question: can't modify ? -->
+## Slice Range
+Gobra supports the `range` clause for slices:
 ``` go
-// @ requires len(s) > 0
-// @ preserves acc(s)
-// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+//@ requires len(s) > 0
+//@ preserves acc(s)
+//@ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
 	//@ invariant acc(s)
 	//@ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
@@ -171,48 +171,33 @@ func addToSlice(s []int, n int) {
 	}
 }
 ```
-<!-- TODO chose one example -->
-``` go
-// @ requires len(s) > 0
-// @ preserves acc(s, 1/2)
-// @ ensures forall j int :: {&s[j]} 0 <= j && j < len(s) ==> res >= s[j]
-// @ ensures 0 <= idx && idx < len(s) && s[idx] == res
-func sliceMax(s []int) (res int /*@ , ghost idx int @*/) {
-	res = s[0]
-	//@ invariant acc(s, 1/2)
-	//@ invariant forall j int :: {&s[j]} 0 <= j && j < i0 ==> res >= s[j]
-	//@ invariant 0 <= idx && idx < len(s) && s[idx] == res
-	for i, a := range s /*@ with i0 @*/ {
-		if a > res {
-			res = a
-			//@ idx = i
-		}
-	}
-	return
-}
 
-func client() {
-	s := make([]int, 10, 15)
-	//@ assert len(s) == 10 && cap(s) == 15
-	m /*@, idx @*/ := sliceMax(s)
-	//@ assert m == 0
-	s[len(s)-1] = 5
-	m /*@, idx @*/ = sliceMax(s)
-	//@ assert m == 5
-}
-```
-
-### Wildcard and Range
-As a consequence, the wildcard permission does not suffice to iterate over the range.
-``` go
-// @ requires acc(s, _)
-func wildRange(s []int) {
-	for i, e := range s {}
-}
-```
+Note that we added the precondition `len(s) > 0`.
+Otherwise there is the error: 
 ``` text
-Might not have read permission to range expression.
-Permission to s might not suffice.
+ERROR Loop invariant might not be established. 
+Permission to s[k] might not suffice.
+```
+For the case where `len(s) == 0`, `i, e` and `i0` are never assigned to.
+Then the second invariant cannot be established as `i0` is arbitrary and
+`s[k]` could be instantiated with `s[-1]`.
+But no permission is held to `&s[-1]`.
+
+Alternatively we could handle the empty case specifically:
+``` go
+// @ preserves acc(s)
+// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+func addToSlice(s []int, n int) {
+	if len(s) == 0 {
+		return
+	}
+	~//@ invariant acc(s)
+	~//@ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
+	~//@ invariant forall k int :: {&s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
+	~for i, e := range s /*@ with i0 @*/ {
+		~s[i] = e + n
+	~}
+~}
 ```
 
 ## Binary Search Example
