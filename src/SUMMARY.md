@@ -13,5 +13,6 @@
 
 # Reasoning about Memory Accesses with Permissions
 - [Fractional Permissions](./fractional-permissions.md)
+  - [Wildcard Permission](./wildcard-permission.md)
 
 # Advanced topics
