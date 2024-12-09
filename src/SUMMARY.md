@@ -15,6 +15,7 @@
 - [Permission and swapping pointers](./basic-permissions.md)
 - [Fractional Permissions](./fractional-permissions.md)
 - [Quantified Permissions](./quantified-permission.md)
+- [Pure Functions and Permissions](./permission-pure.md)
 - [Slices](./slices.md)
 
 # Advanced topics

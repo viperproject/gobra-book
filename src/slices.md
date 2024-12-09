@@ -215,22 +215,6 @@ Might not have read permission to range expression.
 Permission to s might not suffice.
 ```
 
-## Pure Functions and Permissions
-Pure functions have no side effects.
-Hence they should also not leak any permissions.
-Pure functions implicitly return all permissions mentioned in the precondition.
-
-``` gobra
-ghost
-requires p > 0
-requires forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], p)
-decreases
-pure func isSliceSorted(s []int, p perm) bool {
-	return forall i, j int :: {&s[i], &s[j]} 0 <= i && i < j && j < len(s) ==> s[i] <= s[j]
-}
-```
-
-
 ## Binary Search Example
 We conclude this section by returning to the binary search example,
 giving a version for slices with the difference that `binarySearch` returns whether the element `value` is found in the array and not the index where it would have been inserted.
