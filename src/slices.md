@@ -4,17 +4,17 @@ Slices provide a useful abstraction to a access a contiguous sequence of data.
 A slice has a length, a capacity and use an underlying array as storage.
 
 In the following example, a constant `n` is added to a slice.
-We want to highlight that the functions `len` and `cap` can be used in contracts.
+The functions `len` and `cap` can be used in contracts.
 Access to slice elements is specified using quantified permissions.
 Note that the loop must preserve the permissions with an invariant.
 ``` go
-// @ preserves forall k int :: {s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
-// @ ensures forall k int :: {s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+// @ preserves forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
+// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
 	//@ invariant 0 <= i && i <= len(s)
-	//@ invariant forall k int :: {s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
-	//@ invariant forall k int :: {s[k]} i <= k && k < len(s) ==> s[k] == old(s[k])
-	//@ invariant forall k int :: {s[k]} 0 <= k && k < i ==> s[k] == old(s[k]) + n
+	//@ invariant forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
+	//@ invariant forall k int :: {&s[k]} i <= k && k < len(s) ==> s[k] == old(s[k])
+	//@ invariant forall k int :: {&s[k]} 0 <= k && k < i ==> s[k] == old(s[k]) + n
 	for i := 0; i < len(s); i += 1 {
 		s[i] = s[i] + n
 	}
@@ -24,7 +24,7 @@ func client() {
 	s := make([]int, 4, 8)
 	//@ assert len(s) == 4 && cap(s) == 8
 	addToSlice(s, 1)
-	//@ assert forall i int :: {s[i]} 0 <= i && i < 4 ==> s[i] == 1
+	//@ assert forall i int :: {&s[i]} 0 <= i && i < 4 ==> s[i] == 1
 }
 ```
 In the above example, we obtain permission to the slice elements on allocation by making them.
@@ -32,7 +32,7 @@ We obtain permission to the slice elements on allocation,
 in the above example by making it.
 ``` go
 s1 := []int{0, 1, 1, 2, 3, 5}
-//@ assert forall i int :: {s1[i]} 0 <= i && i < len(s1) ==> acc(&s1[i])
+//@ assert forall i int :: {&s1[i]} 0 <= i && i < len(s1) ==> acc(&s1[i])
 //@ assert acc(s1)
 ```
 After initialization with a literal, we also gain permission.
@@ -113,14 +113,14 @@ This simple example shows the usage of `copy` and `append`:
 ``` go
 s1 := []int{1, 2}
 s2 := []int{3, 4, 5}
-
-s0 := make([]int, len(s2))
+                                                                         
+s0 := make([]int, len(s1))
 copy(s0, s1 /*@, perm(1/2) @*/)
-//@ assert forall i int :: {s0[i], s1[i]} 0 <= i && i < len(s0) ==> s0[i] == s1[i]
-
+//@ assert forall i int :: {&s0[i]} {&s1[i]} 0 <= i && i < len(s0) ==> s0[i] == s1[i]
+                                                                         
 s3 := append( /*@ perm(1/2), @*/ s1, s2...)
 s4 := append( /*@ perm(1/2), @*/ s0, 3, 4, 5)
-//@ assert forall i int :: {s3[i], s4[i]} 0 <= i && i < len(s3) ==> s3[i] == s4[i]
+//@ assert forall i int :: {&s3[i]} {&s4[i]} 0 <= i && i < len(s3) ==> s3[i] == s4[i]
 ```
 
 Using the nil slice we could refactor the `make` and `copy` to the single line `s0 := append([]int(nil), s1...)` .
@@ -161,11 +161,11 @@ Permission to copy(s0, s1 , perm(1/2) ) might not suffice.
 ``` go
 // @ requires len(s) > 0
 // @ preserves acc(s)
-// @ ensures forall k int :: {s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
 	//@ invariant acc(s)
-	//@ invariant forall k int :: {s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
-	//@ invariant forall k int :: {s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
+	//@ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
+	//@ invariant forall k int :: {&s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
 	for i, e := range s /*@ with i0 @*/ {
 		s[i] = e + n
 	}
@@ -175,12 +175,12 @@ func addToSlice(s []int, n int) {
 ``` go
 // @ requires len(s) > 0
 // @ preserves acc(s, 1/2)
-// @ ensures forall j int :: {s[j]} 0 <= j && j < len(s) ==> res >= s[j]
+// @ ensures forall j int :: {&s[j]} 0 <= j && j < len(s) ==> res >= s[j]
 // @ ensures 0 <= idx && idx < len(s) && s[idx] == res
 func sliceMax(s []int) (res int /*@ , ghost idx int @*/) {
 	res = s[0]
 	//@ invariant acc(s, 1/2)
-	//@ invariant forall j int :: 0 <= j && j < i0 ==> res >= s[j]
+	//@ invariant forall j int :: {&s[j]} 0 <= j && j < i0 ==> res >= s[j]
 	//@ invariant 0 <= idx && idx < len(s) && s[idx] == res
 	for i, a := range s /*@ with i0 @*/ {
 		if a > res {
@@ -223,10 +223,10 @@ Pure functions implicitly return all permissions mentioned in the precondition.
 ``` gobra
 ghost
 requires p > 0
-requires forall i int :: 0 <= i && i < len(s) ==> acc(&s[i], p)
+requires forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], p)
 decreases
 pure func isSliceSorted(s []int, p perm) bool {
-	return forall i, j int :: {s[i], s[j]} 0 <= i && i < j && j < len(s) ==> s[i] <= s[j]
+	return forall i, j int :: {&s[i], &s[j]} 0 <= i && i < j && j < len(s) ==> s[i] <= s[j]
 }
 ```
 
