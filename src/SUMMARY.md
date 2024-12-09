@@ -12,6 +12,6 @@
 - [Ghost code](./ghost.md)
 
 # Reasoning about Memory Accesses with Permissions
-- [Permission and swapping pointers](./basic-permissions.md)
+- [Permission to write](./permission-write.md)
 
 # Advanced topics

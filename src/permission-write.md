@@ -1,4 +1,4 @@
-# Permission and swapping pointers
+# Permission to write
 
 Permissions allow us to reason about mutable data.
 Reading and writing to a location is permitted based on the permission amount held.
