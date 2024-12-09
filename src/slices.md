@@ -234,26 +234,36 @@ pure func isSliceSorted(s []int, p perm) bool {
 ## Binary Search Example
 We conclude this section by returning to the binary search example,
 giving a version for slices with the difference that `binarySearch` returns whether the element `value` is found in the array and not the index where it would have been inserted.
+Now we can handle slices of arbitrary length and have a more efficient implementation, with the drawback of having to specify permissions.
 
 ``` go
-// @ requires len(s) > 0
-// @ requires p > 0
-// @ preserves acc(s, p)
-// @ preserves isSliceSorted(s, p)
-// @ ensures forall i int :: {s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-// @ ensures 0 <= idx && idx < len(s)
-// @ ensures found ==> s[idx] == value
-// @ ensures !found ==> forall i int :: {s[i]} 0 <= i && i < len(s) ==> s[i] != value
-func binarySearch(s []int, value int /*@ , ghost p perm @*/) (found bool /*@ , ghost idx int @*/) {
+~/*@
+~ghost
+~requires forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
+~decreases
+~pure func isSliceSorted(s []int) bool {
+	~return forall i, j int :: {&s[i], &s[j]} 0 <= i && i < j && j < len(s) ==> s[i] <= s[j]
+~}
+~@*/
+
+// @ preserves acc(s, 1/2)
+// @ preserves isSliceSorted(s)
+// @ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
+// @ ensures found ==> 0 <= idx && idx < len(s) && s[idx] == value
+// @ ensures !found ==> forall i int :: {&s[i]} 0 <= i && i < len(s) ==> s[i] != value
+func binarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
+	if len(s) == 0 {
+		return false /*@ , -1 @*/
+	}
 	low := 0
 	high := len(s) - 1
 	mid := 0
-	// @ invariant acc(s, p)
+	// @ invariant acc(s, 1/2)
 	// @ invariant 0 <= low && low <= high && high < len(s)
 	// @ invariant 0 <= mid && mid < len(s)
-	// @ invariant forall i int :: {s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-	// @ invariant forall i int :: {s[i]} 0 <= i && i < low ==> s[i] < value
-	// @ invariant forall i int :: {s[i]} high < i && i < len(s) ==>  value < s[i]
+	// @ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
+	// @ invariant forall i int :: {&s[i]} 0 <= i && i < low ==> s[i] < value
+	// @ invariant forall i int :: {&s[i]} high < i && i < len(s) ==>  value < s[i]
 	for low < high {
 		mid = (low + high) / 2
 		if s[mid] == value {
@@ -270,11 +280,11 @@ func binarySearch(s []int, value int /*@ , ghost p perm @*/) (found bool /*@ , g
 func binarySearchClient() {
 	xs := []int{1, 5, 7, 11, 23, 43, 53, 123, 234, 1024}
 
-	found /*@, idx @*/ := binarySearch(xs, 11 /*@ , perm(1/2) @*/)
+	found /*@, idx @*/ := binarySearch(xs, 11)
 	//@ assert found ==> xs[idx] == 11
-	//@ assert !found ==> forall i int :: {xs[i]} 0 <= i && i < len(xs) ==> xs[i] != 11
+	//@ assert !found ==> forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> xs[i] != 11
 
-	found /*@, idx @*/ = binarySearch(xs, 12 /*@ , perm(1/2) @*/)
+	found /*@, idx @*/ = binarySearch(xs, 12)
 	//@ assert !found
 }
 ```
