@@ -1,7 +1,8 @@
-# Fractional Permissions
+# Permission to read
 
 So far we have seen permissions of the form `acc(x)` for a pointer `x`.
 We can be more specific and give a permission amount as the second argument to `acc`, as a fractional number.
+In this case we speak of **fractional permissions**.
 
 - The amount `1` allows us to read and write
   `acc(x)`, or equivalently `acc(x, 1)`, `acc(x, writePerm)`, `acc(x, 1/1)`
