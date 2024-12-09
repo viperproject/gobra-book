@@ -8,8 +8,8 @@ The functions `len` and `cap` can be used in contracts.
 Access to slice elements is specified using quantified permissions.
 Note that the loop must preserve the permissions with an invariant.
 ``` go
-// @ preserves forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
-// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+//@ preserves forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
+//@ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
 	//@ invariant 0 <= i && i <= len(s)
 	//@ invariant forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
@@ -80,13 +80,13 @@ In Gobra we must pass an additional ghost parameter for the permission amount re
 This allows the functions generally to be used independent of the exact permission amount.
 ``` gobra
 requires p > 0
-requires forall i int :: { &src[i] } 0 <= i && i < len(src) ==> acc(&src[i])
-requires forall i int :: { &xs[i] } 0 <= i && i < len(xs) ==> acc(&xs[i], p)
+requires forall i int :: {&src[i]} 0 <= i && i < len(src) ==> acc(&src[i])
+requires forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> acc(&xs[i], p)
 ensures len(res) == len(src) + len(xs)
-ensures forall i int :: { &res[i] } 0 <= i && i < len(res) ==> acc(&res[i])
-ensures forall i int :: { &xs[i] } 0 <= i && i < len(xs) ==> acc(&xs[i], p)
-ensures forall i int :: { &res[i] } 0 <= i && i < len(src) ==> res[i] === old(src[i])
-ensures forall i int :: { &res[i] } len(src) <= i && i < len(res) ==> res[i] === xs[i - len(src)]
+ensures forall i int :: {&res[i]} 0 <= i && i < len(res) ==> acc(&res[i])
+ensures forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> acc(&xs[i], p)
+ensures forall i int :: {&res[i]} 0 <= i && i < len(src) ==> res[i] === old(src[i])
+ensures forall i int :: {&res[i]} len(src) <= i && i < len(res) ==> res[i] === xs[i - len(src)]
 func append[T any](ghost p perm, src []T, xs ...T) (res []T)
 ```
 
@@ -97,14 +97,14 @@ The permission to `src` is lost as the underlying array could be reallocated if 
 `copy` copies the elements from `src` to `dst`, stops when the end of the shorter slice is reached and returns the number of elements copied.
  ``` gobra
 requires 0 < p
-requires forall i int :: { &dst[i] } (0 <= i && i < len(dst)) ==> acc(&dst[i], write)
-requires forall i int :: { &src[i] } (0 <= i && i < len(src)) ==> acc(&src[i], p)
+requires forall i int :: {&dst[i]} (0 <= i && i < len(dst)) ==> acc(&dst[i], write)
+requires forall i int :: {&src[i]} (0 <= i && i < len(src)) ==> acc(&src[i], p)
 ensures len(dst) <= len(src) ==> res == len(dst)
 ensures len(src) < len(dst) ==> res == len(src)
-ensures forall i int :: { &dst[i] } 0 <= i && i < len(dst) ==> acc(&dst[i], write)
-ensures forall i int :: { &src[i] } 0 <= i && i < len(src) ==> acc(&src[i], p)
-ensures forall i int :: { &dst[i] } (0 <= i && i < len(src) && i < len(dst)) ==> dst[i] === old(src[i])
-ensures forall i int :: { &dst[i] } (len(src) <= i && i < len(dst)) ==> dst[i] === old(dst[i])
+ensures forall i int :: {&dst[i]} 0 <= i && i < len(dst) ==> acc(&dst[i], write)
+ensures forall i int :: {&src[i]} 0 <= i && i < len(src) ==> acc(&src[i], p)
+ensures forall i int :: {&dst[i]} (0 <= i && i < len(src) && i < len(dst)) ==> dst[i] === old(src[i])
+ensures forall i int :: {&dst[i]} (len(src) <= i && i < len(dst)) ==> dst[i] === old(dst[i])
 func copy[T any](dst, src []T, ghost p perm) (res int)
  ```
 
@@ -118,8 +118,8 @@ s0 := make([]int, len(s1))
 copy(s0, s1 /*@, perm(1/2) @*/)
 //@ assert forall i int :: {&s0[i]} {&s1[i]} 0 <= i && i < len(s0) ==> s0[i] == s1[i]
                                                                          
-s3 := append( /*@ perm(1/2), @*/ s1, s2...)
-s4 := append( /*@ perm(1/2), @*/ s0, 3, 4, 5)
+s3 := append(/*@ perm(1/2), @*/ s1, s2...)
+s4 := append(/*@ perm(1/2), @*/ s0, 3, 4, 5)
 //@ assert forall i int :: {&s3[i]} {&s4[i]} 0 <= i && i < len(s3) ==> s3[i] == s4[i]
 ```
 
@@ -135,7 +135,7 @@ In Go it is possible to append a slice to itself.
 The contract of `append` forbids this.
 ``` go
 s1 := []int{1, 2}
-s2 := append( /*@ perm(1/64), @*/ s1, s1...)
+s2 := append(/*@ perm(1/64), @*/ s1, s1...)
 ```
 ``` text
 ERROR Precondition of call append(  perm(1/64),  s1, s1...) might not hold. 
@@ -185,12 +185,13 @@ But no permission is held to `&s[-1]`.
 
 Alternatively we could handle the empty case specifically:
 ``` go
-// @ preserves acc(s)
-// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+//@ preserves acc(s)
+//@ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
 	if len(s) == 0 {
 		return
 	}
+	// ...
 	~//@ invariant acc(s)
 	~//@ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
 	~//@ invariant forall k int :: {&s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
@@ -200,7 +201,7 @@ func addToSlice(s []int, n int) {
 ~}
 ```
 
-## Binary Search Example
+## Binary Search
 We conclude this section by returning to the binary search example,
 giving a version for slices with the difference that `binarySearch` returns whether the element `value` is found in the array and not the index where it would have been inserted.
 Now we can handle slices of arbitrary length and have a more efficient implementation, with the drawback of having to specify permissions.
@@ -215,11 +216,11 @@ Now we can handle slices of arbitrary length and have a more efficient implement
 ~}
 ~@*/
 
-// @ preserves acc(s, 1/2)
-// @ preserves isSliceSorted(s)
-// @ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-// @ ensures found ==> 0 <= idx && idx < len(s) && s[idx] == value
-// @ ensures !found ==> forall i int :: {&s[i]} 0 <= i && i < len(s) ==> s[i] != value
+//@ preserves acc(s, 1/2)
+//@ preserves isSliceSorted(s)
+//@ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
+//@ ensures found ==> 0 <= idx && idx < len(s) && s[idx] == value
+//@ ensures !found ==> forall i int :: {&s[i]} 0 <= i && i < len(s) ==> s[i] != value
 func binarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
 	if len(s) == 0 {
 		return false /*@ , -1 @*/
@@ -227,12 +228,12 @@ func binarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
 	low := 0
 	high := len(s) - 1
 	mid := 0
-	// @ invariant acc(s, 1/2)
-	// @ invariant 0 <= low && low <= high && high < len(s)
-	// @ invariant 0 <= mid && mid < len(s)
-	// @ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-	// @ invariant forall i int :: {&s[i]} 0 <= i && i < low ==> s[i] < value
-	// @ invariant forall i int :: {&s[i]} high < i && i < len(s) ==>  value < s[i]
+	//@ invariant acc(s, 1/2)
+	//@ invariant 0 <= low && low <= high && high < len(s)
+	//@ invariant 0 <= mid && mid < len(s)
+	//@ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
+	//@ invariant forall i int :: {&s[i]} 0 <= i && i < low ==> s[i] < value
+	//@ invariant forall i int :: {&s[i]} high < i && i < len(s) ==>  value < s[i]
 	for low < high {
 		mid = (low + high) / 2
 		if s[mid] == value {
