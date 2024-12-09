@@ -118,36 +118,11 @@ ensures x1 != x2
 func lemma(x1, x2 *int) {}
 ```
 
-## `inhale` and `exhale`
-Permissions can be manually added (removed) by inhaling (exhaling).
-This can be useful for debugging but should not be needed for normal verification purposes.
-
-The statement `exhale ASSERTION`
-1. asserts that all value constraints in `ASSERTION` hold
-2. asserts that all permissions mentioned by `ASSERTION` are held
-3. removes all permissions mentioned by `ASSERTION`
-
-Exhale is similar to `assert`, with the difference that `assert` does not remove any permissions:
-``` gobra
-requires acc(x, 1)
-func breathingTraining(x *int) {
-	assert acc(x, 1)
-	exhale acc(x, 1/4)
-	assert acc(x, 3/4)
-	assert acc(x, 3/4)
-}
-```
-
-The statement `inhale ASSERTION`
-1. adds all permissions mentioned by `ASSERTION`
-2. assumes all value constraints in `ASSERTION` hold
-
-
 ## Access Predicates are not duplicable
 In classical logic, if the proposition \\( P \\) holds then clearly the proposition \\( P \land P\\) holds as well.
 For assertions containing access predicates, this does no longer hold.
 Consider `acc(p, 1/2)` which denotes read permission.
-But `acc(p, 1/2) && acc(p, 1/2)` implies full permissions `acc(p, 1)`.
+But `acc(p, 1/2) && acc(p, 1/2)` implies write permission `acc(p, 1)`.
 
 
 ## Footnotes

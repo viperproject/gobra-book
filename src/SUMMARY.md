@@ -14,5 +14,6 @@
 # Reasoning about Memory Accesses with Permissions
 - [Fractional Permissions](./fractional-permissions.md)
   - [Wildcard Permission](./wildcard-permission.md)
+- [Inhaling and Exhaling](./inhale-exhale.md)
 
 # Advanced topics
