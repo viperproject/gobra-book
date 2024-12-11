@@ -61,41 +61,20 @@ func swap(x *int, y *int) {
 ~	*x = *y
 ~	*y = tmp
 }
-```
 
-If we now try to swap,
-``` go
 func client() {
-	a := 1
-	b := 2
-    x := &a
-    y := &b
-	swap(x, y)
-}
-```
-we first get the error:
-``` text
-property error: got a that is not effective addressable
-        x := &a
-      ^
-```
-Gobra requires us to be explicit and mark a variable `a` that is referenced with `a /*@@@*/`.
-This should ensure that the programmer is aware, in which cases, Gobra employs the *permission machinery*.
-Otherwise, if the local variables `a` and `b` are never referenced, reasoning about them is much easier.
-Note that the outer `@`s belong to the annotation, so the equivalent in Gobra is just `a@`.
-``` go
-~func client() {
-	a /*@@@*/ := 1
-	b /*@@@*/ := 2
-    x := &a
-    y := &b
+	x := new(int)
+	y := new(int)
+    *x = 1
+    *y = 2
 	swap(x, y)
 	//@ assert *x == 2
 	//@ assert *y == 1
 }
 ```
 
-In our example, permissions `acc(x)` and `acc(y)` are obtained in `client` when initializing `x` and `y`,
+
+In our example, permissions `acc(x)` and `acc(y)` are obtained in `client` when they allocated with `new`,
 then transferred when calling `swap(x, y)`.
 We add the postcondition `acc(x) && acc(y)` to transfer the permissions back to the caller when the function returns.
 Otherwise the permissions are leaked (lost).
@@ -182,10 +161,10 @@ func swap(x *int, y *int) {
 	*y = tmp
 }
 func client() {
-	a /*@@@*/ := 1
-	b /*@@@*/ := 2
-	x := &a
-	y := &b
+	x := new(int)
+	y := new(int)
+    *x = 1
+    *y = 2
 	swap(x, x)
 	//@ assert *x == 1
 	swap(x, y)
