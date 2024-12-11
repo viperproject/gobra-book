@@ -17,5 +17,6 @@
 - [Quantified Permissions](./quantified-permission.md)
 - [Pure Functions and Permissions](./permission-pure.md)
 - [Slices](./slices.md)
+- [Maps](./maps.md)
 
 # Advanced topics
