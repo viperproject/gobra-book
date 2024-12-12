@@ -1,4 +1,5 @@
-personal_ws-1.1 en 99 utf-8
+personal_ws-1.1 en 101 utf-8
+Addressability
 Collatz
 Datatypes
 Errorf
@@ -28,6 +29,7 @@ Viper
 Wireguard
 addToSlice
 addToSliceClient
+addressability
 arity
 bool
 boolean
