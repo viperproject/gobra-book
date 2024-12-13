@@ -6,11 +6,11 @@ watched := make(map[string]bool, 10) // optional capacity
 //@ assert acc(watched) && len(watched) == 0
 ```
 Permission is obtained from `make`.
-Note that the accessibility predicate `acc(watched)` is for the entire map.
+The accessibility predicate `acc(watched)` is for the entire map.
 Individual elements like in slices are not addressable.
 
 Holding write permissions, we can add entries.
-In specifications we can check with `in` if a key is contained in the map.
+In specifications, we can check with `in` if a key is contained in the map.
 ``` go
 watched["Blade Runner"] = true
 //@ assert "Blade Runner" in watched && len(watched) == 1
@@ -30,7 +30,7 @@ Gobra does not support Go's built-in functions `delete` to remove map entries an
 
 A `nil` map is obtained with `new` or by not initializing a map variable.
 No elements can be added to a `nil` map.
-Otherwise it behaves like an empty map.
+Otherwise, it behaves like an empty map.
 ``` go
 var rating map[string]int
 //@ assert len(rating) == 0
