@@ -1,4 +1,4 @@
-personal_ws-1.1 en 105 utf-8
+personal_ws-1.1 en 108 utf-8
 Addressability
 Collatz
 Datatypes
@@ -53,6 +53,8 @@ halfRoundedUp
 hasNext
 incChannel
 incr
+injective
+injectivity
 inlined
 invariants
 isComparable
@@ -102,5 +104,6 @@ uintptr
 unapplied
 unbuffered
 untyped
+variadic
 verifier
 vous

@@ -26,5 +26,6 @@
   - [Wildcard Permission](./wildcard-permission.md)
   - [Permission Type and Parameters](./permission-type.md)
 - [Inhaling and Exhaling](./inhale-exhale.md)
+- [Quantified Permissions](./quantified-permission.md)
 
 # Advanced topics
