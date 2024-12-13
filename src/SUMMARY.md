@@ -9,6 +9,7 @@
 - [Basic specifications](./basic-specs.md)
   - [`assert` and `assume`](./assert-assume.md)
   - [requires, ensures, and preserves](./requires-ensures.md)
+- [Array Operations](./basic-array.md)
 - [Overflow Checking](./overflow.md)
 - [Loops](./loops.md)
   - [Invariants](./loops-invariant.md)
