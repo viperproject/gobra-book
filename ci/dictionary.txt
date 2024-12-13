@@ -1,4 +1,5 @@
 personal_ws-1.1 en 0 utf-8
+binarySearch
 Collatz
 Datatypes
 Errorf
@@ -7,6 +8,7 @@ Gobra
 Gobra's
 Init
 Isqrt
+iteratively
 LockInv
 LockP
 Mergesorts
