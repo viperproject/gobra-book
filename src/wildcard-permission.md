@@ -19,7 +19,8 @@ func client() {
 	p := &pair{3, 5}
 	res := p.sum()
 	//@ assert p.left == 3 && p.right == 5
-	p.left, p.right = p.right, res	// Error
+	p.left = p.right  // Error
+	p.right =  res
 	//@ assert p.left == 5 && p.right == 8
 }
 ```
