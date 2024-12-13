@@ -27,5 +27,8 @@
   - [Permission Type and Parameters](./permission-type.md)
 - [Inhaling and Exhaling](./inhale-exhale.md)
 - [Quantified Permissions](./quantified-permission.md)
+- [Pure Functions and Permissions](./permission-pure.md)
+- [Slices](./slices.md)
+- [Maps](./maps.md)
 
 # Advanced topics
