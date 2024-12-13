@@ -22,5 +22,9 @@
 - [Permission to write](./permission-write.md)
 - [Self-Framing Assertions](./self-framing.md)
 - [Addressability and Sharing](./addressable.md)
+- [Permission to read](./fractional-permissions.md)
+  - [Wildcard Permission](./wildcard-permission.md)
+  - [Permission Type and Parameters](./permission-type.md)
+- [Inhaling and Exhaling](./inhale-exhale.md)
 
 # Advanced topics
