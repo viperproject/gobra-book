@@ -1,5 +1,5 @@
-personal_ws-1.1 en 0 utf-8
-binarySearch
+personal_ws-1.1 en 105 utf-8
+Addressability
 Collatz
 Datatypes
 Errorf
@@ -8,7 +8,6 @@ Gobra
 Gobra's
 Init
 Isqrt
-iteratively
 LockInv
 LockP
 Mergesorts
@@ -31,7 +30,9 @@ Viper
 Wireguard
 addToSlice
 addToSliceClient
+addressability
 arity
+binarySearch
 bool
 boolean
 callee
@@ -58,6 +59,7 @@ isComparable
 isContained
 isEven
 isqrt
+iteratively
 listPermissions
 llist
 maxScore

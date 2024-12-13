@@ -18,4 +18,9 @@
   - [Range](./loops-range.md)
 - [Ghost code](./ghost.md)
 
+# Reasoning about Memory Accesses with Permissions
+- [Permission to write](./permission-write.md)
+- [Self-Framing Assertions](./self-framing.md)
+- [Addressability and Sharing](./addressable.md)
+
 # Advanced topics
