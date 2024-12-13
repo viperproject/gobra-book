@@ -1,0 +1,39 @@
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """
+**Program 1:**
+``` go
+/*@
+ghost
+requires n >= 0
+decreases n
+pure
+func fibonacci(n int) (ghost res int) {
+    return n <= 1 ? n : fibonacci(n-1) + fibonacci(n-2)
+}
+@*/
+
+// @ requires n >= 0
+// @ ensures res == fibonacci(n)
+func fibIterative(n int) (res int) {
+	a, b := 0, 1
+	//@ (1)
+	for i := 0; i < n; i++ {
+		a, b = b, a+b
+	}
+	return a
+}
+```
+Which of the following specifications have to be inserted before the loop such that **Program 1** verifies?
+"""
+prompt.distractors = [
+	"`invariant 0 <= i && i < n`",
+	"`invariant a == fibonacci(i+1)`",
+]
+answer.answer = [
+	"`invariant 0 <= i && i <= n`",
+	"`invariant a == fibonacci(i)`",
+	"`invariant b == fibonacci(i+1)`",
+]
+context = ""
+id = "3756711b-3034-4eb1-9915-b0d395335a0b"

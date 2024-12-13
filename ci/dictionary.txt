@@ -52,6 +52,7 @@ halfRoundedUp
 hasNext
 incChannel
 incr
+inlined
 invariants
 isComparable
 isContained
