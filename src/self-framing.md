@@ -2,7 +2,7 @@
 
 Assertions must be well-defined and require access to all locations being read.
 
-If we forget to transfer permissions back, the postcondition has no permission to read `*y` and `*x`.
+This applies also to contracts, in order to read `*x` and `*y` the postcondition must hold permission for `x` and `y`.
 ``` go
 //@ requires acc(x) && acc(y)
 //@ ensures *x == old(*y) && *y == old(*x)

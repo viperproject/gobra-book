@@ -19,12 +19,9 @@ func driver(p *int) {
 Permissions are held to *resources*.
 The following chapter will also introduce access to predicates but for now, we are concerned only with pointers.
 
-
 For a pointer to an integer `x *int`,
 the accessibility predicate `acc(x)` denotes write (and read) access to `x`.
-
 Having access `acc(x)` to a pointer `x` implies `x != nil` and that reading (e.g. `tmp := *x`) and writing (e.g. `*x = 1`) does not panic.
-
 Let us illustrate this with a function that swaps the values of two integer pointers:
 ``` go
 func swap(x *int, y *int) {
