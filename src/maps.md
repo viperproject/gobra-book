@@ -46,8 +46,9 @@ For example one cannot use other maps, slices and functions as keys.
 
 ## Map Range
 Range loops iterate over the keys and values for a map.
+It is necessary to add a `with` clause (e.g. `range m /*@ with visited @*/`).
+The ghost variable `visited` is a mathematical set (properly introduced in the next chapter) and contains the keys that have been visited already.
 
-TODO(why it doesn't work without visited)
 ``` go
 type Movie struct {
 	name   string
@@ -82,6 +83,36 @@ func critique() {
 Go does not specify the iteration order over maps [^1].
 An entry added during iteration may be produced or skipped.
 Gobra does not allow the mutation of maps while iterating.
+``` go
+// @ requires acc(m)
+func produceSequels(m map[int]Movie) {
+	//@ invariant acc(m)
+	for id, movie := range m /*@ with visited @*/ {
+		m[100*id] = Movie{movie.name + "2", movie.rating - 2} // error
+	}
+}
+
+func main() {
+	movies := map[int]Movie{
+		132: {"Jaws", 6},
+		234: {"Cars", 5},
+	}
+	produceSequels(movies)
+	// fmt.Println(movies)
+}
+```
+``` text
+ERROR Assignment might fail. 
+Permission to m might not suffice.
+```
+The output of the Go program is nondeterministic (two samples):
+``` text
+map[132:{Jaws 6} 234:{Cars 5} 13200:{Jaws2 4} 23400:{Cars2 3} 1320000:{Jaws22 2} 2340000:{Cars22 1} 132000000:{Jaws222 0} 234000000:{Cars222 -1}]
+```
+``` text
+map[132:{Jaws 6} 234:{Cars 5} 13200:{Jaws2 4} 23400:{Cars2 3} 2340000:{Cars22 1} 234000000:{Cars222 -1} 23400000000:{Cars2222 -3} 2340000000000:{Cars22222 -5} 234000000000000:{Cars222222 -7} 23400000000000000:{Cars2222222 -9}]
+```
+
 This is implemented by exhaling a small constant permission amount before the loop.
 As a consequence, wildcard permission does not suffice:
 
