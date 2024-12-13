@@ -68,11 +68,14 @@ func client() {
     *x = 1
     *y = 2
 	swap(x, y)
-	//@ assert *x == 2
+	//@ assert *x == 2 // fail
 	//@ assert *y == 1
 }
 ```
-
+``` text
+ERROR Assert might fail. 
+Permission to *x might not suffice.
+```
 
 In our example, permissions `acc(x)` and `acc(y)` are obtained in `client` when they allocated with `new`,
 then transferred when calling `swap(x, y)`.
