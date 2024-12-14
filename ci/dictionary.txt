@@ -1,4 +1,4 @@
-personal_ws-1.1 en 100 utf-8
+personal_ws-1.1 en 104 utf-8
 Collatz
 Datatypes
 Errorf
@@ -9,6 +9,7 @@ Init
 Isqrt
 LockInv
 LockP
+Mergesorts
 Mutex
 Overconstraining
 PredTrue
@@ -29,6 +30,7 @@ Wireguard
 addToSlice
 addToSliceClient
 arity
+binarySearch
 bool
 boolean
 callee
@@ -49,11 +51,13 @@ halfRoundedUp
 hasNext
 incChannel
 incr
+inlined
 invariants
 isComparable
 isContained
 isEven
 isqrt
+iteratively
 listPermissions
 llist
 maxScore
