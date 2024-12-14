@@ -80,11 +80,11 @@ We might forget to add one and update `low = mid` instead of `low = mid + 1`.
         high = mid
     }
 ```
-For example for `N=3`, `bisectRight([N]int{1, 2, 3}, 2)` does not terminate.
+For example for `N=3`, `binarySearch([N]int{1, 2, 3}, 2)` does not terminate.
 But the program still verifies since only partial correctness is checked.
 <!-- 
 	arr := [N]int{1, 2, 3}
-	i := bisectRight(arr, 2)
+	i := binarySearch(arr, 2)
 low mid high
  0 1 3
  1 1 2
@@ -92,7 +92,7 @@ low mid high
 This changes when we add `decreases`.
 ``` go
 // @ decreases
-func bisectRight(arr [N]int, value int) (idx int) {
+func binarySearch(arr [N]int, value int) (idx int) {
 ```
 ``` sh
 ERROR Function might not terminate. 
@@ -140,7 +140,7 @@ In general, one can specify a list of expressions with
 
 A tuple termination measure decreases based on the lexicographical order over the tuple elements.
 
-For `bisectRight` we used `decreases high - low`.
+For `binarySearch` we used `decreases high - low`.
 Alternatively, we could use `decreases high, N - low`
 
 ### Conditional 
