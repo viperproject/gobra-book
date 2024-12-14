@@ -17,4 +17,17 @@
 - [Overflow Checking](./overflow.md)
 - [Ghost Code and Pure Functions](./basic-ghost-pure.md)
 
+# Reasoning about Memory Accesses with Permissions
+- [Permission to write](./permission-write.md)
+- [Self-Framing Assertions](./self-framing.md)
+- [Addressability and Sharing](./addressable.md)
+- [Permission to read](./fractional-permissions.md)
+  - [Wildcard Permission](./wildcard-permission.md)
+  - [Permission Type and Parameters](./permission-type.md)
+- [Inhaling and Exhaling](./inhale-exhale.md)
+- [Quantified Permissions](./quantified-permission.md)
+- [Pure Functions and Permissions](./permission-pure.md)
+- [Slices](./slices.md)
+- [Maps](./maps.md)
+
 # Advanced topics
