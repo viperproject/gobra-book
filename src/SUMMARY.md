@@ -15,6 +15,7 @@
   - [Binary Search](./loops-binarysearch.md)
   - [Range](./loops-range.md)
 - [Overflow Checking](./overflow.md)
+- [Termination](./termination.md)
 - [Ghost Code and Pure Functions](./basic-ghost-pure.md)
 
 # Advanced topics
