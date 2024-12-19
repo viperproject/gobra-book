@@ -183,6 +183,25 @@ ERROR Postcondition might not hold.
 Assertion res >= 0 might not hold.
 ```
 
+
+## Default Precondition and Postcondition
+> If no precondition is specified by the user, it defaults to `true`.
+>
+> If no postcondition is specified by the user, it defaults to `true`.
+
+``` go
+func foo() int
+```
+is equivalent to
+``` go
+//@ requires true
+//@ ensures true
+func foo() int
+```
+
+Since `true` always holds, the precondition `true` does not restrict when a function can be called.
+A postcondition `true` provides no information about the return values.
+
 ## Quiz
 {{#quiz ../quizzes/basic-specs.toml}}
 
