@@ -50,10 +50,12 @@ In the next sections, we explain how to prove that a function satisfies its cont
 Preconditions are added with the keyword `requires` before a function declaration.
 In Go programs, we write Gobra annotations in special line comments starting with `//@`.
 
-> Gobra checks statically that a function's preconditions hold for every call of that function and returns an error if it cannot prove it.
+> Gobra checks that a function's preconditions hold for every call of that function and reports an error if it cannot prove it.
+>
+> Gobra assumes the preconditions hold at the beginning of the function's body.
 
 Let us exemplify this with the absolute value example:
-``` go
+```go
 package abs
 
 const MinInt32 = -2147483648
@@ -92,7 +94,7 @@ For the calls `Abs(3)` and `Abs(-2)` the preconditions hold, since clearly `3 !=
 This check fails for `Abs(MinInt32)`.
 The function `client2` calls `Abs` with its arguments constrained by another precondition `a > 0 && b < 0`.
 Here the precondition holds for the call `Abs(a)`, since `a > 0` implies `a != MinInt32`.
-We get another error for `Abs(b)`, as the only information about `b` that we have at this point is `b < 0` which does not exclude `b != MinInt32`.
+We get another error for `Abs(b)`, as the only information Gobra has about `b` at this point is `b < 0` which does not exclude `b != MinInt32`.
 
 
 Please note that the errors are reported at the location of the call since the caller is violating the contract of the function.
@@ -100,7 +102,7 @@ Please note that the errors are reported at the location of the call since the c
 
 Preconditions `a > 0 && b < 0` joined by the logical AND can be split into multiple lines.
 We can write the contract for `client2` equivalently as:
-``` go
+```go
 //@ requires a > 0
 //@ requires b < 0
 func client2(a, b int32)
@@ -112,7 +114,7 @@ Gobra can be instructed to perform checks with the `assert` statement.
 > Gobra checks that the assertion holds and reports an error if it cannot prove it.
 
 The first assertion passes in the following program since it can be inferred from the precondition.
-``` go
+```go
 //@ requires a > 0 && b < 0
 func client3(a, b int32) {
     //@ assert a > b
@@ -129,124 +131,58 @@ Assertion b > -10 might not hold.
 Postconditions are added with the keyword `ensures` before a function declaration.
 By convention, they are written after any preconditions.
 
-> Gobra checks the proof that, the postconditions of a function hold whenever the function returns. Otherwise, an error is reported.
+> Gobra checks that a function's postconditions hold whenever the function returns and reports an error if it cannot prove it.
 
-In the absolute value example, we have already added the precondition `res >= 0 && (res == x || res == -x)`.
-The comments give the information Gobra has at the respective program locations.
-At the begging of the function, we can assume the precondition holds.
-Then we get different conditions depending on the branch.
+In the absolute value example, we have already seen the precondition `res >= 0 && (res == x || res == -x)`.
+Assertions are included in the program to show the information Gobra has at the respective program locations.
+At the beginning of the function, the precondition holds.
+Depending on the branch taken, different constraints hold for `x`.
 In this example, the postcondition must be proven to hold at both return locations.
-With `|=` we write a reasoning steps that lead to the postcondition.
-In this case, Gobra can check this automatically.
-``` go
+After the calls to `Abs`, the caller can `assert` the postcondition.
+```go
 const MinInt32 = -2147483648
 
-// @ requires x != MinInt32
-// @ ensures res >= 0 && (res == x || res == -x)
+//@ requires x != MinInt32
+//@ ensures res >= 0 && (res == x || res == -x)
 func Abs(x int32) (res int32) {
-    // x != MinInt32 
+    //@ assert x != MinInt32
     if x < 0 {
-        // x != MinInt32 && x < 0
+        //@ assert x != MinInt32 && x < 0
         return -x
-        // x != MinInt32 && x < 0 && res == -x
-        // |= -x >= 0 && res == -x
-        // |= res >= 0 && res == -x
-        // |= res >= 0 && (res == x || res == -x)
     } else {
-        // x != MinInt32 && !(x < 0)
+        //@ assert x != MinInt32 && !(x < 0)
         return x
-        // x != MinInt32 && !(x < 0) && res == x
-        // |= x >= 0 && res == x
-        // |= res >= 0 && res == x
-        // |= res >= 0 && (res == x || res == -x)
     }
 }
 
-func client1() {
-	v1 := Abs(3)
-	//@ assert v1 == 3
-	v2 := Abs(-2)
-	//@ assert v2 == 2
+func client4() {
+    v1 := Abs(3)
+    //@ assert v1 >= 0 && (v1 == 3 || v1 == -3)
+    //@ assert v1 == 3
+    v2 := Abs(-2)
+    //@ assert v2 >= 0 && (v2 == -2 || v2 == -(-2))
+    //@ assert v2 == 2
 }
 ```
 
 
-## Old Posts
-If no specifications are given, the pre and postcondition default to `true`.
-Hence this does not restrict how a function can be called.
-Also, the caller gets no guarantee for the return value.
-
-Note that in the above example, we only specified a precondition so the postcondition of `newton` is implicitly `true`.
-With Gobra's `assert` statement we can explicitly  assertions.
-This is a useful debugging tool.
+If we exchange the bodies of the `if` statement, the function `WrongAbs` does not satisfy its contract:
 ``` go
-r := newton(arg, 4)
-//@ assert r >= 0
-```
-Verification happens modularly and a caller cannot peek into the body of a function.
-The only thing the caller can assume is the postcondition.
-Since in this case, it is `true` and gives no constraints for `r`.
-We get the error:
-``` text
-Assert might fail. 
-Assertion r >= 0 might not hold.
-```
-
-Similarly, we can add postconditions with the keyword `ensures`.
-Go conveniently has named return values so we can use them in specifications.
-``` go
-//@ requires x > 0
-//@ requires n >= 2
-//@ ensures res > 0
-func newton(x int, n int) (res int) {
-	return x/2 + n / x / 2
+//@ requires x != MinInt32
+//@ ensures res >= 0 && (res == x || res == -x)
+func WrongAbs(x int32) (res int32) {
+    if x < 0 {
+        return x
+    } else {
+        return -x
+    }
 }
 ```
-Here Gobra must checks that for any integers with `x > 0` and `n >= 2`,
-after executing the function body `res >= 0` must hold.
-
-If we specify a stronger postcondition like `ensures res >= 2`,
-verification fails:
-
 ``` text
-Postcondition might not hold. 
-Assertion res >= 2 might not hold.
+ERROR Postcondition might not hold. 
+Assertion res >= 0 might not hold.
 ```
 
-Then `newton` does not satisfy this specification since for `x=1` and `n=2` the result is `1`.
-
-
-With postcondition `res > 0`, we can now iteratively call `newton`.
-In the comments, we note what information we have at that point in time.
-``` go
-//@ requires n > 100
-func foo(n int)
-	// {n > 0}
-	x0 := n
-	// {n > 0, x0 == n}
-	x := newton(x0, n)
-	// {n > 0, x0 == n, x > 0}
-	x  = newton(x, n)
-	// {n > 0, x0 == n, x > 0}
-	// ...
-```
-
-<!-- ``` go -->
-<!-- //@ ensures res >= 0 -->
-<!-- func abs(n int) (res int) { -->
-<!-- 	// {n = ?} -->
-<!-- 	if n < 0 { -->
-<!-- 		// {n < 0} -->
-<!-- 		res = -n -->
-<!-- 		// {n < 0, res} -->
-<!-- 		return -n -->
-<!-- 	} else { -->
-<!-- 		// {n >= 0} -->
-<!-- 		res = n -->
-<!-- 		return -->
-<!-- 	} -->
-<!-- } -->
-<!-- ``` -->
 ## Assertions
 Until now we did not define what assertions can be.
 They are boolean expressions from Go like you would use for the condition of an `if` statement with certain limitations.
