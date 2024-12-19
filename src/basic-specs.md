@@ -106,8 +106,23 @@ We can write the contract for `client2` equivalently as:
 func client2(a, b int32)
 ```
 
+## `assert`
+Gobra can be instructed to perform checks with the `assert` statement.
 
-> Gobra checks the proof for an assertion and reports an error if it cannot prove it.
+> Gobra checks that the assertion holds and reports an error if it cannot prove it.
+
+The first assertion passes in the following program since it can be inferred from the precondition.
+``` go
+//@ requires a > 0 && b < 0
+func client3(a, b int32) {
+    //@ assert a > b
+    //@ assert b > -10 // error
+}
+```
+``` text
+ERROR Assert might fail. 
+Assertion b > -10 might not hold.
+```
 
 ## Postconditions with `ensures`
 
