@@ -9,18 +9,32 @@ Postconditions describe what conditions hold whenever a function returns.
 
 For example, we give a contract for the function `Abs` that computes the absolute value of a `x int32`. 
 Mathematically speaking, `Abs(x)` should return \\( \|x\| \\).
+The postcondition `res >= 0 && (res == x || res == -x)` states
+that if `x` is negative, it must be negated, and otherwise the same value must be returned.
+We could _test_ the expected result for some cases like `Abs(-5) == 5`, `Abs(0) == 0`, and `Abs(1) == 1`, but is this enough?
+``` go
+//@ ensures res >= 0 && (res == x || res == -x)
+func Abs(x int32) (res int32) {
+    if x < 0 {
+        return -x
+    } else {
+        return x
+    }
+}
+```
+There is a subtle bug, which Gobra detects with [overflow checking](./overflow.md) enabled:
+``` text
+ERROR Expression -x might cause integer overflow.
+```
+
+By two's complement arithmetic there is one more negative integer and negating the smallest `int32` causes overflow: `Abs(-2147483648)` returns `-2147483648` which would clearly violate the postcondition that the result is non-negative.
+We complete the contract for `Abs` with a precondition, such that we cannot call `Abs` for this value:
 ``` go
 const MinInt32 = -2147483648  // -1<<32
 //@ requires x != MinInt32
 //@ ensures res >= 0 && (res == x || res == -x)
 func Abs(x int32) (res int32)
 ```
-The postcondition `res >= 0 && (res == x || res == -x)` states
-that if `x` is negative, it must be negated, and otherwise the same value must be returned.
-But careful, negating the smallest `int32` value overflows and we cannot properly define the absolute value for `MinInt32`.
-In the section [Overflow Checking](./overflow.md) we explore this topic further.
-The precondition `x != MinInt32` does not allow calling `Abs` with this value.
-This contract captures the notion that `Abs` returns the absolute value, without needing to know the body of `Abs`.
 
 
 Gobra uses a _modular_ verification approach.
@@ -29,7 +43,7 @@ This is crucial for scaling verification to large projects.
 
 It is the programmer's job to write the specification, as well as any proof annotations, and it is Gobra's job to check that the proof that a function satisfies its contract is correct.
 These checks happen _statically_.
-In the next sections, we explain how to prove that a function satisfies its contract and how callers of this function may rely on its contract"
+In the next sections, we explain how to prove that a function satisfies its contract and how callers of this function may rely on its contract.
 
 
 ## Preconditions with `requires`
@@ -93,7 +107,56 @@ func client2(a, b int32)
 ```
 
 
-## Postcondition with `ensures`
+> Gobra checks the proof for an assertion and reports an error if it cannot prove it.
+
+## Postconditions with `ensures`
+
+Postconditions are added with the keyword `ensures` before a function declaration.
+By convention, they are written after any preconditions.
+
+> Gobra checks the proof that, the postconditions of a function hold whenever the function returns. Otherwise, an error is reported.
+
+In the absolute value example, we have already added the precondition `res >= 0 && (res == x || res == -x)`.
+The comments give the information Gobra has at the respective program locations.
+At the begging of the function, we can assume the precondition holds.
+Then we get different conditions depending on the branch.
+In this example, the postcondition must be proven to hold at both return locations.
+With `|=` we write a reasoning steps that lead to the postcondition.
+In this case, Gobra can check this automatically.
+``` go
+const MinInt32 = -2147483648
+
+// @ requires x != MinInt32
+// @ ensures res >= 0 && (res == x || res == -x)
+func Abs(x int32) (res int32) {
+    // x != MinInt32 
+    if x < 0 {
+        // x != MinInt32 && x < 0
+        return -x
+        // x != MinInt32 && x < 0 && res == -x
+        // |= -x >= 0 && res == -x
+        // |= res >= 0 && res == -x
+        // |= res >= 0 && (res == x || res == -x)
+    } else {
+        // x != MinInt32 && !(x < 0)
+        return x
+        // x != MinInt32 && !(x < 0) && res == x
+        // |= x >= 0 && res == x
+        // |= res >= 0 && res == x
+        // |= res >= 0 && (res == x || res == -x)
+    }
+}
+
+func client1() {
+	v1 := Abs(3)
+	//@ assert v1 == 3
+	v2 := Abs(-2)
+	//@ assert v2 == 2
+}
+```
+
+
+## Old Posts
 If no specifications are given, the pre and postcondition default to `true`.
 Hence this does not restrict how a function can be called.
 Also, the caller gets no guarantee for the return value.
