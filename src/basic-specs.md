@@ -183,30 +183,6 @@ ERROR Postcondition might not hold.
 Assertion res >= 0 might not hold.
 ```
 
-## Assertions
-Until now we did not define what assertions can be.
-They are boolean expressions from Go like you would use for the condition of an `if` statement with certain limitations.
-Namely, they must be deterministic and side-effect-free.
-We can't call arbitrary functions but only `pure` ones which we introduce soon.
-Additionally they can contain implications (`==>`), conditionals (`cond ? e1 : e2`) and quantifiers (e.g. `exists x int :: n > 42`
-, e.g. `forall x int :: x >= 5 ==> x >= 0`).
-We will look at these constructs in later chapters.
-
-## Overconstraining
-By mistake, we might add contradicting assertions.
-```go
-//@ requires y > 0
-//@ requires y < 0
-func newtonNever(x, y int) int {
-	return x/2 + y / 2 / x
-}
-```
-Since `y > 0 && y < 0` implies `false`.
-Now under normal circumstances, this function cannot be called 
-unless `false` is already established.
-
-
-
 ## Quiz
 {{#quiz ../quizzes/basic-specs.toml}}
 
