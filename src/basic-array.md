@@ -46,9 +46,7 @@ goroutine 1 [running]:
 main.getItem(...)
         /home/gobra/array.go:20
 ```
-Note that Go is memory safe and checks if the index is in range
-as opposed to C [^1] where out-of-bounds accesses are *Undefined Behavior*.
-
+Note that Go is memory safe and checks if the index is in range.
 
 Now if we check the program with Gobra we can find the error statically at **verification time**.
 ``` go
@@ -93,7 +91,7 @@ Index i into arr[i] might be negative.
 ```
 
 ### Implication `==>`
-In Gobra the operator for the implication[^2]  *if P then Q* is `==>`.
+In Gobra the operator for the implication[^1]  *if P then Q* is `==>`.
 This gives our final version for the precondition:
 
 ```gobra
@@ -126,29 +124,8 @@ We show later how we could use a `ghost` return value instead.
 
 
 ## Footnotes
-[^1]: Before accessing the element, the index is compared (`CMPQ`) to the length of the array (`$5`).
-``` assembly
-CMPQ    AX, $5
-JCC     main_getItem_pc92
-```
-(compiled with x86-64 gcc 1.22.1)
 
-``` c
-#include <stdio.h>
-int main(int argc, char *argv[]) {
-    int a[] = {2, 3, 5, 7, 11};
-    printf("%d, %d, %d\n", a[-1], a[1], a[10]);
-    return 0;
-}
-```
-
-``` sh
-1, 3, 517856616 
-```
-Note that the `1` is not from the array `a` but in this case actually the `argc` that is stored on the stack before the array.
-
-
-[^2]: The implication operator has the following truth table:
+[^1]: The implication operator has the following truth table:
 
 | `P ==> Q` | `Q=false` | `Q=true` |
 |-----------|-----------|----------|
