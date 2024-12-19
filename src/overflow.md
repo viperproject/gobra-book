@@ -31,29 +31,3 @@ If we tweak the `const N` that denotes the array length to `2147483648` which is
 This bug was actually in Java's standard library ([Read All About It: Nearly All Binary Searches and Mergesorts are Broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)).
 We think this highlights why heavily used code should be verified.
 
-
-## Absolute Value
-Can you spot the overflow in the following example?
-``` gobra
-const MinInt64 = -9223372036854775808 // = -1 << 63 
-ensures res >= 0
-func abs(x int64) (res int64) {
-	if x < 0 {
-		return -x
-	} else {
-		return x
-	}
-}
-```
-
-``` text
-Expression -x might cause integer overflow.
-```
-This is because by two's complement arithmetic there is one more negative integer and `abs(MinInt64)` overflows.
-
-<!-- result is actually MinInt64 -->
-The program verifies when we add the precondition
-``` gobra
-requires x > MinInt64
-```
-

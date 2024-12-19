@@ -37,11 +37,11 @@ Sometimes, this suffices and a termination measure can be automatically inferred
 For example, for simple functions like:
 ``` go
 decreases
-func abs(n int) (res int) {
-    if n < 0 {
-       return -n 
+func Abs(x int) (res int) {
+    if x < 0 {
+       return -x 
     } else {
-       return n
+       return x
     }
 }
 ```
