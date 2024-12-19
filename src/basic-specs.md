@@ -1,100 +1,96 @@
 # Basic Specifications
-In this section, we introduce the verification of functions with preconditions and postconditions and show how we can specify them in Gobra with `requires` and `ensures`.
-First, we give an abstract overview and then take a look at examples.
+How can we differentiate between a correct and a faulty implementation?
+Before we can prove that a Go program is correct, we must first make it clear _what it means for the program to be correct_.
+In this section, we explain how to do this by associating a _contract_ with each function in the program.
+The contract for a function has two main components: _preconditions_ and _postconditions_:
+Preconditions describe under which conditions a function may be called.
+Postconditions describe what conditions hold whenever a function returns.
 
-In simple terms, we want to be sure that our functions compute what they should do.
-But how can we differentiate between a correct and faulty implementation?
-One person's feature may be another person's bug.
-We need to formalize the idea of *computing what they should do*.
-For this purpose, we introduce specifications.
-Looking at functions and methods, come in the form of **preconditions** and **postconditions**.
 
-Similar to how the types of function parameters restrict what values can be passed to a function, preconditions allow us to specify an assertion that must hold whenever a function is called.
-For example, we could require that a function is never called with an argument `x` equal to zero (`requires x != 0`).
+For example, we give a contract for the function `Abs` that computes the absolute value of a `x int32`. 
+Mathematically speaking, `Abs(x)` should return \\( \|x\| \\).
+``` go
+const MinInt32 = -2147483648  // -1<<32
+//@ requires x != MinInt32
+//@ ensures res >= 0 && (res == x || res == -x)
+func Abs(x int32) (res int32)
+```
+The postcondition `res >= 0 && (res == x || res == -x)` states
+that if `x` is negative, it must be negated, and otherwise the same value must be returned.
+But careful, negating the smallest `int32` value overflows and we cannot properly define the absolute value for `MinInt32`.
+In the section [Overflow Checking](./overflow.md) we explore this topic further.
+The precondition `x != MinInt32` does not allow calling `Abs` with this value.
+This contract captures the notion that `Abs` returns the absolute value, without needing to know the body of `Abs`.
 
-Postconditions are assertions that must hold whenever a function returns.
-An example postcondition could be that the return value `res int` of a function is always positive (`ensures r >= 0`).
 
-Together they form a contract:
-- A function can be called when the caller satisfies its preconditions.
-- Assuming the precondition, we must be able to deduce that the postcondition of a function holds whenever it returns.
-- Then the caller can assume the postcondition holds after the call.
+Gobra uses a _modular_ verification approach.
+Each function is verified independently and all we know about a function at call sites is its specification.
+This is crucial for scaling verification to large projects.
 
-It is the programmers job to write the specification, and it is Gobra's job to prove whether this contract is followed.
+It is the programmer's job to write the specification, as well as any proof annotations, and it is Gobra's job to check that the proof that a function satisfies its contract is correct.
+These checks happen _statically_.
+In the next sections, we explain how to prove that a function satisfies its contract and how callers of this function may rely on its contract"
+
 
 ## Preconditions with `requires`
-The function `newton` computes an approximation of the integer square root of `y`.
-Using it as an example, we begin writing our first specifications and examine the error messages we may encounter.
-```go
-func newton(x, y int) int {
-	return x/2 + y/2/x
+Preconditions are added with the keyword `requires` before a function declaration.
+In Go programs, we write Gobra annotations in special line comments starting with `//@`.
+
+> Gobra checks statically that a function's preconditions hold for every call of that function and returns an error if it cannot prove it.
+
+Let us exemplify this with the absolute value example:
+``` go
+package abs
+
+const MinInt32 = -2147483648
+
+//@ requires x != MinInt32
+//@ ensures res >= 0 && (res == x || res == -x)
+func Abs(x int32) (res int32) {
+    if x < 0 {
+        return -x
+    } else {
+        return x
+    }
 }
-``` 
-Gobra can prove the absence of panics, and if we try to verify the following program, we get the error:
-``` text
-Assignment might fail. 
-Divisor x might be zero.
-```
 
-To avoid the *divide by zero* error we should restrict `x` to be non-zero.
-We can add this assertion as an annotation with the `requires` keyword before the function declaration.
-
-```go
-//@ requires x != 0
-func newton(x, y int) int {
-	return x/2 + y / 2 / x
+func client1() {
+    v1 := Abs(3)  // v1 == 3
+    v2 := Abs(-2) // v2 == 2
+    v3 := Abs(MinInt32) // error
 }
-```
 
-Since the square root makes sense only for positive numbers we can additionally require `y > 0`.
-We could combine the assertions with the conjunction `&&` as `requires x != 0 && y > 0` or equivalently write them on separate lines:
-```go
-//@ requires x != 0
-//@ requires y > 0
-func newton(x, y int) int
-```
-
-If we now try to call `newton` with forbidden values, Gobra reports errors at the callers site.
-```go
-func client() {
-	newton(4, 4)
-	newton(4, -1) // error
-	newton(0, 4)  // error
+//@ requires a > 0 && b < 0
+func client2(a, b int32) {
+    v4 := Abs(a)
+    v5 := Abs(b) // error
 }
 ```
 ``` text
-Precondition of call newton(4, -1) might not hold. 
-Assertion y > 0 might not hold.
+ERROR Precondition of call Abs(MinInt32) might not hold. 
+Assertion x != -2147483648 might not hold.
+ERROR Precondition of call Abs(b) might not hold. 
+Assertion x != MinInt32 might not hold.
 ```
-The third call is also violating `newton`'s precondition (`Assertion y > 0 might not hold.`).
-But Gobra stops the verification of the function `client` after finding the first error.
-Gobra uses modular verification, so we could see both errors if the offending calls happen in different functions.
 
-Gobra checks for each call that the precondition is satisfied.
-For constant values, this is easy to check.
-But what if we have an `arg` we know nothing about?
-```go
-func client(arg int) {
-	newton(4, arg) // error: Assertion y > 0 might not hold.
-	newton(arg, 4) // error: Assertion x != 0 might not hold.
-}
+The function `client1` calls `Abs` with constant values.
+For the calls `Abs(3)` and `Abs(-2)` the preconditions hold, since clearly `3 != MinInt32` and `-2 != MinInt32`.
+This check fails for `Abs(MinInt32)`.
+The function `client2` calls `Abs` with its arguments constrained by another precondition `a > 0 && b < 0`.
+Here the precondition holds for the call `Abs(a)`, since `a > 0` implies `a != MinInt32`.
+We get another error for `Abs(b)`, as the only information about `b` that we have at this point is `b < 0` which does not exclude `b != MinInt32`.
+
+
+Please note that the errors are reported at the location of the call since the caller is violating the contract of the function.
+
+
+Preconditions `a > 0 && b < 0` joined by the logical AND can be split into multiple lines.
+We can write the contract for `client2` equivalently as:
+``` go
+//@ requires a > 0
+//@ requires b < 0
+func client2(a, b int32)
 ```
-<!-- and error prone -->
-Of course, we could add checks for the preconditions manually.
-We want to emphasize that these checks happen at runtime.
-Gobra verifies beforehand, that the checks do not trigger for any call.
-```go
-func newton(x, y int) int
-	if y <= 0 {
-		panic(fmt.Errorf("Requires y > 0 but got y = %d instead", y))
-	}
-	if x == 0 {
-		panic(errors.New("Requires x != 0 but got x = 0"))
-	}
-	return x/2 + y / 2 / x
-}
-```
-Also, note that Gobra reports the error for the callers as they are violating the contract.
 
 
 ## Postcondition with `ensures`
@@ -195,16 +191,6 @@ Since `y > 0 && y < 0` implies `false`.
 Now under normal circumstances, this function cannot be called 
 unless `false` is already established.
 
-## Summary
-- Preconditions can be specified `requires ASSERTION`
-- Postconditions can be specified with `ensures ASSERTION`
-- The default pre and postcondition is `true`
-- The caller of a function must satisfy the function's precondition
-- Assuming the precondition, the postcondition must hold when a function returns
-- After a call, the caller can assume the postcondition
-- Assertions are boolean expressions that are deterministic and have no side effects.
-- Functions and methods are verified modularly.
-- Assertions can be checked with the `assert ASSERTION`
 
 
 ## Quiz
