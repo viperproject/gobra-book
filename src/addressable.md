@@ -1,25 +1,39 @@
 # Addressability, `@` and Sharing
 
-If we try to take the address of a variable, we get an error from Gobra:
+Variables are called _shared_ if their address is taken.
+Gobra requires us to explicitly mark variables as shared.
+This should ensure that the programmer is aware, in which cases, Gobra employs reasoning about permissions.
+We distinguish _shared arrays_ and _shared structs_ from their _exclusive_ counterparts.
+Since if the address of an array or struct is never taken, we do not have to worry about data races, and reasoning about them is much easier.
+
+
+## Shared Variables with `@`
+
+Variables are marked as _shared_ by appending the ampersand symbol to a variable name.
+For a variable `a` we either write `a /*@@@*/` using an inline comment or equivalently `a@` in `.gobra` files:
 ``` go
-~func main() {
+func main() {
+	a /*@@@*/ := 1
+	// a@ := 1
+    x := &a
+}
+```
+
+Otherwise, if we try to take the address of a non-shared variable, Gobra reports an error:
+``` go
+func main() {
 	a := 1
     x := &a
-~}
+}
 ```
 ``` text
 property error: got a that is not effective addressable
         x := &a
       ^
 ```
-In Go there is the notation of [addressability](https://go.dev/ref/spec#Address_operators) that defines when we can take the address `&a`.
-Gobra requires us to be explicit and mark the variable `a` as *shared*.
-This is done by appending the ampersand symbol to a variable name (`a@`) or equivalently in a comment with `a /*@@@*/`. 
-This should ensure that the programmer is aware, in which cases, Gobra employs the *permission machinery*.
-For example, we only need permissions for a shared array.
-While for an *exclusive* array, we do not have to worry about data races and reasoning about them is much easier.
 
-For structured variables of slice, shared arrays, or shared struct types, their elements or fields can be addressed individually.
+
+For structured variables of slice, shared array, or shared struct types, their elements or fields can be addressed individually.
 Access can be specified for example to the first element of a shared array with `acc(&a[0])` or to the field `x` of a shared struct `c` with `acc(&c.x)`.
 Sometimes, an address is taken implicitly, as in the following example where the method `Scale` expects a receiver of type `*Coord`:
 ``` go
@@ -50,7 +64,7 @@ func client2() {
 }
 ```
 
-## share
+## `share`
 Parameters of a function or method can be shared with the `share` statement at the beginning of the body.
 ``` go
 func client3(c1, c2 Coord) {
@@ -60,3 +74,5 @@ func client3(c1, c2 Coord) {
 }
 ```
 
+## Further Reading
+In Go, there is the notion of [addressability](https://go.dev/ref/spec#Address_operators) which clearly defines which operands are addressable.
