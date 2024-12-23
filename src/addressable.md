@@ -1,4 +1,4 @@
-# Addressability and Sharing
+# Addressability, `@` and Sharing
 
 If we try to take the address of a variable, we get an error from Gobra:
 ``` go
