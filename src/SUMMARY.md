@@ -19,6 +19,7 @@
 
 # Reasoning about Memory Accesses with Permissions
 - [Permission to write](./permission-write.md)
+- [Pure Functions and Permissions](./permission-pure.md)
 - [Self-Framing Assertions](./self-framing.md)
 - [Addressability, `@` and Sharing](./addressable.md)
 - [Permission to read](./fractional-permissions.md)
@@ -26,7 +27,6 @@
   - [Permission Type and Parameters](./permission-type.md)
 - [Inhaling and Exhaling](./inhale-exhale.md)
 - [Quantified Permissions](./quantified-permission.md)
-- [Pure Functions and Permissions](./permission-pure.md)
 - [Slices](./slices.md)
 - [Maps](./maps.md)
 
