@@ -202,26 +202,30 @@ func addToSlice(s []int, n int) {
 ```
 
 ## Binary Search
-We conclude this section by returning to the binary search example,
-giving a version for slices with the difference that `binarySearch` returns whether the element `value` is found in the array and not the index where it would have been inserted.
-Now we can handle slices of arbitrary length and have a more efficient implementation, with the drawback of having to specify permissions.
+We conclude this section by returning to the binary search example.
+Now we can `BinarySearch` sorted slices of arbitrary length for a target value.
+This version is also more efficient as no arrays have to be copied around, with the drawback of having to specify permissions.
+
+The function `BinarySearch` returns whether the value is contained in the slice, together with its index as a ghost return value.
+We write a `pure` and `ghost` function `isSliceSorted` that we can use in the contract of `BinarySearch`.
 
 ``` go
-~/*@
-~ghost
-~requires forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
-~decreases
-~pure func isSliceSorted(s []int) bool {
-	~return forall i, j int :: {&s[i], &s[j]} 0 <= i && i < j && j < len(s) ==> s[i] <= s[j]
-~}
-~@*/
+package binarysearchslice
+/*@
+ghost
+requires forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
+decreases
+pure func isSliceSorted(s []int) bool {
+	return forall i, j int :: {&s[i], &s[j]} 0 <= i && i < j && j < len(s) ==> s[i] <= s[j]
+}
+@*/
 
 //@ preserves acc(s, 1/2)
 //@ preserves isSliceSorted(s)
 //@ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
 //@ ensures found ==> 0 <= idx && idx < len(s) && s[idx] == value
 //@ ensures !found ==> forall i int :: {&s[i]} 0 <= i && i < len(s) ==> s[i] != value
-func binarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
+func BinarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
 	if len(s) == 0 {
 		return false /*@ , -1 @*/
 	}
@@ -247,14 +251,24 @@ func binarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
 	return s[low] == value /*@ , low @*/
 }
 
-func binarySearchClient() {
+func BinarySearchClient() {
 	xs := []int{1, 5, 7, 11, 23, 43, 53, 123, 234, 1024}
+	//@ assert isSliceSorted(xs)
+	//@ assert xs[3] == 11
+	found /*@, idx @*/ := BinarySearch(xs, 11)
+	//@ assert found && xs[idx] == 11
 
-	found /*@, idx @*/ := binarySearch(xs, 11)
-	//@ assert found ==> xs[idx] == 11
-	//@ assert !found ==> forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> xs[i] != 11
-
-	found /*@, idx @*/ = binarySearch(xs, 12)
+	found /*@, idx @*/ = BinarySearch(xs, 12)
 	//@ assert !found
 }
+```
+
+We had to add `assert xs[3] == 11` in order to `assert found` after the first call.
+Without this, we can only assert the following:
+``` go
+xs := []int{1, 5, 7, 11, 23, 43, 53, 123, 234, 1024}
+//@ assert isSliceSorted(xs)
+found /*@, idx @*/ := BinarySearch(xs, 11)
+//@ assert found ==> xs[idx] == 11
+//@ assert !found ==> forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> xs[i] != 11
 ```
