@@ -70,42 +70,56 @@ We can easily construct a termination measure that decreases instead by subtract
 ```
 
 ## Binary Search Termination
-Let us look again at the binary search example.
-We might forget to add one and update `low = mid` instead of `low = mid + 1`.
-``` go
-    mid = (high-low)/2 + low
-    if arr[mid] <= value {
-        low = mid
-    } else {
-        high = mid
-    }
-```
-For example for `N=3`, `binarySearch([N]int{1, 2, 3}, 2)` does not terminate.
-But the program still verifies since only partial correctness is checked.
+Let us look again at the [binary search](./loops-binarysearch.md) example.
+This time we introduce an implementation error:
+`low` is updated as `low = mid` instead of `low = mid + 1`.
+`BinarySearchArr` could loop forever, for example for `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 8)`.
+Without `decreases` the function would still verify since only partial correctness is checked.
 <!-- 
+For example for `N=3`, `BinarySearchArr([N]int{1, 2, 3}, 2)` does not terminate.
 	arr := [N]int{1, 2, 3}
-	i := binarySearch(arr, 2)
+	i := BinarySearchArr(arr, 2)
 low mid high
  0 1 3
  1 1 2
     -->
-This changes when we add `decreases`.
 ``` go
 // @ decreases
-func binarySearch(arr [N]int, value int) (idx int) {
+// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
+// @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != value
+func BinarySearchArr(arr [N]int, value int) (found bool) {
+	low := 0
+	high := len(arr) - 1
+	mid := 0
+	//@ invariant 0 <= low && low <= high && high < len(arr)
+	//@ invariant 0 <= mid && mid < len(arr)
+	//@ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < value
+	//@ invariant forall i int :: {arr[i]} high < i && i < len(arr) ==>  value < arr[i]
+	//@ decreases high - low
+	for low < high {
+		mid = (low + high) / 2
+		if arr[mid] == value {
+			return true
+		} else if arr[mid] < value {
+			low = mid // <--- Implementation Error, should be low=mid+1
+		} else {
+			high = mid
+		}
+	}
+	return arr[low] == value
+}
 ```
 ``` sh
 ERROR Function might not terminate. 
 Required termination condition might not hold.
 ```
-If we fix the error and change the update back to `low = mid + 1` we still get the same error.
-That is due to the loop for which we have to specify a termination measure as well.
-We might be tempted to try `decreases high` or `decreases N-low` as termination measures.
-However, this is not enough since the termination measure must decrease in every iteration. In iterations where we update `low`, `high` does not decrease, and vice versa.
+
+We might be tempted to try `decreases high` or `decreases len(arr)-low` as termination measures for the loop.
+However, this is not enough since the termination measure must decrease in every iteration.
+In iterations where we update `low`, `high` does not decrease, and vice versa.
 The solution is to combine the two as `decreases high - low`.
-It can be helpful to think of the interpretation for the algorithm.
-In this case `high - low` denotes the length of the subarray that we have not checked yet.
-Now the program verifies again.
+This measure coincides with the length of the subarray that has not been searched yet.
+If we change back to `low=mid+1`, the program verifies again .
 
 
 ## Wildcard Termination Measure `_`
@@ -140,8 +154,8 @@ In general, one can specify a list of expressions with
 
 A tuple termination measure decreases based on the lexicographical order over the tuple elements.
 
-For `binarySearch` we used `decreases high - low`.
-Alternatively, we could use `decreases high, N - low`
+For `BinarySearchArr` we used `decreases high - low`.
+Alternatively, we could use `decreases high, len(arr) - low`
 
 ### Conditional 
 When we want to prove termination only under certain conditions we can add an `if` clause at the end.
