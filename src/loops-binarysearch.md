@@ -1,167 +1,162 @@
 # Binary Search
 
-We will follow along the example of function `binarySearch(arr [N]int, value int) (idx int)` that efficiently finds the rightmost position `idx` in a sorted array of integers `arr` where `value` would be inserted according to the sorted order.
+We will follow along the example of function `BinarySearchArr(arr [N]int, value int) (found bool)` that efficiently searches a sorted array of integers and returns whether `value` is contained in the array.
+The following snippet shows the expected results for a test array:
+``` go
+~func main() {
+	arr := [7]int{0, 1, 1, 2, 3, 5, 8}
+	fmt.Println(BinarySearchArr(arr, 2))   // true
+	fmt.Println(BinarySearchArr(arr, 4))   // false
+	fmt.Println(BinarySearchArr(arr, -1))  // false
+	fmt.Println(BinarySearchArr(arr, 10))  // false
+~}
+```
+
 Our approach is to gradually add specifications and fix errors along the way.
 If you want to see the final code only you can skip to the end of this chapter.
 
-Let us begin by writing the specification.
-First, we must require the `arr` to be sorted.
+Let us begin by writing the contract.
+First, we must require the array `arr` to be sorted.
 We have already seen how we can write this as a precondition:
 ``` go
-requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
+//@ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 ```
+If `BinarySearchArr` returns not found, `value` must not be an element of `arr`,
+or equivalently, all elements of `arr` are not equal to `value`:
+``` go
+//@ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != value
+```
+The full contract should include a case for when `value` is found.
+While we could specify with an existential quantifier that there exists an index `idx` such that `arr[idx] == value`, this is not efficient and discouraged.
+Hence we omit this case and show later how a `ghost` parameter can be used instead.
 
-To understand the the behavior we want to achieve we can look at a small example.
-Note that for values like `1` contained in `arr` we want the index just after the last occurrence of that value to be returned.
+Here is the first implementation of `BinarySearchArr` and its contract.
+The variables `low` and `high` denote the parts of the array that remains to be searched.
+It is not yet known whether there is an element `value` with an index between `low` and `high`.
+We will have to add several loop invariants until this function satisfies its contract.
 ``` go
-arr := [7]int{0, 1, 1, 2, 3, 5, 8}
-binarySearch(arr, -1) == 0
-binarySearch(arr, 0) == 1
-binarySearch(arr, 1) == 3
-binarySearch(arr, 8) == 7
-binarySearch(arr, 9) == 7
-```
-<!-- we can't assert them with our version...  -->
-
-All values to the left of `idx` should compare less or equal to `value`
-and all values from `idx` to the end of the array should be strictly greater than `value`.
-``` go
-ensures forall i int :: 0 <= i && i < idx ==> arr[i] <= value
-ensures forall j int :: idx <= j && j < len(arr) ==> value < arr[j]
-```
-Something is still missing.
-An issue is that the `Index j into arr[j] might be negative` since we only have `idx <= j` and no lower bound for `idx`.
-Similarly, the `Index i into arr[i] might exceed sequence length`.
-After constraining `idx` to be between `0` and `N` we are ready to implement `binarySearch`:
-``` go
-// @ requires forall i, j int :: 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
-// @ ensures 0 <= idx && idx <= N
-// @ ensures forall i int :: 0 <= i && i < idx ==> arr[i] <= value
-// @ ensures forall j int :: idx <= j && j < len(arr) ==> value < arr[j]
-func binarySearch(arr [N]int, value int) (idx int) {
+//@ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
+//@ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != value
+func BinarySearchArr(arr [N]int, value int) (found bool) {
 	low := 0
-	high := N
+	high := len(arr) - 1
 	mid := 0
 	for low < high {
 		mid = (low + high) / 2
-		if arr[mid] <= value {
+		if arr[mid] == value {
+			return true
+		} else if arr[mid] < value {
 			low = mid + 1
 		} else {
 			high = mid
 		}
 	}
-	return low
+	return arr[low] == value
 }
 ```
-We will have to add several invariants until we can verify the function.
-
-First Gobra complains that the `Index mid into arr[mid] might be negative.`
-
-So our first invariant is, that `mid` remains a valid index for `arr`:
-``` go
-	// @ invariant 0 <= mid && mid < N
-```
-Let's check manually if this invariant works.
-1. Before the first iteration `mid` is initialized to `N / 2` hence `0 <= N / 2 && N / 2 < N` trivially holds.
-2. For an arbitrary iteration, we assume that before this iteration `0 <= mid && mid < N` was true. Now we need to show that after updating `mid = (low + high) / 2`  the invariant is still true (the rest of the body does not influence mid). But we fail to do so as the invariant does not capture the values `low` and `high`.
-
-So let us add what we know about `low` and `high` to help the verifier.
-``` go
-	// @ invariant 0 <= low && low < high && high < N
-	// @ invariant 0 <= mid && mid < N
-```
-With this change we fixed the *Index-Error* but are confronted with a new error.
 ``` text
-Loop invariant might not be preserved. 
+ERROR Conditional statement might fail. 
+Index mid into arr[mid] might be negative.
+```
+
+The variable `mid` is computed as the average of `low` and `high`.
+If we compare `value` with the element `arr[mid]`, we either find it,
+or we can half the search range:
+We either continue searching in the lower half between `low` and `mid` or the upper half between `mid+1` and `high`.
+
+For this we need the invariant that `mid` remains a valid index for `arr`:
+``` go
+	//@ invariant 0 <= mid && mid < len(arr)
+```
+Let us check this invariant works:
+1. Before the first iteration `mid` is initialized to `0` hence `0 <= mid && mid < N` trivially holds.
+2. For an arbitrary iteration, we assume that before this iteration `0 <= mid && mid < N` was true. Now we need to show that after updating `mid = (low + high) / 2`, the invariant is still true (the rest of the body does not influence mid). But this cannot be proven without bounds for `low` and `high`.
+
+We know that `low` and `high` stay between `0` and `len(arr)`,
+and `low` should be smaller than `high`, right?
+``` go
+	//@ invariant 0 <= low && low < high && high < len(arr)
+	//@ invariant 0 <= mid && mid < len(arr)
+```
+``` text
+ERROR Loop invariant might not be preserved. 
 Assertion low < high might not hold.
 ```
-While `low < high` is true before the first iteration (assuming `N>0`)
-and holds by the loop condition at the beginning of every except the last iteration.
+With this change we fix the *Index-Error* but are confronted with a new error.
+While `low < high` holds before the first iteration and holds for every iteration except the last.
 But an invariant must hold after every iteration, including the last.
-This is achieved by changing `low < high` to `low <= high`.
+To account for this, we weaken `low < high` to `low <= high`.
 
-Note that after exiting the loop we know `!(low < high)` because the loop condition must have failed and `low <= high` from the invariant.
+Note that after exiting the loop we have `!(low < high)` from the loop condition and `low <= high` from the invariant.
 Together this implies `low == high`.
 
-Our next challenge is:
 ``` text
-Postcondition might not hold. 
-Assertion forall i int :: 0 <= i && i < idx ==> arr[i] <= value might not hold.
+ERROR Postcondition might not hold. 
+Assertion !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != value might not hold.
 ```
 
-So we need to find assertions that describe which parts of the array we have already searched.
-The goal is that after the last iteration the invariants together with `low == high` should be able prove the postconditions.
+Our next challenge is to find invariants that describe which parts of the array have been searched and do not contain `value`.
+After the last iteration the invariants together with `low == high` should be enough to prove the postcondition.
 
-For this step it is useful to think about how binary search works.
-The slice `arr[low:high]` denotes the part of the array we still have to search for and which is halved every iteration.
-In the prefix `arr[:low]` are no elements larger than `value`
-and in the suffix `arr[high:]` no elements smaller or equal than `value`.
-Exemplified for `binarySearch([7]int{0, 1, 1, 2, 3, 5, 8}, 4)`:
-
-| `low` | `mid` | `high` | `arr[low:]`   | `arr[high:]` |
-|-------|-------|--------|---------------|--------------|
-| 0     | 0     | 7      | []            | []           |
-| 4     | 3     | 7      | [0 1 1 2]     | []           |
-| 6     | 5     | 7      | [0 1 1 2 3 5] | []           |
-| 6     | 6     | 6      | [0 1 1 2 3 5] | [8]          |
-
+Let us exemplify the execution of binary search with the concrete values `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 4)`.
+The following expressions are evaluated at the beginning of the loop and once after the loop:
+| `low` | `high` | `arr[:low]` | `arr[low:high+1]` | `arr[high+1:]` |
+|-------|--------|-------------|-------------------|----------------|
+| 0     | 6      | []          | [0 1 1 2 3 5 8]   | []             |
+| 4     | 6      | [0 1 1 2]   | [3 5 8]           | []             |
+| 4     | 5      | [0 1 1 2]   | [3 5]             | [8]            |
+| 5     | 5      | [0 1 1 2 3] | [5]               | [8]            |
+Here we can see the pattern that the slice `arr[low:high+1]` denotes the part of the array we still have to search for.
+All elements in the prefix `arr[:low]` are smaller than `value` and all elements in the suffix `arr[high+1:]` are larger than `value`.
 Translating the above into Gobra invariants gives:
 ``` go
-// @ invariant forall i int :: 0 <= i && i < low ==> arr[i] <= value
-// @ invariant forall j int :: high <= j && j < N ==> value < arr[j]
+//@ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < value
+//@ invariant forall i int :: {arr[i]} high < i && i < len(arr) ==>  value < arr[i]
 ```
 
-When the function returns, `idx == low` holds and as discussed above also `low == high`.
-We can clearly see that `low` and `high` with `idx` yields the postconditions:
-
-``` go
-// @ ensures forall i int :: 0 <= i && i < idx ==> arr[i] <= value
-// @ ensures forall j int :: idx <= j && j < len(arr) ==> value < arr[j]
-```
-
-Now we can be happy because `Gobra found no errors`.
-
-We will see `binarySearch` search again when we look at termination and do overflow checking.
+When exiting the loop we either found `target` or know that 
+all elements except at index `low` (which is equal to `high`) are not equal to `target`.
+After the final test `arr[low] == value` we know this for the entire array.
+Combining all invariants the postcondition can be proven and `Gobra found no errors`.
+We will see `BinarySearchArr` search again when we look at [termination](./termination.md) and [overflow checking](./overflow.md).
 
 ## Full Example
 
 ``` go
-// @ requires forall i, j int :: 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
-// @ ensures 0 <= idx  && idx <= N
-// @ ensures forall i int :: 0 <= i && i < idx ==> arr[i] <= value
-// @ ensures forall j int :: idx <= j && j < len(arr) ==> value < arr[j]
-func binarySearch(arr [N]int, value int) (idx int) {
+package binarysearcharr
+const N = 7
+//@ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
+//@ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != value
+func BinarySearchArr(arr [N]int, value int) (found bool) {
 	low := 0
-	high := N
+	high := len(arr) - 1
 	mid := 0
-	// @ invariant 0 <= low && low <= high && high <= N
-	// @ invariant forall i int :: 0 <= i && i < low ==> arr[i] <= value
-	// @ invariant forall j int :: high <= j && j < N ==> value < arr[j]
-	// @ invariant 0 <= mid && mid < N
+	//@ invariant forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
+	//@ invariant 0 <= low && low <= high && high < len(arr)
+	//@ invariant 0 <= mid && mid < len(arr)
+	//@ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < value
+	//@ invariant forall i int :: {arr[i]} high < i && i < len(arr) ==>  value < arr[i]
 	for low < high {
 		mid = (low + high) / 2
-		if arr[mid] <= value {
+		if arr[mid] == value {
+			return true
+		} else if arr[mid] < value {
 			low = mid + 1
 		} else {
 			high = mid
 		}
 	}
-	return low
+	//@ assert low == high
+	return arr[low] == value
+}
+
+func client() {
+	arr := [7]int{0, 1, 1, 2, 3, 5, 8}
+	//@ assert forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
+	//@ assert arr[3] == 2	// trigger that 2 is contained
+	found2 := BinarySearchArr(arr, 2)
+	//@ assert found2
+	found4 := BinarySearchArr(arr, 4)
+	// we cannot assert !found4
 }
 ```
-
-<!-- Client Code  -->
-<!-- ``` go -->
-<!-- // @ requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j] -->
-<!-- // @ ensures found == -1 ==> forall i int :: 0 <= i && i < len(arr) ==> arr[i] != value -->
-<!-- // @ ensures found != -1 ==> 0 <= found && found < len(arr) && arr[found] == value -->
-<!-- func find(arr [N]int, value int) (found int) { -->
-<!-- 	idx := binarySearch(arr, value) -->
-<!-- 	if idx == 0 || arr[idx-1] != value { -->
-<!-- 		return -1 -->
-<!-- 	} else { -->
-<!-- 		return idx - 1 -->
-<!-- 	} -->
-<!-- } -->
-<!-- ``` -->
-
