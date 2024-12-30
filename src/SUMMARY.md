@@ -20,3 +20,4 @@
 - [Ghost Code and Pure Functions](./basic-ghost-pure.md)
 
 # Advanced topics
+- [Quantifier Triggers](./triggers.md)
