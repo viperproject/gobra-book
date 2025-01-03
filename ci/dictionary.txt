@@ -1,4 +1,4 @@
-personal_ws-1.1 en 104 utf-8
+personal_ws-1.1 en 106 utf-8
 Collatz
 Datatypes
 Errorf
@@ -52,6 +52,8 @@ hasNext
 incChannel
 incr
 inlined
+instantiation
+instantiations
 invariants
 isComparable
 isContained
