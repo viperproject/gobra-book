@@ -147,6 +147,30 @@ We need to include in the contract that `idx` is _the position where target woul
 // @ ensures idx < len(arr) ==>  target <= arr[idx]
 ```
 This stronger contract still follows from the loop invariants.
+Let us take a step back and take a look at the contract which has grown quite large:
+``` go
+// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
+// @ ensures 0 <= idx && idx <= len(arr)
+// @ ensures idx > 0 ==> arr[idx-1] < target
+// @ ensures idx < len(arr) ==> target <= arr[idx]
+// @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
+// @ ensures found ==> 0 <= idx < len(arr) && arr[idx] == target
+func BinarySearchArr(arr [N]int, target int) (idx int, found bool)
+```
+We can simplify the cases with `!found` and `found` to
+``` go
+// @ found == (idx < len(arr) && arr[idx] == target)
+```
+The previous postcondition `found ==> 0 <= idx < len(arr) && arr[idx] == target` is directly covered by the new one together with `0 <= idx && idx <= len(arr)`.
+The other postcondition `!found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target` is also covered; for `!found` either it holds:
+
+1. `idx >= len(arr)`. Then it follows from `idx > 0 ==> arr[idx-1] < target` and `idx <= len(arr)` that `arr[len(arr)-1] < target` which implies that `target` is not contained since the array is sorted.
+
+2. `idx < len(arr)` and `arr[idx] != target`.
+From the postcondition `idx < len(arr) ==> target <= arr[idx]` we can infer `arr[idx] > target` and since the array is sorted `target` is not contained in `arr[idx:]`.
+The postcondition `idx > 0 ==> arr[idx-1] < target` ensures that `target` is not contained in `arr[:idx]`.
+
+
 The full example can be found below.
 We will see `BinarySearchArr` search again when we look at [termination](./termination.md) and [overflow checking](./overflow.md).
 
@@ -172,9 +196,8 @@ func FinalClient() {
 // @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 // @ ensures 0 <= idx && idx <= len(arr)
 // @ ensures idx > 0 ==> arr[idx-1] < target
-// @ ensures idx < len(arr) ==>  target <= arr[idx]
-// @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
-// @ ensures found ==> idx < len(arr) && arr[idx] == target
+// @ ensures idx < len(arr) ==> target <= arr[idx]
+// @ ensures found == (idx < len(arr) && arr[idx] == target)
 func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
 	low := 0
 	high := len(arr)
@@ -182,7 +205,7 @@ func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
 	//@ invariant 0 <= low && low <= high && high <= len(arr)
 	//@ invariant 0 <= mid && mid < len(arr)
 	//@ invariant low > 0 ==> arr[low-1] < target
-	//@ invariant high < len(arr) ==>  target <= arr[high]
+	//@ invariant high < len(arr) ==> target <= arr[high]
 	for low < high {
 		// fmt.Println(low, high, arr[:low], arr[low:high], arr[high:])
 		mid = (low + high) / 2
