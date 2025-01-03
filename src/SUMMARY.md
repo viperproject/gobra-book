@@ -10,6 +10,7 @@
   <!-- - [`assert` and `assume`](./assert-assume.md) -->
   <!-- - [requires, ensures, and preserves](./requires-ensures.md)-->
 - [Array Operations](./basic-array.md)
+- [Quantifiers (`forall`, `exists`) and Implication (`==>`)](./quantifier.md)
 - [Loops](./loops.md)
   - [Invariants](./loops-invariant.md)
   - [Binary Search](./loops-binarysearch.md)
