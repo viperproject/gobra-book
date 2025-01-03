@@ -155,17 +155,13 @@ As opposed to normal functions where we cannot peek inside them,
 calls to `pure` functions can be thought of as inlined.
 The following assertions pass:
 ``` go
-/*@
-ghost
-decreases
 func client(n int) {
-	if n > 1 {
-		assert fibonacci(n) == fibonacci(n-1) + fibonacci(n-2)
+    if n > 1 {
+        //@ assert fibonacci(n) == fibonacci(n-1) + fibonacci(n-2)
+    } else if n == 0 {
+        //@ assert fibonacci(n) == 0
     }
-    if n == 0 {
-    	assert fibonacci(0) == 0
-    }
-}@*/
+}
 ```
 
 We leave it as an exercise in the Quiz to provide invariants for an iterative implementation satisfying the specification:
