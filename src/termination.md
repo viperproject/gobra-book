@@ -119,7 +119,7 @@ However, this is not enough since the termination measure must decrease in every
 In iterations where we update `low`, `high` does not decrease, and vice versa.
 The solution is to combine the two as `decreases high - low`.
 This measure coincides with the length of the subarray that has not been searched yet.
-If we change back to `low=mid+1`, the program verifies again .
+If we change back to `low=mid+1`, the program verifies again.
 
 
 ## Wildcard Termination Measure `_`
