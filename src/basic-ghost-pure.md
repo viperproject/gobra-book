@@ -17,42 +17,36 @@ In the [binary search section](./loops-binarysearch.md), we relied on the precon
 ``` gobra
 requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 ```
-If we want to write clients that use `binarySearch` we have to propagate the preconditions, for example, we might want to write `insert`:
-``` go
-// @ requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
-func insert(arr [N]int, value int) {
-	var fresh [N + 1]int
-	idx := binarySearch(arr, value)
-    // ...
-}
-```
 
+If we want to write other functions operating on sorted arrays we have to copy the precondition.
 In the spirit of *don't repeat yourself* we want to abstract the precondition.
 Our first attempt is:
 ``` go
 func isArraySorted(arr [N]int) bool {
-	//@ invariant 1<=i && i <= len(arr)
-	for i:=1; i<len(arr); i++ {
-		if arr[i-1] > arr[i] {
-			return false
-		}
-	}
-	return true
+    //@ invariant 1<=i && i <= len(arr)
+    for i:=1; i<len(arr); i++ {
+        if arr[i-1] > arr[i] {
+            return false
+        }
+    }
+    return true
 }
 
 //@ requires isArraySorted(arr)
-func insert(arr [N]int, value int) {
+func client(arr [N]int, value int) {
     // ...
 }
 ```
 But we get the error:
 ``` text
-error: ghost error: Found call to non-ghost impure function in ghost code
+ERROR ghost error: Found call to non-ghost impure function in ghost code
 requires isArraySorted(arr)
          ^
 ```
+<!-- wanted to InsertSorted example that calls BinarySearch arr and inserts the searched value in a the newly returned array of length N + 1
+but this is not straightforward to verify.
+Annoyingly, the isArraySorted function would not work for the returned array of different length -->
 
-Recall:
 > Assertions are boolean expressions that are deterministic and have no side effects.
 
 We are not allowed to call arbitrary functions in specifications!
@@ -88,7 +82,7 @@ func isArraySorted(arr [N]int) bool {
 }
 ```
 ``` text
-error: For now, the body of a pure block is expected to be a single return with a pure expression, got Vector(  omitted...
+ERROR For now, the body of a pure block is expected to be a single return with a pure expression, got Vector(  omitted...
 ```
 
 Due to the syntactical restrictions, we need another way to express it.
@@ -111,7 +105,7 @@ func isSorted(arr [N]int) bool {
 @*/
 
 //@ requires isSorted(arr)
-func insert(arr [N]int, value int) {
+func client(arr [N]int, value int) {
     // ...
 }
 ```
