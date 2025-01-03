@@ -5,7 +5,7 @@ It is currently buggy and should be used with care.
 </div>
 
 ## Usage
-On the command line you can enable overflow checking with the `--overflow` or `-o` flag.
+On the command line, you can enable overflow checking with the `--overflow` or `-o` flag.
 
 The size of `int` is [implementation-specific](https://go.dev/ref/spec#Numeric_types)  in Go and either 32 or 64 bits.
 For overflow checking Gobra assumes 64 bit integers.
@@ -47,7 +47,7 @@ func BinarySearchArr(arr [N]int, value int) (found bool) {
 ERROR Expression may cause integer overflow.
 Expression (low + high) / 2 might cause integer overflow.
 ```
-For example if `low = (MaxInt64-1)/2` and `high = MaxInt64 - 1` their sum cannot be represented by an `int64` and the result will be negative.
+For example, if `low = (MaxInt64-1)/2` and `high = MaxInt64 - 1` their sum cannot be represented by an `int64` and the result will be negative.
 The solution is to replace the offending statement with
 `mid = (high-low)/2 + low` where the subtraction does not overflow since `high >= low` and `low >= 0` holds.
 After this change, Gobra reports no errors.
