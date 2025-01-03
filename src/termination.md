@@ -74,6 +74,7 @@ Let us look again at the [binary search](./loops-binarysearch.md) example.
 This time we introduce an implementation error:
 `low` is updated as `low = mid` instead of `low = mid + 1`.
 `BinarySearchArr` could loop forever, for example for `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 8)`.
+For readability we only kept the specification relevant for termination checking.
 Without `decreases` the function would still verify since only partial correctness is checked.
 <!-- 
 For example for `N=3`, `BinarySearchArr([N]int{1, 2, 3}, 2)` does not terminate.
@@ -85,29 +86,23 @@ low mid high
     -->
 ``` go
 // @ decreases
-// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
-// @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != value
-func BinarySearchArr(arr [N]int, value int) (found bool) {
+func BinarySearch(arr [N]int, target int) (idx int, found bool) {
 	low := 0
-	high := len(arr) - 1
+	high := len(arr)
 	mid := 0
-	//@ invariant 0 <= low && low <= high && high < len(arr)
-	//@ invariant 0 <= mid && mid < len(arr)
-	//@ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < value
-	//@ invariant forall i int :: {arr[i]} high < i && i < len(arr) ==>  value < arr[i]
+	//@ invariant 0 <= low && low <= high && high <= len(arr)
 	//@ decreases high - low
 	for low < high {
 		mid = (low + high) / 2
-		if arr[mid] == value {
-			return true
-		} else if arr[mid] < value {
+		if arr[mid] < target {
 			low = mid // <--- Implementation Error, should be low=mid+1
 		} else {
 			high = mid
 		}
 	}
-	return arr[low] == value
+	return low, low < len(arr) && arr[low] == target
 }
+
 ```
 ``` sh
 ERROR Function might not terminate. 

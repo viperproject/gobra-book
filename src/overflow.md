@@ -12,41 +12,39 @@ For overflow checking Gobra assumes 64 bit integers.
 This can be overridden with the `--int32` flag.
 
 ## Binary Search Example
-
-If we check our binary search program for large arrays with overflow checking enabled, Gobra detects a potential overflow:
+If we check our [binary search](./loops-binarysearch.md) program for large arrays with overflow checking enabled, Gobra detects a potential overflow.
 ``` go
 package binarysearch
 
 // ##(--overflow)
 
-const N = 1<<62 - 1
-//@ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
-//@ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != value
-func BinarySearchArr(arr [N]int, value int) (found bool) {
+const N = 1 << 62
+
+func BinarySearchOverflow(arr [N]int, target int) (idx int, found bool) {
 	low := 0
-	high := len(arr) - 1
+	high := len(arr)
 	mid := 0
-	//@ invariant 0 <= low && low <= high && high < len(arr)
-	//@ invariant 0 <= mid && mid < len(arr)
-	//@ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < value
-	//@ invariant forall i int :: {arr[i]} high < i && i < len(arr) ==>  value < arr[i]
+	//@ invariant 0 <= low && low <= high && high <= len(arr)
 	for low < high {
 		mid = (low + high) / 2
-		if arr[mid] == value {
-			return true
-		} else if arr[mid] < value {
+		if arr[mid] < target {
 			low = mid + 1
 		} else {
 			high = mid
 		}
 	}
-	return arr[low] == value
+	if low < len(arr) {
+	 	return low, arr[low] == target
+	} else {
+	 	return low, false
+	}
 }
 ```
 ``` text
 ERROR Expression may cause integer overflow.
 Expression (low + high) / 2 might cause integer overflow.
 ```
+<!-- TODO if it works without error use: `return low, low < len(arr) && arr[low] == target` otherwise explain why not -->
 For example, if `low = (MaxInt64-1)/2` and `high = MaxInt64 - 1` their sum cannot be represented by an `int64` and the result will be negative.
 The solution is to replace the offending statement with
 `mid = (high-low)/2 + low` where the subtraction does not overflow since `high >= low` and `low >= 0` holds.
