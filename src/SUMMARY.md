@@ -9,7 +9,7 @@
 - [Basic specifications](./basic-specs.md)
   <!-- - [`assert` and `assume`](./assert-assume.md) -->
   <!-- - [requires, ensures, and preserves](./requires-ensures.md)-->
-- [Array Operations](./basic-array.md)
+- [Verifying programs with arrays](./basic-array.md)
 - [Quantifiers (`forall`, `exists`) and Implication (`==>`)](./quantifier.md)
 - [Loops](./loops.md)
   - [Invariants](./loops-invariant.md)
