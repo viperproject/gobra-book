@@ -1,23 +1,23 @@
 # Range Loops
 
-In Go, loops can iterate over a `range` clause
-Gobra supports `range` for arrays, slices, and maps.
-Supported are integers, strings, and functions.
+Besides traditional `for` loops, Go supports iterating over data structures with for-range loops.
+In this section, we consider range clauses for arrays.
+We show how to reason about for-range loops that iterate over [slices](./slices.md) and [maps](./maps.md) in their corresponding sections.
+These data-structures pose additional changes, as they may be concurrently accessed, and thus, we need to employ permissions when reasoning about them.
+Gobra does not support range clauses for integers, strings, and functions.
 
-In the section for slices and maps `range` is discussed again.
-Here we refactor the `LinearSearch` example from the section on [invariants](./loops-invariant.md) to use a `range` loop for an array.
+Here we refactor the `LinearSearch` example from the section on [loop invariants](./loops-invariant.md) to use a for-range loop.
 The contract is left unchanged, but Gobra reports an error:
 ``` go
 const N = 10
 
-// @ ensures idx != -1 ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 func LinearSearch(arr [N]int, target int) (idx int, found bool) {
 	// @ invariant 0 <= i && i <= len(arr)
 	// @ invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
-	for i, a := range arr { // before: for i:=0;i<len(arr);i+=1
-		if a == target {    // before: arr[i] == target
+	for i, a := range arr {
+		if a == target {
 			return i, true
 		}
 	}
@@ -28,24 +28,23 @@ func LinearSearch(arr [N]int, target int) (idx int, found bool) {
 ERROR Postcondition might not hold. 
 Assertion !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target might not hold.
 ```
-For loops, the common pattern is that the negation of the loop condition together with the invariant implies the postcondition.
-In the standard `for` loop, we can deduce that `i == len(arr)` after the last iteration.
-For the `range` version, `i` is equal `len(arr)-1` in the last iteration.
-But there is no loop condition, and Gobra only _knows_ that `0 <= i && i < len(arr)` holds after the last iteration which is not enough to prove the postcondition.
+We have come across the pattern where the negation of the loop condition, combined with the invariant, often implies the postcondition.
+In a standard for loop, we can deduce that `i == len(arr)` holds after the final iteration.
+In the range version, however, `i` equals `len(arr) - 1` during the last iteration.
+Since the range version has no explicit loop condition, Gobra only _knows_ that `0 <= i && i < len(arr)` holds during the after iteration, which is insufficient to prove the postcondition.
 
-## `with`
-We can specify an additional loop variable defined using `with i0` after `range`.
-The invariant `0 <= i0 && i0 <= len(arr)` holds as well as `i0 < len(arr) ==>  i == i0`.
+## Helper loop variable from a `with` clause
+We can specify an additional loop variable `i0` defined using `with i0` after a `range` clause.
+The invariant `0 <= i0 && i0 <= len(arr)` holds, as does `i0 < len(arr) ==> i == i0`.
 Additionally, `i0` will be equal to `len(arr)` at the end of the loop.
-Hence if we replace `i` with `i0` in the second invariant, Gobra can show the postcondition.
-We can remove the invariant `0 <= i && i < len(arr)` as this is implicitly available to Gobra.
+Thus, if we replace `i` with `i0` in the second invariant, Gobra can verify the postcondition.
+The invariant `0 <= i && i < len(arr)` can be removed, as it is implicitly understood by Gobra.
 Our final verifying version is:
 ``` go
 package main
 
 const N = 10
 
-// @ ensures idx != -1 ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 func LinearSearchRange(arr [N]int, target int) (idx int, found bool) {
