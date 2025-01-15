@@ -8,12 +8,14 @@ In the section for slices and maps `range` is discussed again.
 Here we refactor the `LinearSearch` example from the section on [invariants](./loops-invariant.md) to use a `range` loop for an array.
 The contract is left unchanged, but Gobra reports an error:
 ``` go
+const N = 10
+
 // @ ensures idx != -1 ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 func LinearSearch(arr [N]int, target int) (idx int, found bool) {
-	//@ invariant 0 <= i && i <= len(arr)
-	//@ invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
+	// @ invariant 0 <= i && i <= len(arr)
+	// @ invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
 	for i, a := range arr { // before: for i:=0;i<len(arr);i+=1
 		if a == target {    // before: arr[i] == target
 			return i, true
@@ -47,7 +49,7 @@ const N = 10
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 func LinearSearchRange(arr [N]int, target int) (idx int, found bool) {
-	//@ invariant forall j int :: 0 <= j && j < i0 ==> arr[j] != target
+	// @ invariant forall j int :: 0 <= j && j < i0 ==> arr[j] != target
 	for i := range arr /*@ with i0 @*/ {  // <--- added with
 		if arr[i] == target {
 			return i, true
@@ -59,11 +61,11 @@ func LinearSearchRange(arr [N]int, target int) (idx int, found bool) {
 func client() {
 	arr := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 	i10, found := LinearSearchRange(arr, 10)
-	//@ assert !found
-	//@ assert forall i int :: 0 <= i && i < len(arr) ==> arr[i] != 10
-	//@ assert arr[4] == 4
+	// @ assert !found
+	// @ assert forall i int :: 0 <= i && i < len(arr) ==> arr[i] != 10
+	// @ assert arr[4] == 4
 	i4, found4 := LinearSearchRange(arr, 4)
-	//@ assert found4
-	//@ assert arr[i4] == 4
+	// @ assert found4
+	// @ assert arr[i4] == 4
 }
 ```

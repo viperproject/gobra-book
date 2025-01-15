@@ -9,8 +9,8 @@ To get started, we write an assertion that checks that an array is initialized w
 ``` go
 ~const N = 42
 ~func client1() {
-    var a [N]int
-    //@ assert forall i int :: 0 <= i && i < len(a) ==> a[i] == 0
+    var a [1000]int
+    // @ assert forall i int :: 0 <= i && i < len(a) ==> a[i] == 0
 ~}
 ```
 We make use of the `forall` quantifier to use an arbitrary `i` of type `int`.
@@ -25,7 +25,7 @@ This could include `i=-1` and we face the error:
 ~const N = 42
 ~func client2() {
     var a [N]int
-    //@ assert forall i int :: a[i] == 0
+    // @ assert forall i int :: a[i] == 0
 ~}
 ```
 ``` text
@@ -60,8 +60,8 @@ but we can state that for any indices `i` and `j` it must hold `arr[i] <= arr[j]
 Again, we must enforce that `i` and `j` are valid indices.
 This results in the precondition:
 ``` go
-//@ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
-func BinarySearch(arr [N]int, target int) (int, bool)
+// @ ensures forall i, j int :: {res[i], res[j]} 0 <= i && i < j && j < len(res) ==> res[i] <= res[j]
+func sort(arr [1000]int) (res [1000]int)
 ```
 Note that we can quantify `i` and `j` at the same time instead of using two `forall` quantifiers:
 `requires forall i int :: forall j int :: arr[i] <= arr[j]`.
@@ -101,7 +101,7 @@ func Contains(arr [10]int, target int) (found bool) {
 func client3() {
     arr := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
     found := Contains(arr, 10)
-    //@ assert !found
+    // @ assert !found
     found4 := Contains(arr, 4)
 }
 ```

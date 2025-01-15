@@ -60,7 +60,7 @@ For example, integers `i, j int` are lower-bounded if `i >= 0` and decreasing if
 A common case is that we iterate over an array with an increasing loop variable `i`.
 We can easily construct a termination measure that decreases instead by subtracting `i` from the array's length.
 ``` go
-	//@ decreases len(arr) - i
+	// @ decreases len(arr) - i
 	for i:=0; i<N; i++ {
 		if arr[i] > res {
 			res = arr[i]
@@ -85,13 +85,21 @@ low mid high
  1 1 2
     -->
 ``` go
-// @ decreases
+// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
+// @ ensures 0 <= idx && idx <= len(arr)
+// @ ensures idx > 0 ==> arr[idx-1] < target
+// @ ensures idx < len(arr) ==> target <= arr[idx]
+// @ ensures found == (idx < len(arr) && arr[idx] == target)
+// @ decreases  // <--- added for termination checking
 func BinarySearch(arr [N]int, target int) (idx int, found bool) {
 	low := 0
 	high := len(arr)
 	mid := 0
-	//@ invariant 0 <= low && low <= high && high <= len(arr)
-	//@ decreases high - low
+	// @ invariant 0 <= low && low <= high && high <= len(arr)
+	// @ invariant 0 <= mid && mid < len(arr)
+	// @ invariant low > 0 ==> arr[low-1] < target
+	// @ invariant high < len(arr) ==> target <= arr[high]
+	// @ decreases high - low   // <-- added for termination checking
 	for low < high {
 		mid = (low + high) / 2
 		if arr[mid] < target {
@@ -179,7 +187,7 @@ In the next section, we discuss why `pure` and `ghost` functions must have termi
 If you could find a termination measure for the function `Collatz` you would solve a
 [famous mathematical problem](https://en.wikipedia.org/wiki/Collatz_conjecture).
 ``` go
-//@ requires n >= 1
+// @ requires n >= 1
 func Collatz(n int) int {
     if n == 1 {
         return 1
