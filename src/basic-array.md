@@ -69,17 +69,6 @@ Then the calls `getItem(a, -1)` and `getItem(a, 10)` will get rejected.
 There is a punchline missing here. We should show how to fix the verification error for the `getItem` function by adding a precondition and then show that we now have a verification error in the client
 -->
 
-Array accesses must also be within bounds in specifications and proof annotations for them to be well-defined.
-For example, consider an `assert` statement:
-```go
-a := [5]int{2, 3, 5, 7, 11}
-//@ assert a[10] > 10
-```
-``` text
-ERROR: index 10 is out of bounds
-	assert a[10] > 10
-```
-
 > Gobra statically checks that every access to arrays is within bounds.
 
 <!-- this is also checked in specs (e.g. not well defined) -->
