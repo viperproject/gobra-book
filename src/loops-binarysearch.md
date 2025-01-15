@@ -20,16 +20,16 @@ Let us begin by writing a first contract.
 First, we must require the array `arr` to be sorted.
 We have already seen how we can write this as a precondition:
 ``` go
-//@ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
+// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 ```
 If `BinarySearchArr` returns not found, `target` must not be an element of `arr`,
 or equivalently, all elements of `arr` are not equal to `target`:
 ``` go
-//@ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
+// @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 ```
 For the case where `target` is found, `idx` gives its position:
 ``` go
-//@ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == value
+// @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == value
 ```
 
 This contract does not yet capture that the `idx` must be the first index where `target` is found or otherwise the position where `target` would appear in the sort order.
@@ -38,8 +38,8 @@ Here is the first implementation of `BinarySearchArr`.
 The elements with an index between `low` and `high` denote the parts of the array that remain to be searched for `target`.
 We must add several loop invariants until this function satisfies its contract.
 ``` go
-//@ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
-//@ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
+// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
+// @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 func BinarySearchArr(arr [N]int, target int) (found bool) {
 	low := 0
 	high := len(arr)
@@ -65,7 +65,7 @@ After comparing `target` with the element `arr[mid]` we can half the search rang
 We either continue searching in the lower half between `low` and `mid` or the upper half between `mid+1` and `high`.
 For this, we need the invariant that `mid` remains a valid index for `arr`:
 ``` go
-	//@ invariant 0 <= mid && mid < len(arr)
+	// @ invariant 0 <= mid && mid < len(arr)
 ```
 Let us check if this invariant works:
 1. Before the first iteration `mid` is initialized to `0` hence `0 <= mid && mid < N` trivially holds.
@@ -74,8 +74,8 @@ Let us check if this invariant works:
 We know that `low` and `high` stay between `0` and `len(arr)`,
 and `low` should be smaller than `high`, right?
 ``` go
-	//@ invariant 0 <= low && low < high && high <= len(arr)
-	//@ invariant 0 <= mid && mid < len(arr)
+	// @ invariant 0 <= low && low < high && high <= len(arr)
+	// @ invariant 0 <= mid && mid < len(arr)
 ```
 ``` text
 ERROR Loop invariant might not be preserved. 
@@ -110,15 +110,15 @@ Here we can see the pattern that the slice `arr[low:high]` denotes the part of t
 All elements in the prefix `arr[:low]` are smaller than `target` and all elements in the suffix `arr[high:]` are larger or equal than `target`.
 Translating the above into Gobra invariants gives:
 ``` go
-//@ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < target
-//@ invariant forall j int :: {arr[j]} high <= j && j < len(arr) ==>  target <= arr[j]
+// @ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < target
+// @ invariant forall j int :: {arr[j]} high <= j && j < len(arr) ==>  target <= arr[j]
 ```
 
 As it still known that the array is sorted, we can equivalently simplify this by relating `target` only to the elements
 `arr[low-1]` and `arr[high]` (also taking care that the indices are in bound):
 ``` go
-//@ invariant low > 0 ==> arr[low-1] < target
-//@ invariant high < len(arr) ==>  target <= arr[high]
+// @ invariant low > 0 ==> arr[low-1] < target
+// @ invariant high < len(arr) ==>  target <= arr[high]
 ```
 
 When exiting the loop we know that `low == high`, and if `target` is contained in `arr` it must be located at index `low`.
@@ -131,11 +131,11 @@ func InitialClient() {
 	i1, found1 := BinarySearchArr(arr, 1)
 	i2, found2 := BinarySearchArr(arr, 2)
 	i4, found4 := BinarySearchArr(arr, 4)
-	//@ assert found1  // Assert might fail.
-	//@ assert i1 == 1 // Assert might fail.
-	//@ assert found2  // Assert might fail.
-	//@ assert i4 == 5 // Assert might fail.
-	//@ assert !found4
+	// @ assert found1  // Assert might fail.
+	// @ assert i1 == 1 // Assert might fail.
+	// @ assert found2  // Assert might fail.
+	// @ assert i4 == 5 // Assert might fail.
+	// @ assert !found4
 }
 ```
 While we know for certain that 4 is not contained, the current postcondition does not give us information about the index otherwise.
@@ -184,13 +184,13 @@ const N = 7
 func FinalClient() {
 	arr := [7]int{0, 1, 1, 2, 3, 5, 8}
 	i1, found1 := BinarySearchArr(arr, 1)
-	//@ assert found1 && arr[i1] == 1 && i1 == 1
+	// @ assert found1 && arr[i1] == 1 && i1 == 1
 	i2, found2 := BinarySearchArr(arr, 2)
-	//@ assert found2 && arr[i2] == 2 && i2 == 3
+	// @ assert found2 && arr[i2] == 2 && i2 == 3
 	i4, found4 := BinarySearchArr(arr, 4)
-	//@ assert !found4 && i4 == 5
+	// @ assert !found4 && i4 == 5
 	i10, found10 := BinarySearchArr(arr, 10)
-	//@ assert !found10 && i10 == len(arr)
+	// @ assert !found10 && i10 == len(arr)
 }
 
 // @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]

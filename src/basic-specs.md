@@ -12,7 +12,7 @@ Mathematically speaking, `Abs(x)` should return \\( \|x\| \\).
 ``` go
 // ##(--overflow)
 
-//@ ensures res >= 0 && (res == x || res == -x)
+// @ ensures res >= 0 && (res == x || res == -x)
 func Abs(x int32) (res int32) {
     if x < 0 {
         return -x
@@ -48,8 +48,8 @@ We complete the contract for `Abs` with a precondition that prevents `Abs` from 
 // ##(--overflow)
 const MinInt32 = -2147483648  // -1<<32
 
-//@ requires x != MinInt32
-//@ ensures res >= 0 && (res == x || res == -x)
+// @ requires x != MinInt32
+// @ ensures res >= 0 && (res == x || res == -x)
 func Abs(x int32) (res int32)
 ```
 Gobra only considers function calls that satisfy the precondition.
@@ -71,8 +71,8 @@ Let us exemplify this with the absolute value example:
 ```go
 const MinInt32 = -2147483648
 
-//@ requires x != MinInt32
-//@ ensures res >= 0 && (res == x || res == -x)
+// @ requires x != MinInt32
+// @ ensures res >= 0 && (res == x || res == -x)
 func Abs(x int32) (res int32) {
     if x < 0 {
         return -x
@@ -87,7 +87,7 @@ func client1() {
     v3 := Abs(MinInt32) // error
 }
 
-//@ requires a > 0 && b < 0
+// @ requires a > 0 && b < 0
 func client2(a, b int32) {
     v4 := Abs(a)
     v5 := Abs(b) // error
@@ -113,8 +113,8 @@ Please note that the errors are reported at the location of the call since the c
 Preconditions `a > 0 && b < 0` joined by the logical AND can be split into multiple lines.
 We can write the contract for `client2` equivalently as:
 ```go
-//@ requires a > 0
-//@ requires b < 0
+// @ requires a > 0
+// @ requires b < 0
 func client2(a, b int32)
 ```
 
@@ -132,10 +132,10 @@ These checks do not introduce any assertions at runtime, so there is no performa
 
 The first assertion passes in the following program since it can be inferred from the precondition.
 ```go
-//@ requires a > 0 && b < 0
+// @ requires a > 0 && b < 0
 func client3(a, b int32) {
-    //@ assert a > b
-    //@ assert b > -10 // error
+    // @ assert a > b
+    // @ assert b > -10 // error
 }
 ```
 ``` text
@@ -156,26 +156,26 @@ We illustrate this by adding `assert` statements in the code for `client4` that 
 ```go
 const MinInt32 = -2147483648
 
-//@ requires x != MinInt32
-//@ ensures res >= 0 && (res == x || res == -x)
+// @ requires x != MinInt32
+// @ ensures res >= 0 && (res == x || res == -x)
 func Abs(x int32) (res int32) {
-    //@ assert x != MinInt32
+    // @ assert x != MinInt32
     if x < 0 {
-        //@ assert x != MinInt32 && x < 0
+        // @ assert x != MinInt32 && x < 0
         return -x
     } else {
-        //@ assert x != MinInt32 && !(x < 0)
+        // @ assert x != MinInt32 && !(x < 0)
         return x
     }
 }
 
 func client4() {
     v1 := Abs(3)
-    //@ assert v1 >= 0 && (v1 == 3 || v1 == -3)
-    //@ assert v1 == 3
+    // @ assert v1 >= 0 && (v1 == 3 || v1 == -3)
+    // @ assert v1 == 3
     v2 := Abs(-2)
-    //@ assert v2 >= 0 && (v2 == -2 || v2 == -(-2))
-    //@ assert v2 == 2
+    // @ assert v2 >= 0 && (v2 == -2 || v2 == -(-2))
+    // @ assert v2 == 2
 }
 ```
 
@@ -192,8 +192,8 @@ If we exchange the bodies of the `if` statement, the function `WrongAbs` does no
 ``` go
 const MinInt32 = -2147483648
 
-//@ requires x != MinInt32
-//@ ensures res >= 0 && (res == x || res == -x)
+// @ requires x != MinInt32
+// @ ensures res >= 0 && (res == x || res == -x)
 func WrongAbs(x int32) (res int32) {
     if x < 0 {
         return x
@@ -216,8 +216,8 @@ func foo() int
 ```
 is equivalent to
 ``` go
-//@ requires true
-//@ ensures true
+// @ requires true
+// @ ensures true
 func foo() int
 ```
 

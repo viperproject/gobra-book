@@ -3,12 +3,12 @@ type = "MultipleChoice"
 prompt.prompt = """
 **Program 1:**
 ```go
-//@ ensures res >= 0
+// @ ensures res >= 0
 func square(x int) (res int) {
 	return x * x
 }
 r := square(a)
-//@ assert r == a*a
+// @ assert r == a*a
 ```
 What is the verification result of **Program 1**?
 """
@@ -25,7 +25,7 @@ type = "MultipleChoice"
 prompt.prompt = """
 **Program 2:**
 ```go
-//@ requires false
+// @ requires false
 func dontCallMe()  {}
 ```
 Which of the following programs containing a function with precondition `false` verify?
@@ -33,7 +33,7 @@ Which of the following programs containing a function with precondition `false` 
 prompt.distractors = [
     """
 ```go
-//@ requires false
+// @ requires false
 func dontCallMe()  {}
 
 func client() {
@@ -44,10 +44,10 @@ func client() {
 ]
 answer.answer = ["""
 ```go
-//@ requires false
+// @ requires false
 func dontCallMe()  {}
 
-//@ requires x % 2 == 1
+// @ requires x % 2 == 1
 func callMeNeither(x int) {
     if x % 2 == 0 {
         dontCallMe()
@@ -57,7 +57,7 @@ func callMeNeither(x int) {
 """,
 """
 ```go
-//@ requires false
+// @ requires false
 func dontCallMe()  {}
 ```
 """

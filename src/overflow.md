@@ -20,11 +20,19 @@ package binarysearch
 
 const N = 1 << 62
 
+// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
+// @ ensures 0 <= idx && idx <= len(arr)
+// @ ensures idx > 0 ==> arr[idx-1] < target
+// @ ensures idx < len(arr) ==> target <= arr[idx]
+// @ ensures found == (idx < len(arr) && arr[idx] == target)
 func BinarySearchOverflow(arr [N]int, target int) (idx int, found bool) {
 	low := 0
 	high := len(arr)
 	mid := 0
-	//@ invariant 0 <= low && low <= high && high <= len(arr)
+	// @ invariant 0 <= low && low <= high && high <= len(arr)
+	// @ invariant 0 <= mid && mid < len(arr)
+	// @ invariant low > 0 ==> arr[low-1] < target
+	// @ invariant high < len(arr) ==> target <= arr[high]
 	for low < high {
 		mid = (low + high) / 2
 		if arr[mid] < target {

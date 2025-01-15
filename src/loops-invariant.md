@@ -6,11 +6,11 @@ An _invariant_ is an assertion that is preserved by the loop across iterations.
 > 1. before the first iteration after performing the initialization statement
 > 2. after every iteration
 
-If the loop is exited early with a `break` or `return` statement, the invariant may not hold.
+<!-- If the loop is exited early with a `break` or `return` statement, the invariant may not hold. -->
 
 In Gobra we can specify it with the `invariant` keyword before a loop.
 ``` go
-//@ invariant ASSERTION
+// @ invariant ASSERTION
 for condition { // ... }
 ```
 
@@ -40,12 +40,12 @@ func LinearSearch(arr [N]int, target int) (idx int, found bool) {
 func client() {
 	arr := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 	i10, found := LinearSearch(arr, 10)
-	//@ assert !found
-	//@ assert forall i int :: 0 <= i && i < len(arr) ==> arr[i] != 10
-	//@ assert arr[4] == 4
+	// @ assert !found
+	// @ assert forall i int :: 0 <= i && i < len(arr) ==> arr[i] != 10
+	// @ assert arr[4] == 4
 	i4, found4 := LinearSearch(arr, 4)
-	//@ assert found4
-	//@ assert arr[i4] == 4
+	// @ assert found4
+	// @ assert arr[i4] == 4
 }
 ```
 
@@ -73,7 +73,7 @@ Therefore `i == len(arr)` and `forall i int :: 0 <= i && i < len(arr) ==> arr[i]
 When we change the first invariant to use `1 <= i` instead of `0 <= i`, this invariant does not hold before the first iteration:
 ``` go
 func NotEstablished(arr [N]int, target int) (idx int, found bool) {
-	//@ invariant 1 <= i && i <= len(arr)
+	// @ invariant 1 <= i && i <= len(arr)
 	for i := 0; i < len(arr); i += 1 {
 		if arr[i] == target {
 			return i, true
@@ -92,7 +92,7 @@ When we change the first invariant to use `i < len(arr)` instead of `i <= len(ar
 After the last iteration `i==len(arr)` holds and this invariant is not preserved.
 ``` go
 func NotPreserved(arr [N]int, target int) (idx int, found bool) {
-	//@ invariant 0 <= i && i < len(arr)
+	// @ invariant 0 <= i && i < len(arr)
 	for i := 0; i < len(arr); i += 1 {
 		if arr[i] == target {
 			return i, true
