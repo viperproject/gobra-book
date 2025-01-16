@@ -17,42 +17,36 @@ In the [binary search section](./loops-binarysearch.md), we relied on the precon
 ``` gobra
 requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 ```
-If we want to write clients that use `binarySearch` we have to propagate the preconditions, for example, we might want to write `insert`:
-``` go
-// @ requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
-func insert(arr [N]int, value int) {
-	var fresh [N + 1]int
-	idx := binarySearch(arr, value)
-    // ...
-}
-```
 
+If we want to write other functions operating on sorted arrays we have to copy the precondition.
 In the spirit of *don't repeat yourself* we want to abstract the precondition.
 Our first attempt is:
 ``` go
 func isArraySorted(arr [N]int) bool {
-	//@ invariant 1<=i && i <= len(arr)
-	for i:=1; i<len(arr); i++ {
-		if arr[i-1] > arr[i] {
-			return false
-		}
-	}
-	return true
+    // @ invariant 1<=i && i <= len(arr)
+    for i:=1; i<len(arr); i++ {
+        if arr[i-1] > arr[i] {
+            return false
+        }
+    }
+    return true
 }
 
-//@ requires isArraySorted(arr)
-func insert(arr [N]int, value int) {
+// @ requires isArraySorted(arr)
+func client(arr [N]int, value int) {
     // ...
 }
 ```
 But we get the error:
 ``` text
-error: ghost error: Found call to non-ghost impure function in ghost code
+ERROR ghost error: Found call to non-ghost impure function in ghost code
 requires isArraySorted(arr)
          ^
 ```
+<!-- wanted to InsertSorted example that calls BinarySearch arr and inserts the searched value in a the newly returned array of length N + 1
+but this is not straightforward to verify.
+Annoyingly, the isArraySorted function would not work for the returned array of different length -->
 
-Recall:
 > Assertions are boolean expressions that are deterministic and have no side effects.
 
 We are not allowed to call arbitrary functions in specifications!
@@ -76,9 +70,9 @@ This is where `pure` comes into play.
 We can mark a function with the `pure` keyword.
 Note that it must come before `func` and after the pre and postconditions.
 ``` go
-//@ pure
+// @ pure
 func isArraySorted(arr [N]int) bool {
-	~//@ invariant 1<=i && i <= len(arr)
+	~// @ invariant 1<=i && i <= len(arr)
 	~for i:=1; i<len(arr); i++ {
 		~if arr[i-1] > arr[i] {
 			~return false
@@ -88,7 +82,7 @@ func isArraySorted(arr [N]int) bool {
 }
 ```
 ``` text
-error: For now, the body of a pure block is expected to be a single return with a pure expression, got Vector(  omitted...
+ERROR For now, the body of a pure block is expected to be a single return with a pure expression, got Vector(  omitted...
 ```
 
 Due to the syntactical restrictions, we need another way to express it.
@@ -110,8 +104,8 @@ func isSorted(arr [N]int) bool {
 }
 @*/
 
-//@ requires isSorted(arr)
-func insert(arr [N]int, value int) {
+// @ requires isSorted(arr)
+func client(arr [N]int, value int) {
     // ...
 }
 ```
@@ -155,17 +149,13 @@ As opposed to normal functions where we cannot peek inside them,
 calls to `pure` functions can be thought of as inlined.
 The following assertions pass:
 ``` go
-/*@
-ghost
-decreases
 func client(n int) {
-	if n > 1 {
-		assert fibonacci(n) == fibonacci(n-1) + fibonacci(n-2)
+    if n > 1 {
+        // @ assert fibonacci(n) == fibonacci(n-1) + fibonacci(n-2)
+    } else if n == 0 {
+        // @ assert fibonacci(n) == 0
     }
-    if n == 0 {
-    	assert fibonacci(0) == 0
-    }
-}@*/
+}
 ```
 
 We leave it as an exercise in the Quiz to provide invariants for an iterative implementation satisfying the specification:
@@ -182,11 +172,11 @@ For example, if we try to modify a variable `x` with a ghost statement.
 To make a statement ghost, add `ghost` before it.
 ``` go
 	var x int
-	//@ ghost x = 1
+	// @ ghost x = 1
 	// ...
 ```
 ``` text
-ghost error: only ghost locations can be assigned to in ghost code
+ERROR ghost error: only ghost locations can be assigned to in ghost code
 ```
 Gobra detects that modifying `x` could clearly alter the output of the program.
 
@@ -194,13 +184,13 @@ The control flow must also not diverge.
 We are not allowed to make any statement `ghost`, for example if we try to exit early out of the function `loop`, this would change its (termination) behavior.
 ``` go
 func loop() {
-	//@ ghost return
+	// @ ghost return
 	for {}
 }
 ```
 But this is not permitted:
 ``` text
-ghost error: expected ghostifiable statement
+ERROR ghost error: expected ghostifiable statement
 ```
 
 ## Termination of `ghost` functions
@@ -209,7 +199,7 @@ This is also to ensure that their presence does not change the program's behavio
 As a simple example, assume that `inf()` does not terminate.
 ``` go
 func boo()  {
-	//@ ghost y := inf()
+	// @ ghost y := inf()
 	return 0
 }
 ```
@@ -259,9 +249,9 @@ The assertions all pass since
 ## Ghost Parameter
 Let us look at the function `max` that returns the maximum element of a non-empty array with signature:
 ``` go
-//@ requires len(arr) > 0
-//@ ensures forall i int :: 0 <= i && i < len(arr) ==> arr[i] <= res
-//@ ensures exists i int :: 0 <= i && i < len(arr) ==> arr[i] == res
+// @ requires len(arr) > 0
+// @ ensures forall i int :: 0 <= i && i < len(arr) ==> arr[i] <= res
+// @ ensures exists i int :: 0 <= i && i < len(arr) ==> arr[i] == res
 func max(arr [N]int) (res int)
 ```
 Verifying this function would be challenging because of the `exists` quantifier.
@@ -270,19 +260,19 @@ Additionally, the postcondition gives clients only the maximal value.
 With a `ghost` out parameter `idx` we can return the index of the maximal value.
 
 ``` go
-//@ requires len(arr) > 0
-//@ ensures forall i int :: 0 <= i && i < len(arr) ==> arr[i] <= res
-//@ ensures 0 <= idx && idx < len(arr) && arr[idx] == res
+// @ requires len(arr) > 0
+// @ ensures forall i int :: 0 <= i && i < len(arr) ==> arr[i] <= res
+// @ ensures 0 <= idx && idx < len(arr) && arr[idx] == res
 func max(arr [N]int) (res int /*@ , ghost idx int @*/) {
 	res = arr[0]
-    //@ idx = 0
-	//@ invariant 0 <= i0 && i0 <= N
-	//@ invariant forall j int :: 0 <= j && j < i0 ==> arr[j] <= res
-	//@ invariant 0 <= idx && idx < N && arr[idx] == res
+    // @ idx = 0
+	// @ invariant 0 <= i0 && i0 <= N
+	// @ invariant forall j int :: 0 <= j && j < i0 ==> arr[j] <= res
+	// @ invariant 0 <= idx && idx < N && arr[idx] == res
 	for i, a := range arr /*@ with i0 @*/ {
 		if a > res {
 			res = a
-			//@ idx = i
+			// @ idx = i
 		}
 	}
 	return res /*@ , idx @*/
@@ -291,9 +281,11 @@ func max(arr [N]int) (res int /*@ , ghost idx int @*/) {
 Now when calling `max` we must also assign to a `ghost` variable:
 ``` go
 ~arr := [N]int{-2, 2, 1, 5, 5}
-//@ ghost var idx int
+// @ ghost var idx int
 m, /*@ idx @*/ := max(arr)
 ```
+
+<!-- todo if not declared before, it is inferred automatically for the := assignment -->
 
 ## More Ghosts
 <!-- from tutorial.md -->

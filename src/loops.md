@@ -1,11 +1,11 @@
 # Loops
 
 Reasoning with loops introduces a challenge for verification.
-Loops could execute an unbounded number of iterations.
-Similar to pre and postconditions for functions, we have to write a specification for a loop in the form of an *invariant*.
+Loops may execute an unbounded number of iterations.
+As is typical in program verification, we reason about loops through [loop invariants](https://en.wikipedia.org/wiki/Loop_invariant), i.e., assertions that describe properties that hold for all iterations of the loop.
 
-Using the example of a binary search, we showcase how we can gradually build up the invariant until we are able to verify the function.
+Using the example of a [binary search](./loops-binarysearch.md), we showcase how we can gradually build up the invariant until we are able to verify the function.
 
-We will also introduce the verification of loops over a `range`.
+We will also introduce the verification of loops with [`range`](./loops-range.md) clauses.
 
-Termination of loops will be discussed in the [next section](./termination.md).
+[Termination](./termination.md) of loops will be discussed in a following section.

@@ -9,10 +9,10 @@
 - [Basic specifications](./basic-specs.md)
   <!-- - [`assert` and `assume`](./assert-assume.md) -->
   <!-- - [requires, ensures, and preserves](./requires-ensures.md)-->
-- [Array Operations](./basic-array.md)
+- [Verifying programs with arrays](./basic-array.md)
 - [Quantifiers (`forall`, `exists`) and Implication (`==>`)](./quantifier.md)
 - [Loops](./loops.md)
-  - [Invariants](./loops-invariant.md)
+  - [Loop Invariants](./loops-invariant.md)
   - [Binary Search](./loops-binarysearch.md)
   - [Range](./loops-range.md)
 - [Overflow Checking](./overflow.md)
@@ -20,3 +20,4 @@
 - [Ghost Code and Pure Functions](./basic-ghost-pure.md)
 
 # Advanced topics
+- [Quantifier Triggers](./triggers.md)
