@@ -52,7 +52,7 @@ Permission to *x might not suffice.
 The permissions a function requires must be specified in the precondition.
 Since `swap` modifies both `x` and `y` we write:
 ``` go
-//@ requires acc(x) && acc(y)
+// @ requires acc(x) && acc(y)
 func swap(x *int, y *int) {
 ~	tmp := *x
 ~	*x = *y
@@ -65,8 +65,8 @@ func client() {
     *x = 1
     *y = 2
 	swap(x, y)
-	//@ assert *x == 2 // fail
-	//@ assert *y == 1
+	// @ assert *x == 2 // fail
+	// @ assert *y == 1
 }
 ```
 ``` text
@@ -81,9 +81,9 @@ Otherwise the permissions are leaked (lost).
 
 With `old(*y)` we can use the value of `*y` from the state at the beginning of the function call before any modifications.
 ``` go
-//@ requires acc(x) && acc(y)
-//@ ensures acc(x) && acc(y)
-//@ ensures *x == old(*y) && *y == old(*x)
+// @ requires acc(x) && acc(y)
+// @ ensures acc(x) && acc(y)
+// @ ensures *x == old(*y) && *y == old(*x)
 func swap(x *int, y *int) {
 	~tmp := *x
 	~*x = *y
@@ -103,12 +103,12 @@ Having `acc(x) && acc(y)` implies `x != y` since we are not allowed to have writ
 One possibility is to perform a case distinction on `x == y`.
 While this works, the resulting specs are verbose, and we better refactor them to a reduced form.
 ``` go
-//@ requires x == y ==> acc(x)
-//@ requires x != y ==> acc(x) && acc(y)
-//@ ensures x == y ==> acc(x)
-//@ ensures x != y ==> acc(x) && acc(y)
-//@ ensures x != y ==> *x == old(*y) && *y == old(*x)
-//@ ensures x == y ==> *x == old(*x)
+// @ requires x == y ==> acc(x)
+// @ requires x != y ==> acc(x) && acc(y)
+// @ ensures x == y ==> acc(x)
+// @ ensures x != y ==> acc(x) && acc(y)
+// @ ensures x != y ==> *x == old(*y) && *y == old(*x)
+// @ ensures x == y ==> *x == old(*x)
 func swap(x *int, y *int) {
 	tmp := *x
 	*x = *y
@@ -118,31 +118,31 @@ func swap(x *int, y *int) {
 
 1. It is a common pattern that a function requires and ensures the same permissions. Here we have
     ``` go
-    //@ requires x == y ==> acc(x)
-    //@ ensures x == y ==> acc(x)
+    // @ requires x == y ==> acc(x)
+    // @ ensures x == y ==> acc(x)
     ```
     We can replace this with a single line using `preserves`, which is syntactical sugar for the above.
     ``` go
-    //@ preserves x == y ==> acc(x)
+    // @ preserves x == y ==> acc(x)
     ```
 2. `acc(x)` is needed in any case, hence it can be factored out
     ``` go
-    //@ preserves x == y ==> acc(x)
-    //@ preserves x != y ==> acc(x) && acc(y)
+    // @ preserves x == y ==> acc(x)
+    // @ preserves x != y ==> acc(x) && acc(y)
     ```
     becomes
     ``` go
-    //@ preserves acc(x)
-    //@ preserves x != y ==> acc(y)
+    // @ preserves acc(x)
+    // @ preserves x != y ==> acc(y)
     ```
 3. Simplify the postconditions
     ``` go
-    //@ ensures x != y ==> *x == old(*y) && *y == old(*x)
-    //@ ensures x == y ==> *x == old(*x)
+    // @ ensures x != y ==> *x == old(*y) && *y == old(*x)
+    // @ ensures x == y ==> *x == old(*x)
     ```
     with:
     ``` go
-    //@ ensures *x == old(*y) && *y == old(*x)
+    // @ ensures *x == old(*y) && *y == old(*x)
     ```
     where the assertion is unchanged for the case `x != y` and we see it is equivalent for the case `x == y` by substituting `y` with `x`.
 
@@ -152,9 +152,9 @@ This gives us the...
 
 ## Final version of `swap`
 ``` go
-//@ preserves acc(x)
-//@ preserves x != y ==> acc(y)
-//@ ensures *x == old(*y) && *y == old(*x)
+// @ preserves acc(x)
+// @ preserves x != y ==> acc(y)
+// @ ensures *x == old(*y) && *y == old(*x)
 func swap(x *int, y *int) {
 	tmp := *x
 	*x = *y
@@ -166,10 +166,10 @@ func client() {
     *x = 1
     *y = 2
 	swap(x, x)
-	//@ assert *x == 1
+	// @ assert *x == 1
 	swap(x, y)
-	//@ assert *x == 2
-	//@ assert *y == 1
+	// @ assert *x == 2
+	// @ assert *y == 1
 }
 ```
 

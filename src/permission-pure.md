@@ -25,9 +25,9 @@ pure func allZero(s *[N]int) bool {
 
 func client() {
     xs := new([N]int)
-    //@ assert allZero(xs)
+    // @ assert allZero(xs)
     // implicitly transferred back
-    //@ assert acc(xs)
+    // @ assert acc(xs)
 }
 ```
 

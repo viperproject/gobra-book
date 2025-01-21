@@ -3,7 +3,7 @@
 Go provides the built-in map data structure implementing a hash table.
 ``` go
 watched := make(map[string]bool, 10) // optional capacity
-//@ assert acc(watched) && len(watched) == 0
+// @ assert acc(watched) && len(watched) == 0
 ```
 Permission is obtained from `make`.
 The accessibility predicate `acc(watched)` is for the entire map.
@@ -13,7 +13,7 @@ Holding write permissions, we can add entries.
 In specifications, we can check with `in` if a key is contained in the map.
 ``` go
 watched["Blade Runner"] = true
-//@ assert "Blade Runner" in watched && len(watched) == 1
+// @ assert "Blade Runner" in watched && len(watched) == 1
 ```
 
 The values can be retrieved with their keys.
@@ -21,10 +21,10 @@ Note that key elements must be comparable.
 For example one cannot use other maps, slices, and functions as keys.
 ``` go
 elem, ok := watched["Blade Runner"]
-//@ assert ok && elem
+// @ assert ok && elem
 // non-existing key
 elem, ok := watched["Dune"]
-//@ assert !ok && !elem
+// @ assert !ok && !elem
 ```
 
 ## `nil` map
@@ -33,13 +33,13 @@ No permission is held for the `nil` map and no elements can be added.
 Otherwise, it behaves like an empty map.
 ``` go
 var rating map[string]int
-//@ assert acc(rating, noPerm)
-//@ assert len(rating) == 0
+// @ assert acc(rating, noPerm)
+// @ assert len(rating) == 0
 r, ok := rating["Dune"]
-//@ assert !ok && r == 0
+// @ assert !ok && r == 0
 
 rotten := new(map[string]int)
-//@ assert len(*rotten) == 0
+// @ assert len(*rotten) == 0
 ```
 We can read from the `nil` map like from an empty map, also without permission.
 For functions reading from a map `m`,
@@ -77,12 +77,12 @@ type Movie struct {
 	rating int
 }
 
-//@ requires acc(m, 1/2)
-//@ requires len(m) > 0
+// @ requires acc(m, 1/2)
+// @ requires len(m) > 0
 func avgRating(m map[int]Movie) int {
 	sum := 0
-	//@ invariant acc(m, 1/2)
-	//@ invariant len(m) > 0
+	// @ invariant acc(m, 1/2)
+	// @ invariant len(m) > 0
 	for _, movie := range m /*@ with visited @*/ {
 		sum += movie.rating
 	}
@@ -95,7 +95,7 @@ func critique() {
 		234: {"Tenet", 7},
 		432: {"Dunkirk", 9},
 	}
-	//@ assert acc(nolan) && len(nolan) == 3
+	// @ assert acc(nolan) && len(nolan) == 3
 	avgRating(nolan) // 8
 }
 ```
@@ -111,7 +111,7 @@ Gobra does not allow the mutation of maps while iterating.
 ~}
 // @ requires acc(m)
 func produceSequels(m map[int]Movie) {
-	//@ invariant acc(m)
+	// @ invariant acc(m)
 	for id, movie := range m /*@ with visited @*/ {
 		m[2*id] = Movie{movie.name + "2", movie.rating - 2} // error
 	}
@@ -142,12 +142,12 @@ map[2:{Jaws 6} 3:{Cars 5} 4:{Jaws2 4} 6:{Cars2 3} 12:{Cars22 1} 24:{Cars222 -1} 
 Mutation is prevented by by exhaling a small constant permission amount to the map before the loop.
 As a consequence, wildcard permission does not suffice:
 ``` go
-//@ requires acc(m, _)
-//@ requires len(m) > 0
+// @ requires acc(m, _)
+// @ requires len(m) > 0
 func wildRating(m map[int]Movie) int {
 	sum := 0
-	//@ invariant acc(m, _)
-	//@ invariant len(m) > 0
+	// @ invariant acc(m, _)
+	// @ invariant len(m) > 0
 	for _, movie := range m /*@ with visited @*/ {
 		sum += movie.rating
 	}

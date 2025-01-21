@@ -129,13 +129,13 @@ But `acc(p, 1/2) && acc(p, 1/2)` implies write permission `acc(p, 1)`.
 ## Footnotes
 [^1]: As a simple illustration; for more please refer to the chapter on concurrency.
 ``` go
-//@ requires acc(p, 1/2)
+// @ requires acc(p, 1/2)
 func reader(p *int) {
 	_ = *p
 	// ...
 }
 
-//@ requires acc(p, 1)
+// @ requires acc(p, 1)
 func driver(p *int) {
 	go reader(p)
 	go reader(p)

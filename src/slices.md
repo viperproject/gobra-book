@@ -8,13 +8,13 @@ The functions `len` and `cap` can be used in contracts.
 Access to slice elements is specified using quantified permissions.
 Note that the loop must preserve the permissions with an invariant.
 ``` go
-//@ preserves forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
-//@ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+// @ preserves forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
+// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
-	//@ invariant 0 <= i && i <= len(s)
-	//@ invariant forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
-	//@ invariant forall k int :: {&s[k]} i <= k && k < len(s) ==> s[k] == old(s[k])
-	//@ invariant forall k int :: {&s[k]} 0 <= k && k < i ==> s[k] == old(s[k]) + n
+	// @ invariant 0 <= i && i <= len(s)
+	// @ invariant forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
+	// @ invariant forall k int :: {&s[k]} i <= k && k < len(s) ==> s[k] == old(s[k])
+	// @ invariant forall k int :: {&s[k]} 0 <= k && k < i ==> s[k] == old(s[k]) + n
 	for i := 0; i < len(s); i += 1 {
 		s[i] = s[i] + n
 	}
@@ -22,9 +22,9 @@ func addToSlice(s []int, n int) {
 
 func client() {
 	s := make([]int, 4, 8)
-	//@ assert len(s) == 4 && cap(s) == 8
+	// @ assert len(s) == 4 && cap(s) == 8
 	addToSlice(s, 1)
-	//@ assert forall i int :: {&s[i]} 0 <= i && i < 4 ==> s[i] == 1
+	// @ assert forall i int :: {&s[i]} 0 <= i && i < 4 ==> s[i] == 1
 }
 ```
 In the above example, we obtain permission to the slice elements on allocation by making them.
@@ -32,8 +32,8 @@ We obtain permission to the slice elements on allocation,
 in the above example by making it.
 ``` go
 s1 := []int{0, 1, 1, 2, 3, 5}
-//@ assert forall i int :: {&s1[i]} 0 <= i && i < len(s1) ==> acc(&s1[i])
-//@ assert acc(s1)
+// @ assert forall i int :: {&s1[i]} 0 <= i && i < len(s1) ==> acc(&s1[i])
+// @ assert acc(s1)
 ```
 After initialization with a literal, we also gain permission.
 The second assertion is syntactic sugar for the first.
@@ -63,12 +63,12 @@ func client2() {
 	s := make([]int, 3)
 	l := s[:2]
 	r := s[1:]
-	//@ assert forall i int :: {&r[i]} 0 <= i && i < len(r) ==> &r[i] == &s[i+1]
+	// @ assert forall i int :: {&r[i]} 0 <= i && i < len(r) ==> &r[i] == &s[i+1]
 	addToSlice(l, 1)
-	//@ assert s[0] == 1 && s[1] == 1
+	// @ assert s[0] == 1 && s[1] == 1
 	addToSlice(r, 1)
-	//@ assert r[0] == 2 && r[1] == 1
-	//@ assert s[0] == 1 && s[1] == 2 && s[2] == 1
+	// @ assert r[0] == 2 && r[1] == 1
+	// @ assert s[0] == 1 && s[1] == 2 && s[2] == 1
 }
 ```
 
@@ -116,19 +116,19 @@ s2 := []int{3, 4, 5}
                                                                          
 s0 := make([]int, len(s1))
 copy(s0, s1 /*@, perm(1/2) @*/)
-//@ assert forall i int :: {&s0[i]} {&s1[i]} 0 <= i && i < len(s0) ==> s0[i] == s1[i]
+// @ assert forall i int :: {&s0[i]} {&s1[i]} 0 <= i && i < len(s0) ==> s0[i] == s1[i]
                                                                          
 s3 := append(/*@ perm(1/2), @*/ s1, s2...)
 s4 := append(/*@ perm(1/2), @*/ s0, 3, 4, 5)
-//@ assert forall i int :: {&s3[i]} {&s4[i]} 0 <= i && i < len(s3) ==> s3[i] == s4[i]
+// @ assert forall i int :: {&s3[i]} {&s4[i]} 0 <= i && i < len(s3) ==> s3[i] == s4[i]
 ```
 
 Using the nil slice we could refactor the `make` and `copy` to the single line `s0 := append([]int(nil), s1...)` .
 As opposed to the nil pointer, we can have permission to the nil slice:
 ``` go
 var s2 []int
-//@ assert acc(s2)
-//@ assert s2 == nil && len(s2) == 0 && cap(s2) == 0
+// @ assert acc(s2)
+// @ assert s2 == nil && len(s2) == 0 && cap(s2) == 0
 ```
 
 In Go it is possible to append a slice to itself.
@@ -147,7 +147,7 @@ Again, Gobra's contract of `copy` forbids this:
 ``` go
 s := []int{1, 2, 3, 4}
 s1 := s[1:]
-//@ assert acc(s1)
+// @ assert acc(s1)
 copy(s, s1 /*@, perm(1/2) @*/)
 // fmt.Println(s) // [2 3 4 4]
 ```
@@ -159,13 +159,13 @@ Permission to copy(s0, s1 , perm(1/2) ) might not suffice.
 ## Range clause for slices
 Gobra supports the `range` clause for slices:
 ``` go
-//@ requires len(s) > 0
-//@ preserves acc(s)
-//@ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+// @ requires len(s) > 0
+// @ preserves acc(s)
+// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
-	//@ invariant acc(s)
-	//@ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
-	//@ invariant forall k int :: {&s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
+	// @ invariant acc(s)
+	// @ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
+	// @ invariant forall k int :: {&s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
 	for i, e := range s /*@ with i0 @*/ {
 		s[i] = e + n
 	}
@@ -185,16 +185,16 @@ But no permission is held to `&s[-1]`.
 
 Alternatively we could handle the empty case specifically:
 ``` go
-//@ preserves acc(s)
-//@ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
+// @ preserves acc(s)
+// @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
 func addToSlice(s []int, n int) {
 	if len(s) == 0 {
 		return
 	}
 	// ...
-	~//@ invariant acc(s)
-	~//@ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
-	~//@ invariant forall k int :: {&s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
+	~// @ invariant acc(s)
+	~// @ invariant forall k int :: {&s[k]} i0 <= k && k < len(s) ==> s[k] == old(s[k])
+	~// @ invariant forall k int :: {&s[k]} 0 <= k && k < i0 ==> s[k] == old(s[k]) + n
 	~for i, e := range s /*@ with i0 @*/ {
 		~s[i] = e + n
 	~}
@@ -220,11 +220,11 @@ pure func isSliceSorted(s []int) bool {
 }
 @*/
 
-//@ preserves acc(s, 1/2)
-//@ preserves isSliceSorted(s)
-//@ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-//@ ensures found ==> 0 <= idx && idx < len(s) && s[idx] == value
-//@ ensures !found ==> forall i int :: {&s[i]} 0 <= i && i < len(s) ==> s[i] != value
+// @ preserves acc(s, 1/2)
+// @ preserves isSliceSorted(s)
+// @ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
+// @ ensures found ==> 0 <= idx && idx < len(s) && s[idx] == value
+// @ ensures !found ==> forall i int :: {&s[i]} 0 <= i && i < len(s) ==> s[i] != value
 func BinarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
 	if len(s) == 0 {
 		return false /*@ , -1 @*/
@@ -232,12 +232,12 @@ func BinarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
 	low := 0
 	high := len(s) - 1
 	mid := 0
-	//@ invariant acc(s, 1/2)
-	//@ invariant 0 <= low && low <= high && high < len(s)
-	//@ invariant 0 <= mid && mid < len(s)
-	//@ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-	//@ invariant forall i int :: {&s[i]} 0 <= i && i < low ==> s[i] < value
-	//@ invariant forall i int :: {&s[i]} high < i && i < len(s) ==>  value < s[i]
+	// @ invariant acc(s, 1/2)
+	// @ invariant 0 <= low && low <= high && high < len(s)
+	// @ invariant 0 <= mid && mid < len(s)
+	// @ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
+	// @ invariant forall i int :: {&s[i]} 0 <= i && i < low ==> s[i] < value
+	// @ invariant forall i int :: {&s[i]} high < i && i < len(s) ==>  value < s[i]
 	for low < high {
 		mid = (low + high) / 2
 		if s[mid] == value {
@@ -253,13 +253,13 @@ func BinarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
 
 func BinarySearchClient() {
 	xs := []int{1, 5, 7, 11, 23, 43, 53, 123, 234, 1024}
-	//@ assert isSliceSorted(xs)
-	//@ assert xs[3] == 11
+	// @ assert isSliceSorted(xs)
+	// @ assert xs[3] == 11
 	found /*@, idx @*/ := BinarySearch(xs, 11)
-	//@ assert found && xs[idx] == 11
+	// @ assert found && xs[idx] == 11
 
 	found /*@, idx @*/ = BinarySearch(xs, 12)
-	//@ assert !found
+	// @ assert !found
 }
 ```
 
@@ -267,8 +267,8 @@ We had to add `assert xs[3] == 11` in order to `assert found` after the first ca
 Without this, we can only assert the following:
 ``` go
 xs := []int{1, 5, 7, 11, 23, 43, 53, 123, 234, 1024}
-//@ assert isSliceSorted(xs)
+// @ assert isSliceSorted(xs)
 found /*@, idx @*/ := BinarySearch(xs, 11)
-//@ assert found ==> xs[idx] == 11
-//@ assert !found ==> forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> xs[i] != 11
+// @ assert found ==> xs[idx] == 11
+// @ assert !found ==> forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> xs[i] != 11
 ```

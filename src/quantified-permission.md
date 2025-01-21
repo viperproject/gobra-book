@@ -21,7 +21,7 @@ In the above example this (injective) mapping is from `i` to `&s[i]`.
 Gobra reports an error if it cannot prove this.
 In the following example, the postcondition of `getPointers` does not specify that the returned pointers are all distinct.
 ``` go
-//@ ensures acc(ps[0],1/2) && acc(ps[1],1/2) && acc(ps[2],1/2)
+// @ ensures acc(ps[0],1/2) && acc(ps[1],1/2) && acc(ps[2],1/2)
 func getPointers() (ps [3]*int) {
 	a /*@@@*/, b /*@@@*/, c /*@@@*/ := 0, 1, 2
 	return [...]*int{&a, &b, &c}

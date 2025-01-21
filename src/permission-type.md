@@ -19,8 +19,8 @@ Note that for access predicates we can and have been using the shorthand `acc(r,
 type rect struct {
 	width, height int
 }
-//@ preserves acc(r, 1/2)
-//@ ensures a == r.width * r.height
+// @ preserves acc(r, 1/2)
+// @ ensures a == r.width * r.height
 func (r *rect) area() (a int) {
 	return r.width * r.height
 }
@@ -43,19 +43,19 @@ We can abstract the exact permission amount by introducing a ghost parameter of 
 ~type rect struct {
 	~width, height int
 ~}
-//@ requires p > 0
-//@ preserves acc(r, p)
-//@ ensures a == r.width * r.height
+// @ requires p > 0
+// @ preserves acc(r, p)
+// @ ensures a == r.width * r.height
 func (r *rect) area(/*@ghost p perm @*/) (a int) {
 	return r.width * r.height
 }
 
-//@ requires acc(r, 1/4)
-//@ requires r.width == 0
+// @ requires acc(r, 1/4)
+// @ requires r.width == 0
 func client(r *rect) {
 	// a1 := r.area()
 	a1 := r.area(/*@1/8@*/)
-	//@ assert a1 == 0
+	// @ assert a1 == 0
 }
 ```
 

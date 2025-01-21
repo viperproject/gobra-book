@@ -44,10 +44,10 @@ type Coord struct {
 	x, y int
 }
 
-//@ requires acc(&c.x) && acc(&c.y)
-//@ ensures acc(&c.x) && acc(&c.y)
-//@ ensures res.x == old(c.x) * factor
-//@ ensures res.y == old(c.y) * factor
+// @ requires acc(&c.x) && acc(&c.y)
+// @ ensures acc(&c.x) && acc(&c.y)
+// @ ensures res.x == old(c.x) * factor
+// @ ensures res.y == old(c.y) * factor
 func (c *Coord) Scale(factor int) Coord {
 	return Coord{x: c.x * factor, y: c.y * factor}
 }
@@ -55,7 +55,7 @@ func client1() {
 	c := Coord{1, 2}
 	// c /*@@@*/ := Coord{1, 2} // fix: mark c shared
 	v := c.Scale(5)
-	//@ assert v == Coord{5, 10}
+	// @ assert v == Coord{5, 10}
 }
 ```
 ``` text
@@ -78,7 +78,7 @@ It is not possible to mark parameters with `@`, as the information on whether a 
 
 ``` go
 func client3(c1, c2 Coord) {
-	//@ share c1, c2
+	// @ share c1, c2
 	v1 := c1.Scale(5)
 	v2 := c2.Scale(-1)
 }

@@ -8,20 +8,20 @@ For example, we could make `sum` more versatile and allow it to be called in cas
 ~type pair struct {
 ~	left, right int
 ~}
-//@ requires acc(p, _)
-//@ ensures acc(p, _)
-//@ ensures s == p.left + p.right
-//@ ensures p.left == old(p.left) && p.right == old(p.right)
+// @ requires acc(p, _)
+// @ ensures acc(p, _)
+// @ ensures s == p.left + p.right
+// @ ensures p.left == old(p.left) && p.right == old(p.right)
 func (p *pair) sum() (s int) {
 	return p.left + p.right
 }
 func client() {
 	p := &pair{3, 5}
 	res := p.sum()
-	//@ assert p.left == 3 && p.right == 5
+	// @ assert p.left == 3 && p.right == 5
 	p.left = p.right  // Error
 	p.right =  res
-	//@ assert p.left == 5 && p.right == 8
+	// @ assert p.left == 5 && p.right == 8
 }
 ```
 ``` text
