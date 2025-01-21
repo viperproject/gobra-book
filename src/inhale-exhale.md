@@ -1,4 +1,4 @@
-# Inhaling and Exhaling
+# Inhaling and exhaling
 
 Permissions can be manually added by inhaling and removed by exhaling.
 This can be useful for debugging but should not be needed for normal verification purposes.

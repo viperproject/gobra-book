@@ -1,4 +1,4 @@
-# Addressability, `@` and Sharing
+# Addressability, `@` and sharing
 
 Variables are called _shared_ if their address is taken[^1].
 Gobra requires us to mark variables as shared explicitly.
@@ -7,7 +7,7 @@ We distinguish _shared arrays_ and _shared structs_ from their _exclusive_ count
 Since if the address of an array or struct is never taken, we do not have to worry about data races, and reasoning about them is much easier.
 
 
-## Shared Variables with `@`
+## Shared variables with `@`
 
 Variables are marked as _shared_ by appending the ampersand symbol to a variable name.
 For a variable `a` we either write `a /*@@@*/` using an inline comment or equivalently `a@` in `.gobra` files:

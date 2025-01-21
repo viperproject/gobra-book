@@ -1,4 +1,4 @@
-# Pure Functions and Permissions
+# Pure functions and permissions
 
 > Pure functions implicitly return all permissions mentioned in the precondition.
 

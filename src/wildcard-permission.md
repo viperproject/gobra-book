@@ -1,4 +1,4 @@
-# Wildcard Permission
+# Wildcard permission
 
 The wildcard permission `_` that stands for an arbitrary positive permission amount (e.g. `acc(p, _)`).
 It enables reading but not writing.

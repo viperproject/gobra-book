@@ -119,7 +119,7 @@ ensures x1 != x2
 func lemma(x1, x2 *int) {}
 ```
 
-## Access Predicates are not duplicable
+## Access predicates are not duplicable
 In classical logic, if the proposition \\( P \\) holds then clearly the proposition \\( P \land P\\) holds as well.
 For assertions containing access predicates, this does no longer hold.
 Consider `acc(p, 1/2)` which denotes read permission.

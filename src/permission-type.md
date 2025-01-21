@@ -1,4 +1,4 @@
-# Permission Type and Parameter
+# Permission type and parameter
 
 The type for permissions in Gobra is `perm`.
 We can convert a fraction to a permission and do calculations with it: 

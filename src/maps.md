@@ -59,7 +59,7 @@ func client() {
 ```
 -->
 
-## Map Range
+## Range clause for maps
 Range loops iterate over the keys and values for a map.
 It is necessary to add a `with` clause (e.g. `range m /*@ with visited @*/`).
 The ghost variable `visited` is a mathematical set (properly introduced in the next chapter) and contains the keys that have been visited already.

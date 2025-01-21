@@ -72,7 +72,7 @@ func client2() {
 }
 ```
 
-## Copy and Append
+## `copy` and `append`
 Go includes the `copy` and `append` built-in functions for common slice operations.
 
 We give the contracts for `copy` and `append` for a generic type `T` (Gobra does not yet support generics).
@@ -156,7 +156,7 @@ ERROR Precondition of call copy(s, s1 , perm(1/2) ) might not hold.
 Permission to copy(s0, s1 , perm(1/2) ) might not suffice.
 ```
 
-## Slice Range
+## Range clause for slices
 Gobra supports the `range` clause for slices:
 ``` go
 //@ requires len(s) > 0
@@ -201,7 +201,7 @@ func addToSlice(s []int, n int) {
 ~}
 ```
 
-## Binary Search
+## Binary search over slices
 We conclude this section by returning to the binary search example.
 Now we can `BinarySearch` sorted slices of arbitrary length for a target value.
 This version is also more efficient as no arrays have to be copied around, with the drawback of having to specify permissions.

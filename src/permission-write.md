@@ -150,7 +150,7 @@ func swap(x *int, y *int) {
 We have simplified the specification significantly and the client can now use swap also in cases where `x` and `y` are aliases.
 This gives us the...
 
-## Final Version of `swap`
+## Final version of `swap`
 ``` go
 //@ preserves acc(x)
 //@ preserves x != y ==> acc(y)

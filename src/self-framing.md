@@ -1,4 +1,4 @@
-# Self-Framing Assertions
+# Self-framing assertions
 
 Assertions in Gobra must be _well-defined_.
 This includes the fact that [array indices](./basic-array.md) in specifications must be in bounds.

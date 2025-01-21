@@ -1,4 +1,4 @@
-# Quantified Permission
+# Quantified permissions
 
 Access predicates can occur within the body of a `forall` quantifier[^1] .
 For example:
@@ -14,7 +14,7 @@ Both arrays and structs have a fixed number of elements (or fields)
 whereas a slice of type `[]T` does not contain information regarding its length.
 *Quantified Permissions* allow us to handle dynamic sizes [^2].
 
-## Injective Resources
+## Injective resources
 
 As a requirement, the mapping between instances of the quantifier and the receiver expression must be injective.
 In the above example this (injective) mapping is from `i` to `&s[i]`.
