@@ -1,6 +1,6 @@
 # Addressability, `@` and Sharing
 
-Variables are called _shared_ if their address is taken.
+Variables are called _shared_ if their address is taken[^1].
 Gobra requires us to mark variables as shared explicitly.
 This should ensure that the programmer is aware, in which cases, Gobra employs reasoning about permissions.
 We distinguish _shared arrays_ and _shared structs_ from their _exclusive_ counterparts.
@@ -84,5 +84,5 @@ func client3(c1, c2 Coord) {
 }
 ```
 
-## Further Reading
-In Go, there is the notion of [addressability](https://go.dev/ref/spec#Address_operators) which clearly defines which operands are addressable.
+
+[^1]: In Go, there is the notion of [addressability](https://go.dev/ref/spec#Address_operators) which clearly defines which operands are addressable.
