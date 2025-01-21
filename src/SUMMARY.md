@@ -19,4 +19,15 @@
 - [Termination](./termination.md)
 - [Ghost Code and Pure Functions](./basic-ghost-pure.md)
 
+# Abstraction and Information Hiding
+- [Introduction](./3-introduction.md)
+- [Predicates, `fold`, and `unfold`](./3-predicates.md)
+- [Abstracting memory access with predicates](./3-abstracting-memory.md)
+- [`unfolding` predicates](./3-unfolding.md)
+- [Predicates and fractional permissions](./3-predicates-fractional.md)
+- [Abstraction functions](./3-abstraction-view.md)
+- [Predicates as termination measures](./3-predicate-termination.md)
+- [Full linked list example](./3-full-example.md)
+- [Abstract predicates]()
+
 # Advanced topics

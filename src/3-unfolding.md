@@ -1,0 +1,9 @@
+# `unfolding` predicates
+
+The `unfolding P in E` statement temporarily unfolds the predicate instance `P` in a pure expression `E`, and folds it back.
+
+For example, the `pure` function `Head` uses `unfolding` in its body in order to access `l.Value`:
+``` go
+{{#include listMem.go:head}}
+```
+Due to the syntactical restrictions of `pure` functions, there is no other way of using the `fold` and `unfold` statements instead.
