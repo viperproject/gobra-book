@@ -2,9 +2,10 @@
 
 Permissions allow us to reason about mutable data.
 Reading and writing to a location is permitted based on the permission amount held.
+Write access is _exclusive_, i.e. permission to write to a location can only be held once.
 Permissions can be transferred between functions/methods, loop iterations, and are gained on allocation.
 
-This is crucial for concurrency, as a short teaser, Gobra can reject the following program with a data race:
+This is crucial for concurrency, as a short teaser, Gobra can reject the following program with a _data race_, i.e. concurrent access to the same memory location with at least one modifying access:
 ``` go
 func inc(p *int) {
 	*p = *p + 1
@@ -16,12 +17,13 @@ func driver(p *int) {
 }
 ```
 
-Permissions are held to *resources*.
-The following chapter will also introduce access to predicates but for now, we are concerned only with pointers.
+Permissions are held for _resources_.
+Pointers are the first kind of resource we introduce.
+<!-- The following chapter will also introduce access to predicates but for now, we are concerned only with pointers. -->
 
 For a pointer to an integer `x *int`,
 the accessibility predicate `acc(x)` denotes write (and read) access to `x`.
-Having access `acc(x)` to a pointer `x` implies `x != nil` and that reading (e.g. `tmp := *x`) and writing (e.g. `*x = 1`) does not panic.
+Having access `acc(x)` to a pointer `x` implies `x != nil`, so reading (e.g. `tmp := *x`) and writing (e.g. `*x = 1`) do not panic.
 Let us illustrate this with a function that swaps the values of two integer pointers:
 ``` go
 func swap(x *int, y *int) {
@@ -30,7 +32,7 @@ func swap(x *int, y *int) {
 	*y = tmp
 }
 ```
-Go provides memory safety and does not try to access invalid memory.
+Go provides memory safety and prevents access to invalid memory.
 Similar to out-of-bounds array indices, a runtime error occurs when we call `swap(nil, x)`:
 ``` text
 panic: runtime error: invalid memory address or nil pointer dereference
@@ -44,24 +46,26 @@ main.main()
 exit status 2
 ```
 Gobra can detect this statically.
-Without access yet, we get the error:
+Without holding access yet, we get the error:
 ``` text
 Assignment might fail. 
 Permission to *x might not suffice.
 ```
 The permissions a function requires must be specified in the precondition.
-Since `swap` modifies both `x` and `y` we write:
+Since `swap` modifies both `x` and `y`, we write:
 ``` go
 // @ requires acc(x) && acc(y)
 func swap(x *int, y *int) {
-~	tmp := *x
-~	*x = *y
-~	*y = tmp
+	tmp := *x
+	*x = *y
+	*y = tmp
 }
 
 func client() {
 	x := new(int)
 	y := new(int)
+    // @ assert acc(x)
+    // @ assert acc(y)
     *x = 1
     *y = 2
 	swap(x, y)
@@ -74,35 +78,57 @@ ERROR Assert might fail.
 Permission to *x might not suffice.
 ```
 
-In our example, permissions `acc(x)` and `acc(y)` are obtained in `client` when they allocated with `new`,
+In our example, permissions `acc(x)` and `acc(y)` are obtained in `client` when they are allocated with `new`,
 then transferred when calling `swap(x, y)`.
+With `assert acc(x)`, we can check whether the permission is held.
 We add the postcondition `acc(x) && acc(y)` to transfer the permissions back to the caller when the function returns.
 Otherwise the permissions are leaked (lost).
 
-With `old(*y)` we can use the value of `*y` from the state at the beginning of the function call before any modifications.
+## `old` state
+To specify the behavior of `swap`, we have to refer to the values `*x` and `*y` before any modifications.
+With `old(*y)`, we can use the value of `*y` from the state at the beginning of the function call.
 ``` go
 // @ requires acc(x) && acc(y)
 // @ ensures acc(x) && acc(y)
 // @ ensures *x == old(*y) && *y == old(*x)
 func swap(x *int, y *int) {
-	~tmp := *x
-	~*x = *y
-	~*y = tmp
+	tmp := *x
+	*x = *y
+	*y = tmp
 }
 ```
 
-## Aliasing
-Clients may want to call `swap` with the same argument `swap(x, x)`.
+## Exclusivity and aliasing
+Clients may want to call `swap` with the same argument, e.g. `swap(x, x)`.
 So far, our specification forbids this and we get the error:
+``` go
+// @ requires acc(x) && acc(y)
+// @ ensures acc(x) && acc(y)
+// @ ensures *x == old(*y) && *y == old(*x)
+func swap(x *int, y *int) {
+	tmp := *x
+	*x = *y
+	*y = tmp
+}
+func client2() {
+	x := new(int)
+	y := new(int)
+    *x = 1
+    *y = 2
+	swap(x, x)
+	// @ assert *x == 1
+}
+```
 ``` go
 Precondition of call swap(x, x) might not hold. 
 Permission to y might not suffice.
 ```
 Having `acc(x) && acc(y)` implies `x != y` since we are not allowed to have write access to the same location.
+As a result, the precondition prevents us from calling `swap(x, x)`.
 
-One possibility is to perform a case distinction on `x == y`.
+One possibility is to perform a case distinction in the specification on `x == y`.
 While this works, the resulting specs are verbose, and we better refactor them to a reduced form.
-``` go
+``` go ,bad
 // @ requires x == y ==> acc(x)
 // @ requires x != y ==> acc(x) && acc(y)
 // @ ensures x == y ==> acc(x)
@@ -115,27 +141,21 @@ func swap(x *int, y *int) {
 	*y = tmp
 }
 ```
-
-1. It is a common pattern that a function requires and ensures the same permissions. Here we have
+1. `acc(x)` is needed in any case, hence it can be factored out
     ``` go
     // @ requires x == y ==> acc(x)
+    // @ requires x != y ==> acc(x) && acc(y)
     // @ ensures x == y ==> acc(x)
-    ```
-    We can replace this with a single line using `preserves`, which is syntactical sugar for the above.
-    ``` go
-    // @ preserves x == y ==> acc(x)
-    ```
-2. `acc(x)` is needed in any case, hence it can be factored out
-    ``` go
-    // @ preserves x == y ==> acc(x)
-    // @ preserves x != y ==> acc(x) && acc(y)
+    // @ ensures x != y ==> acc(x) && acc(y)
     ```
     becomes
     ``` go
-    // @ preserves acc(x)
-    // @ preserves x != y ==> acc(y)
+    // @ requires acc(x)
+    // @ requires x != y ==> acc(y)
+    // @ ensures acc(x)
+    // @ ensures x != y ==> acc(y)
     ```
-3. Simplify the postconditions
+2. Simplify the postconditions
     ``` go
     // @ ensures x != y ==> *x == old(*y) && *y == old(*x)
     // @ ensures x == y ==> *x == old(*x)
@@ -146,9 +166,24 @@ func swap(x *int, y *int) {
     ```
     where the assertion is unchanged for the case `x != y` and we see it is equivalent for the case `x == y` by substituting `y` with `x`.
 
+In the following subsection we additionally reduce the specification.
+At the end of this section you can find the final contract which allows calling swap even in cases where `x` and `y` are aliases.
 
-We have simplified the specification significantly and the client can now use swap also in cases where `x` and `y` are aliases.
-This gives us the...
+## Preserving memory access (`preserves`)
+It is a common pattern that a function requires and ensures the same permissions.
+In our example, `acc(x)` and `x != y ==> acc(y)` is both required and ensured:
+``` go
+// @ requires acc(x)
+// @ requires x != y ==> acc(y)
+// @ ensures acc(x)
+// @ ensures x != y ==> acc(y)
+```
+We can simplify this using the keyword `preserves`, which is syntactical sugar for the above.
+``` go
+// @ preserves acc(x)
+// @ preserves x != y ==> acc(y)
+```
+
 
 ## Final version of `swap`
 ``` go
@@ -160,7 +195,7 @@ func swap(x *int, y *int) {
 	*x = *y
 	*y = tmp
 }
-func client() {
+func client2() {
 	x := new(int)
 	y := new(int)
     *x = 1
