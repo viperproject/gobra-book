@@ -1,14 +1,11 @@
 # Pure functions and permissions
 
-> Pure functions implicitly return all permissions mentioned in the precondition.
-
-Recall that [pure functions](./basic-ghost-pure.md)  have no side effects.
-Hence they should not leak any permissions.
-Pure functions could require write permission,
-but they cannot actually write as this would be a side effect.
+Recall that [pure functions](./basic-ghost-pure.md) have no side effects.
+Hence, they must not leak any permissions and implicitly return all permissions mentioned in the precondition.
+While pure functions can require write permission, they cannot actually modify values, as this would be a side effect.
 
 The `pure` and `ghost` function `allZero` returns whether all elements of an array behind a pointer are zero.
-After allocation with `new`, this can be asserted.
+After allocation with `new`, the array is filled with zero values, and this can be asserted.
 
 ``` go
 package ghostpure
@@ -31,5 +28,8 @@ func client() {
 }
 ```
 
-Currently, we have to manually dereference the array pointer before indexing.
-(TODO simplify after [#805](https://github.com/viperproject/gobra/issues/805))
+
+> Pure functions implicitly return all permissions mentioned in the precondition.
+
+<!-- Currently, we have to manually dereference the array pointer before indexing.
+TODO simplify after [#805](https://github.com/viperproject/gobra/issues/805)) -->
