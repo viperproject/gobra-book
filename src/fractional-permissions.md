@@ -144,7 +144,7 @@ Consider `acc(p, 1/2)`, which denotes read permission, and `acc(p, 1/2) && acc(p
 
 [^1]: As a simple illustration; for more please refer to the chapter on concurrency.
 With the permission `acc(p, 1)` we can start two goroutines requiring `acc(p, 1/2)`.
-There is no datarace, as the value of `p` is only concurrently read but not modified.
+There is no data race, as the value of `p` is only concurrently read but not modified.
 ``` go
 // @ requires acc(p, 1/2)
 func reader(p *int) {
