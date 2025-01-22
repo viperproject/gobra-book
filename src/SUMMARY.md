@@ -29,5 +29,6 @@
 - [Pure functions and permissions](./permission-pure.md)
 - [Slices](./slices.md)
 - [Maps](./maps.md)
+- [Variadic functions]()
 
 # Advanced topics
