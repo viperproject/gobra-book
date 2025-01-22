@@ -5,9 +5,9 @@ Go provides the built-in map data structure implementing a hash table.
 watched := make(map[string]bool, 10) // optional capacity
 // @ assert acc(watched) && len(watched) == 0
 ```
-Permission is obtained from `make`.
+Permission to a map is obtained on allocation, e.g. from `make`.
 The accessibility predicate `acc(watched)` is for the entire map.
-Individual elements like in slices are not addressable.
+Individual elements, as in slices, are not addressable.
 
 Holding write permissions, we can add entries.
 In specifications, we can check with `in` if a key is contained in the map.
@@ -18,7 +18,7 @@ watched["Blade Runner"] = true
 
 The values can be retrieved with their keys.
 Note that key elements must be comparable.
-For example one cannot use other maps, slices, and functions as keys.
+For example, one cannot use other maps, slices, and functions as keys.
 ``` go
 elem, ok := watched["Blade Runner"]
 // @ assert ok && elem
@@ -41,9 +41,9 @@ r, ok := rating["Dune"]
 rotten := new(map[string]int)
 // @ assert len(*rotten) == 0
 ```
-We can read from the `nil` map like from an empty map, also without permission.
-For functions reading from a map `m`,
-the precondition `m != nil ==> acc(m, 1/2)` is commonly used to support both `nil` and non-nil maps.
+We can read from the `nil` map as we would from an empty map, even without permission.
+For functions that read from a map `m`,
+the precondition `m != nil ==> acc(m, 1/2)` is typically used to support both `nil` and non-nil maps.
 
 <!--
 ``` go
@@ -61,11 +61,11 @@ func client() {
 
 ## Range clause for maps
 Range loops iterate over the keys and values for a map.
-It is necessary to add a `with` clause (e.g. `range m /*@ with visited @*/`).
-The ghost variable `visited` is a mathematical set (properly introduced in the next chapter) and contains the keys that have been visited already.
-In the following snippet, we build a map literal, with keys representing identifiers and `Movie`s as values.
+A `with` clause must be added (e.g. `range m /*@ with visited @*/`).
+The ghost variable `visited` is a mathematical set (introduced in the next chapter) that contains the keys already visited.
+In the following snippet, we build a map literal, with keys representing identifiers and `Movie` structs as values.
 The function `avgRating` computes the average rating of all movies in a map.
-We focus on the loop and omit a full functional specification.
+We focus on the loop and omit the full functional specification for simplicity.
 
 <!-- TODO change after https://github.com/viperproject/gobra/issues/808 -->
 
@@ -100,15 +100,18 @@ func critique() {
 }
 ```
 
-Go does not specify the iteration order over maps [^1].
-An entry added during iteration may be produced or skipped.
-Gobra does not allow the mutation of maps while iterating.
+Go does not specify the iteration order over maps (see [^1]).
+An entry added during iteration may either be produced or skipped.
+Gobra prohibits the mutation of maps while iterating.
+<!-- TODO connect/motivate -->
 ``` go
-~package main
-~type Movie struct {
-	~name   string
-	~rating int
-~}
+package main
+
+type Movie struct {
+	name   string
+	rating int
+}
+
 // @ requires acc(m)
 func produceSequels(m map[int]Movie) {
 	// @ invariant acc(m)
@@ -139,8 +142,8 @@ map[2:{Jaws 6} 3:{Cars 5} 4:{Jaws2 4} 6:{Cars2 3} 12:{Cars22 1} 24:{Cars222 -1} 
 
 ```
 
-Mutation is prevented by by exhaling a small constant permission amount to the map before the loop.
-As a consequence, wildcard permission does not suffice:
+Mutation is prevented by exhaling a small constant permission amount to the map before the loop.
+As a consequence, the wildcard permission amount is insufficient:
 ``` go
 // @ requires acc(m, _)
 // @ requires len(m) > 0
@@ -160,7 +163,7 @@ Permission to m might not suffice.
 ```
 
 ## `delete` and `clear`
-Gobra does not support Go's built-in functions `delete` to remove map entries and `clear` to remove all map entries.
+Gobra does not support Go's built-in function `delete` for removing map entries or `clear` for removing all map entries.
 
 
 [^1]: [https://go.dev/ref/spec#For_range](https://go.dev/ref/spec#For_range) 
