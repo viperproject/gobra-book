@@ -1,11 +1,12 @@
 # Slices
 
-Slices provide a useful abstraction to a access a contiguous sequence of data.
-A slice has a length, a capacity and use an underlying array as storage.
+Slices provide an abstraction over a contiguous sequence of data.
+A slice has a length, a capacity, and uses an underlying array as storage.
 
-In the following example, a constant `n` is added to a slice.
-The functions `len` and `cap` can be used in contracts.
-Access to slice elements is specified using quantified permissions.
+In the following example, a constant `n` is added to all elements of a slice.
+Note that the functions `len` and `cap` may be used in contracts.
+Access to slice elements is specified using [quantified permissions](./quantified-permission.md).
+We obtain permission to the slice elements on allocation, here with `make`.
 Note that the loop must preserve the permissions with an invariant.
 ``` go
 // @ preserves forall k int :: {&s[k]} 0 <= k && k < len(s) ==> acc(&s[k])
@@ -27,39 +28,52 @@ func client() {
 	// @ assert forall i int :: {&s[i]} 0 <= i && i < 4 ==> s[i] == 1
 }
 ```
-In the above example, we obtain permission to the slice elements on allocation by making them.
-We obtain permission to the slice elements on allocation,
-in the above example by making it.
+
+After initialization with a literal, we also gain permission.
+``` go
+s1 := []int{0, 1, 1, 2, 3, 5}
+// @ assert forall i int :: {&s1[i]} 0 <= i && i < len(s1) ==> acc(&s1[i])
+```
+
+## Syntactic sugar for slice access
+For a slice `s1`, `acc(s1)` is syntactic sugar for:
+``` go
+forall i int :: {&s1[i]} 0 <= i && i < len(s1) ==> acc(&s1[i])
+```
+The `assert` statements are equivalent:
 ``` go
 s1 := []int{0, 1, 1, 2, 3, 5}
 // @ assert forall i int :: {&s1[i]} 0 <= i && i < len(s1) ==> acc(&s1[i])
 // @ assert acc(s1)
 ```
-After initialization with a literal, we also gain permission.
-The second assertion is syntactic sugar for the first.
+
 ## Slicing
 A slice can be created from another slice or array by slicing it, in general with an expression of the form `a[i:j:k]`.
-To avoid panics, as part of the contract of the slicing operation, Gobra checks that `0 <= i && i <= j && j <= k && k <= cap(a)`.
+To check slicing does not panic, Gobra checks as part of the contract of the slicing operation that `0 <= i && i <= j && j <= k && k <= cap(a)` holds.
 
-We can create two overlapping slices `l` and `r` but run into a permission error:
+We may create two overlapping slices `l` and `r` but run into a permission error:
 ``` go
-~func client2() {
+func overlappingFail() {
     s := make([]int, 3)
     l := s[:2]
     r := s[1:]
     addToSlice(l, 1)
-    addToSlice(r, 1)
-~}
+    addToSlice(r, 1) // error
+}
 ```
 ``` go
 ERROR Assert might fail. 
 Permission to r might not suffice.
 ```
-While we should not be able to assert `acc(l) && acc(r)` (why?),
-to call `addToSlice` we only need permission for either of the slices.
-In order to get permission for the slice `r` we must explicitly assert how the addresses to the elements of `r` relate to those of `s`.
+While we cannot assert `acc(l) && acc(r)`,
+to call `addToSlice` we only need permission for either of the slices, and it should be possible to assert `acc(l)` and `acc(r)` separately.
+In order to get permission for the slice `r`, we must explicitly assert how the addresses to the elements of `r` relate to those of `s`:
+``` gobra
+assert forall i int :: {&r[i]} 0 <= i && i < len(r) ==> &r[i] == &s[i+1]
+```
+With this proof annotation, the function verifies:
 ``` go
-func client2() {
+func overlappingSucceed() {
 	s := make([]int, 3)
 	l := s[:2]
 	r := s[1:]
@@ -73,11 +87,11 @@ func client2() {
 ```
 
 ## `copy` and `append`
-Go includes the `copy` and `append` built-in functions for common slice operations.
+Go includes the `copy` and `append` built-in functions.
 
 We give the contracts for `copy` and `append` for a generic type `T` (Gobra does not yet support generics).
-In Gobra we must pass an additional ghost parameter for the permission amount required to read the elements of `src`.
-This allows the functions generally to be used independent of the exact permission amount.
+In Gobra, we must pass an additional ghost parameter that specifies the permission amount required to read the elements of `src`.
+This allows the functions to generally be used independent of the exact permission amount
 ``` gobra
 requires p > 0
 requires forall i int :: {&src[i]} 0 <= i && i < len(src) ==> acc(&src[i])
@@ -90,11 +104,12 @@ ensures forall i int :: {&res[i]} len(src) <= i && i < len(res) ==> res[i] === x
 func append[T any](ghost p perm, src []T, xs ...T) (res []T)
 ```
 
-Note that since `append` is variadic, the permission must be the first argument.
-The permission to `src` is lost as the underlying array could be reallocated if the capacity is not sufficient to append the new elements.
-`s = append(s, 42)` is a common pattern in Go and this way permissions to `s` are preserved.
+Note that since `append` is variadic, the permission amount must be the first argument.
+The permission to `src` is lost, as the underlying array could be reallocated if the capacity is not sufficient to append the new elements.
+`s = append(s, 42)` is a common pattern in Go, and this way permissions to `s` are preserved.
 
-`copy` copies the elements from `src` to `dst`, stops when the end of the shorter slice is reached and returns the number of elements copied.
+`copy` copies the elements from `src` to `dst`.
+It stops when the end of the shorter slice is reached and returns the number of elements copied.
  ``` gobra
 requires 0 < p
 requires forall i int :: {&dst[i]} (0 <= i && i < len(dst)) ==> acc(&dst[i], write)
@@ -107,8 +122,9 @@ ensures forall i int :: {&dst[i]} (0 <= i && i < len(src) && i < len(dst)) ==> d
 ensures forall i int :: {&dst[i]} (len(src) <= i && i < len(dst)) ==> dst[i] === old(dst[i])
 func copy[T any](dst, src []T, ghost p perm) (res int)
  ```
-
-Permissions must be explicitly passed as `perm(1/2)` instead of only `1/2` as is allowed in the access predicate.
+<!-- TODO why, in the permission type section it works with 1/2 only?! -->
+<!-- as is allowed in the access predicate. -->
+The permissions amount must be explicitly passed as `perm(1/2)` instead of only `1/2`.
 This simple example shows the usage of `copy` and `append`:
 ``` go
 s1 := []int{1, 2}
@@ -123,8 +139,8 @@ s4 := append(/*@ perm(1/2), @*/ s0, 3, 4, 5)
 // @ assert forall i int :: {&s3[i]} {&s4[i]} 0 <= i && i < len(s3) ==> s3[i] == s4[i]
 ```
 
-Using the nil slice we could refactor the `make` and `copy` to the single line `s0 := append([]int(nil), s1...)` .
-As opposed to the nil pointer, we can have permission to the nil slice:
+Using the nil slice, we could refactor the `make` and `copy` operations into the single line `s0 := append([]int(nil), s1...)`.
+As opposed to the nil pointer, we may hold permission for the nil slice:
 ``` go
 var s2 []int
 // @ assert acc(s2)
@@ -142,7 +158,7 @@ ERROR Precondition of call append(  perm(1/64),  s1, s1...) might not hold.
 Permission to append(  perm(1/64),  s1, s2...) might not suffice
 ```
 
-Similarly, in Go the behavior of `copy` is independent whether the underlying memory of the slices overlaps.
+Similarly, in Go the behavior of `copy` is independent of whether the underlying memory of the slices overlaps.
 Again, Gobra's contract of `copy` forbids this:
 ``` go
 s := []int{1, 2, 3, 4}
@@ -157,7 +173,8 @@ Permission to copy(s0, s1 , perm(1/2) ) might not suffice.
 ```
 
 ## Range clause for slices
-Gobra supports the `range` clause for slices:
+Gobra supports the `range` clause for slices.
+We refactor the loop in `addToSlice`:
 ``` go
 // @ requires len(s) > 0
 // @ preserves acc(s)
@@ -178,12 +195,11 @@ Otherwise there is the error:
 ERROR Loop invariant might not be established. 
 Permission to s[k] might not suffice.
 ```
-For the case where `len(s) == 0`, `i, e` and `i0` are never assigned to.
-Then the second invariant cannot be established as `i0` is arbitrary and
-`s[k]` could be instantiated with `s[-1]`.
-But no permission is held to `&s[-1]`.
+For the case where `len(s) == 0`, `i, e` and `i0` are never assigned values.
+As a result, the second invariant cannot be established because `i0` is arbitrary.
+For example, `s[k]` could be instantiated as `s[-1]`, even though no permission is held for `&s[-1]`.
 
-Alternatively we could handle the empty case specifically:
+Alternatively, we could handle the empty case specifically:
 ``` go
 // @ preserves acc(s)
 // @ ensures forall k int :: {&s[k]} 0 <= k && k < len(s) ==> s[k] == old(s[k]) + n
@@ -198,19 +214,20 @@ func addToSlice(s []int, n int) {
 	~for i, e := range s /*@ with i0 @*/ {
 		~s[i] = e + n
 	~}
-~}
+}
 ```
 
 ## Binary search over slices
-We conclude this section by returning to the binary search example.
-Now we can `BinarySearch` sorted slices of arbitrary length for a target value.
-This version is also more efficient as no arrays have to be copied around, with the drawback of having to specify permissions.
+We conclude this section by revisiting the [binary search example](./loops-binarysearch.md).
+Now we can perform a `BinarySearch` sorted slices of arbitrary length for a target value.
+This version is more efficient because no arrays need to be copied.
 
-The function `BinarySearch` returns whether the value is contained in the slice, together with its index as a ghost return value.
-We write a `pure` and `ghost` function `isSliceSorted` that we can use in the contract of `BinarySearch`.
+We define a `pure` and `ghost` function `isSliceSorted`, to use in the contract of `BinarySearch`.
+Unlike `BinarySearchArr`, we add a condition to handle the empty slice and specify access to the slice elements.
 
 ``` go
 package binarysearchslice
+
 /*@
 ghost
 requires forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
@@ -220,55 +237,47 @@ pure func isSliceSorted(s []int) bool {
 }
 @*/
 
-// @ preserves acc(s, 1/2)
-// @ preserves isSliceSorted(s)
-// @ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-// @ ensures found ==> 0 <= idx && idx < len(s) && s[idx] == value
-// @ ensures !found ==> forall i int :: {&s[i]} 0 <= i && i < len(s) ==> s[i] != value
-func BinarySearch(s []int, value int) (found bool /*@ , ghost idx int @*/) {
+// @ requires forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
+// @ requires isSliceSorted(s)
+// @ ensures forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
+// @ ensures 0 <= idx && idx <= len(s)
+// @ ensures idx > 0 ==> s[idx-1] < target
+// @ ensures idx < len(s) ==> target <= s[idx]
+// @ ensures found == (idx < len(s) && s[idx] == target)
+func BinarySearch(s []int, target int) (idx int, found bool) {
 	if len(s) == 0 {
-		return false /*@ , -1 @*/
+		return 0, false
 	}
 	low := 0
-	high := len(s) - 1
+	high := len(s)
 	mid := 0
-	// @ invariant acc(s, 1/2)
-	// @ invariant 0 <= low && low <= high && high < len(s)
+	// @ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
+	// @ invariant 0 <= low && low <= high && high <= len(s)
 	// @ invariant 0 <= mid && mid < len(s)
-	// @ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> old(s[i]) == s[i]
-	// @ invariant forall i int :: {&s[i]} 0 <= i && i < low ==> s[i] < value
-	// @ invariant forall i int :: {&s[i]} high < i && i < len(s) ==>  value < s[i]
+	// @ invariant low > 0 ==> s[low-1] < target
+	// @ invariant high < len(s) ==> target <= s[high]
 	for low < high {
+		// fmt.Println(low, high, s[:low], s[low:high], s[high:])
 		mid = (low + high) / 2
-		if s[mid] == value {
-			return true /*@, mid @*/
-		} else if s[mid] < value {
+		if s[mid] < target {
 			low = mid + 1
 		} else {
 			high = mid
 		}
 	}
-	return s[low] == value /*@ , low @*/
+	// fmt.Println(low, high, s[:low], s[low:high], s[high:])
+	return low, low < len(s) && s[low] == target
 }
 
-func BinarySearchClient() {
-	xs := []int{1, 5, 7, 11, 23, 43, 53, 123, 234, 1024}
-	// @ assert isSliceSorted(xs)
-	// @ assert xs[3] == 11
-	found /*@, idx @*/ := BinarySearch(xs, 11)
-	// @ assert found && xs[idx] == 11
-
-	found /*@, idx @*/ = BinarySearch(xs, 12)
-	// @ assert !found
+func client() {
+	s := []int{0, 1, 1, 2, 3, 5, 8}
+	i1, found1 := BinarySearch(s, 1)
+	// @ assert found1 && s[i1] == 1 && i1 == 1
+	i2, found2 := BinarySearch(s, 2)
+	// @ assert found2 && s[i2] == 2 && i2 == 3
+	i4, found4 := BinarySearch(s, 4)
+	// @ assert !found4 && i4 == 5
+	i10, found10 := BinarySearch(s, 10)
+	// @ assert !found10 && i10 == len(s)
 }
-```
-
-We had to add `assert xs[3] == 11` in order to `assert found` after the first call.
-Without this, we can only assert the following:
-``` go
-xs := []int{1, 5, 7, 11, 23, 43, 53, 123, 234, 1024}
-// @ assert isSliceSorted(xs)
-found /*@, idx @*/ := BinarySearch(xs, 11)
-// @ assert found ==> xs[idx] == 11
-// @ assert !found ==> forall i int :: {&xs[i]} 0 <= i && i < len(xs) ==> xs[i] != 11
 ```
