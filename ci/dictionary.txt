@@ -93,6 +93,7 @@ sqrt
 strconv
 struct
 structs
+subarray
 subtype
 sumPair
 testPred

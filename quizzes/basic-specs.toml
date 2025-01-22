@@ -14,10 +14,10 @@ What is the verification result of **Program 1**?
 """
 prompt.distractors = [
 	"Verification Succeeds. `square` has no side effects and always returns `a*a`. Hence the assertion passes.",
-	"Timeout. This is a hard problem and can not be solved in reasonable time.",
+	"Timeout. This is a hard problem and cannot be solved in reasonable time.",
 ]
 answer.answer = "Verification Fails. `r==a*a` cannot be established from the postcondition."
-context = "Verification is modular and Gobra does not peek into function definitions."
+context = "Gobra uses modular verification. All we know about functions at call sites is their specification. Here only `r>=0` holds after the call."
 id = "d929ba84-7da1-499d-a4fb-6073b811ee66"
 
 [[questions]]
@@ -63,11 +63,10 @@ func dontCallMe()  {}
 """
 ]
 context = """
-if we never call `dontCallMe` we are fine.
+The rule for preconditions is that they must hold whenever a function is called.
 
-A caller needs to establish `false` in order to call `dontCallMe`
-This is the case for `callMeNeither` since the precondition `x % 2 == 1` and the condition `x % 2 == 0` imply `false`.
-
-The default precondition of `client` is `true`, from which `false` cannot be deduced.
+1. error: `client` has the default precondition `true`. When `dontCallMe` is called, `false` cannot be deduced.
+2. verifies: the precondition `x % 2 == 1` from `callMeNeither` and the branch condition `x % 2 == 0` imply `false`.
+3. verifies: `dontCallMe` is never called, which is fine.
 """
 id = "aa8a36cf-74bb-4ef1-a718-7c104ae9ef74"
