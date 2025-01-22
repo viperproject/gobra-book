@@ -53,6 +53,7 @@ func (c *Coord) Scale(factor int) {
 	c.x = c.x * factor
 	c.y = c.y * factor
 }
+
 func client1() {
 	// c := Coord{1, 2}
 	c /*@@@*/ := Coord{1, 2} // fix: mark c shared

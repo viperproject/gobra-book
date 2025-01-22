@@ -110,6 +110,7 @@ func swap(x *int, y *int) {
 	*x = *y
 	*y = tmp
 }
+
 func client2() {
 	x := new(int)
 	y := new(int)
@@ -195,6 +196,7 @@ func swap(x *int, y *int) {
 	*x = *y
 	*y = tmp
 }
+
 func client2() {
 	x := new(int)
 	y := new(int)

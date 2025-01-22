@@ -1,7 +1,7 @@
 # Self-framing assertions
 
 Assertions in Gobra must be _well-defined_.
-This includes the fact that [array indices](./basic-array.md) in specifications must be in bounds.
+This includes the fact that array indices in specifications must be in bounds.
 Operations like division have conditions under which they are well-defined.
 For `a / b` to be well-defined, `b != 0` must hold.
 In the context of permissions, we get a new requirement that assertions are _self-framing_,
