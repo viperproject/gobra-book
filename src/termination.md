@@ -1,12 +1,12 @@
 # Termination
 
-Having talked about loops, the next thing to address is termination.
+Having discussed loops, the next thing to address is termination.
 Here we look at the termination of loops and recursive functions.
-In general, the problem of proving termination is [undecidable](https://en.wikipedia.org/wiki/Halting_problem).
+In general, proving termination is [undecidable](https://en.wikipedia.org/wiki/Halting_problem).
 However, for functions we write in practice, it is usually not hard to show termination.
-By default, Gobra checks for _partial correctness_, i.e. correctness with respect to specifications _if the function terminates_.
-For _total correctness_, termination and correctness with respect to specifications must be proven.
-To prove termination, Gobra uses _terminates measures_, i.e. expressions that are strictly decreasing and bounded from below.
+By default, Gobra checks for _partial correctness_, i.e., correctness with respect to specifications _if the function terminates_.
+For _total correctness_, both termination and correctness with respect to specifications must be proven.
+To prove termination, Gobra uses _termination measures_, i.e., expressions that are strictly decreasing and bounded from below.
 
 
 ## Partial correctness
@@ -20,15 +20,16 @@ func infiniteZero() res {
     for {}
     return 0
 }
+
 func main() {
     r := infiniteZero()
     assert r == 1
 }
 ```
-When the function `main` is verified, it is not known whether `infiniteZero` terminates.
-But the contract guarantees that when `infiniteZero` returns its postcondition can be asserted.
-Assuming it terminates, we can assert an arbitrary property such as `r == 1`.
-This is fine since if we run the program, this statement will never be reached.
+When the function `main` is verified, it is unknown whether `infiniteZero` terminates.
+However, the contract guarantees that when `infiniteZero` returns, its postcondition holds.
+Assuming it terminates, we can assert an arbitrary property, such as `r == 1`.
+This is fine since, if we run the program, this statement will never be reached.
 
 ## Specifying termination measures with `decreases`
 We can instruct Gobra to check for termination by adding the `decreases` keyword to the specification of a function or a loop.
@@ -64,7 +65,7 @@ We can easily construct a termination measure that decreases instead by subtract
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 // @ decreases
-~func LinearSearch(arr [10]int, target int) (idx int, found bool) {
+func LinearSearch(arr [10]int, target int) (idx int, found bool) {
 	// @ invariant 0 <= i && i <= len(arr)
 	// @ invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
 	// @ decreases len(arr) - i
@@ -97,7 +98,7 @@ Required termination condition might not hold.
 
 ## Termination of recursive functions
 The function `fibonacci` recursively computes the `n`'th iterate of the fibonacci sequence.
-As a termination measure, the parameter `n` is suitable since we call recursively call `fibonacci` with smaller arguments and `n` is bounded from below.
+As a termination measure, the parameter `n` is suitable since we recursively call `fibonacci` with smaller arguments and `n` is bounded from below.
 ``` go
 // @ requires n >= 0
 // @ decreases n
@@ -171,7 +172,7 @@ func client() {
 
 
 The use of the wildcard measure can be justified when termination is proven by other means, for example leveraging a different tool.
-Another use case is _gradual verification_ where it can be useful to assume termination of functions in a code base, that have not yet been verified.
+Another use case is _gradual verification_ where it can be useful to assume termination of functions in a codebase, that have not yet been verified.
 
 <!-- Full Syntax `"decreases" [expressionList] ["if" expression]` -->
 
@@ -179,10 +180,9 @@ Another use case is _gradual verification_ where it can be useful to assume term
 ## Termination of binary search
 Let us look again at the [binary search](./loops-binarysearch.md) example.
 This time we introduce an implementation error:
-`low` is updated as `low = mid` instead of `low = mid + 1`.
-`BinarySearchArr` could loop forever, for example for `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 8)`.
-For readability we only kept the specification relevant for termination checking.
-Without `decreases` the function would still verify since only partial correctness is checked.
+`low` is updated to `low = mid` instead of `low = mid + 1`.
+`BinarySearchArr` could loop forever, for example, with `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 8)`.
+Without `decreases`, the function would still verify since only partial correctness is checked.
 <!-- 
 For example for `N=3`, `BinarySearchArr([N]int{1, 2, 3}, 2)` does not terminate.
 	arr := [N]int{1, 2, 3}

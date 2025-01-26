@@ -14,18 +14,18 @@ We can specify it with the keyword `invariant` before a loop.
 for condition { // ... }
 ```
 
-Similarly to `requires` and `ensures` you can split an invariant on multiple lines.
+Similarly to `requires` and `ensures`, you can split an invariant on multiple lines.
 
-Finding loop invariants, in general, can be pretty hard.
-In the general case, there is no procedure to figure out which invariants are needed in order to verify a program against a specification.
+Finding loop invariants, in general, can be quite hard.
+In the general case, there is no procedure to figure out which invariants are needed to verify a program against a specification.
 Nonetheless, it does get much easier the more you do it, and we hope to show it on a few examples step-by-step.
 
-As a first example, the function `LinearSearch` searches an array for a value `target`.
+As a first example, the function `LinearSearch` searches an array for the value `target`.
 If `target` is found, `idx` shall be its index.
-Otherwise, no element of the array must be equal to `target`.
+Otherwise, no element of the array shall be equal to `target`.
 This function bears similarity to `Contains` from the section on [quantifiers](quantifier.md),
 with the difference that we additionally return the index, which allows us to avoid an existential quantifier.
-Here we will be able to prove the contract for the case `found ==> ....` as well by providing appropriate loop invariants.
+Here, we will be able to prove the contract for the case `found ==> ....` as well by providing appropriate loop invariants.
 
 ``` go
 package linearsearch

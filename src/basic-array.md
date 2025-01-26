@@ -36,6 +36,7 @@ func main() {
 	getItem(a, 1)
 	getItem(a, 10)
 }
+
 func getItem(a [5]int, i int) {
 	fmt.Println(a[i]) // error
 }
