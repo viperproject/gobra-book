@@ -1,4 +1,4 @@
-personal_ws-1.1 en 107 utf-8
+personal_ws-1.1 en 109 utf-8
 Collatz
 Datatypes
 Errorf
@@ -38,9 +38,11 @@ callee
 cardinality
 chan
 clientChannel
+codebase
 concurrentInc
 cond
 const
+docstring
 duplicable
 forall
 frac

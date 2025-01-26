@@ -1,7 +1,7 @@
 # Overflow Checking
 <div class="warning">
 Overflow checking is still an experimental feature under development.
-You may experience bugs and observe unexpected results.
+You may encounter bugs and observe unexpected results.
 </div>
 
 ## Usage
@@ -10,7 +10,7 @@ On the command line, you can enable overflow checking with the `--overflow` or `
 The size of `int` is [implementation-specific](https://go.dev/ref/spec#Numeric_types)  in Go and either 32 or 64 bits.
 For overflow checking, Gobra assumes that `int`s have 64 bits by default.
 We may change the behavior of Gobra to consider `int`s with 32 bits by passing the `--int32` flag.
-In a file, we can enable overflow checking by adding the line:
+In a file, we can enable overflow checking by adding the following line:
 ```go
 // ##(--overflow)
 ```

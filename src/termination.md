@@ -97,7 +97,7 @@ Required termination condition might not hold.
 ```
 
 ## Termination of recursive functions
-The function `fibonacci` recursively computes the `n`'th iterate of the fibonacci sequence.
+The function `fibonacci` recursively computes the `n`'th iterate of the Fibonacci sequence.
 As a termination measure, the parameter `n` is suitable since we recursively call `fibonacci` with smaller arguments and `n` is bounded from below.
 ``` go
 // @ requires n >= 0
@@ -131,7 +131,7 @@ Termination measure might not decrease or might not be bounded.
 ## Assuming termination with `decreaes _`
 If we annotate a function or method with `decreases _`, termination is assumed and not checked.
 
-This can be dangerous. With the termination mesaure `_` we can assume that `buggynacci` terminates.
+This can be dangerous. With the termination measure `_` we can assume that `buggynacci` terminates.
 Then the following program verifies, where we want to prove that the `client` code terminates.
 In practice, `buggynacci` would never return and `doSomethingVeryImportant` would never be called.
 ``` go
