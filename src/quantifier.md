@@ -83,9 +83,11 @@ Now when `a[3]` matches `a[i]`, for example in `assert a[3] == 0`, Gobra learns 
 0 <= 3 && 3 < len(a) ==> a[3] == 0
 ```
 
-> While we include triggers in the following examples as a best practice, readers may disregard them for now.
-> Choosing the right trigger expressions may require careful consideration.
-> This advanced topic will be addressed in the section on [triggers](./triggers.md).
+<div class="warning">
+While we include triggers in the following examples as a best practice, readers may disregard them for now.
+Choosing the right trigger expressions may require careful consideration.
+This advanced topic will be addressed in the section on [triggers](./triggers.md).
+</div>
 
 ## Existential quantifier `exists`
 <!-- syntax (`exists IDENTIFIER [,IDENTIFIER]* TYPE :: ASSERTION`). -->

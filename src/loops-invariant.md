@@ -1,10 +1,10 @@
 # Loop Invariants
 
-An _invariant_ is an assertion that is preserved by the loop across iterations.
+A _loop invariant_ is an assertion that is preserved by the loop across iterations.
 
-> Gobra checks that the invariant holds
-> 1. before the first iteration after performing the initialization statement
-> 2. after every iteration
+ Gobra checks that the invariant holds
+ 1. before the first iteration after performing the initialization statement
+ 2. after every iteration
 
 <!-- If the loop is exited early with a `break` or `return` statement, the invariant may not hold. -->
 
@@ -146,3 +146,7 @@ func client() {
 ``` 
 -->
 	
+
+> Gobra checks that a loop invariant holds
+> 1. before the first iteration after performing the initialization statement
+> 2. after every iteration
