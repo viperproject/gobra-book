@@ -17,7 +17,8 @@
   - [Range](./loops-range.md)
 - [Overflow Checking](./overflow.md)
 - [Termination](./termination.md)
-- [Ghost Code and Pure Functions](./basic-ghost-pure.md)
+- [Ghost code](./ghost.md)
+- [Pure functions](./pure.md)
 
 # Advanced topics
 - [Quantifier Triggers](./triggers.md)
