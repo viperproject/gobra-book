@@ -29,13 +29,13 @@ Please note that we write `decreases l.Mem()` instead of `decreases acc(l.Mem(),
 
 For the `List` API, we can use the termination measure `l.Mem()` for the methods `Length` , `Get`, `View`.
 
-It might be tempting to use the length of a `List` or the length of sequence from the abstraction function `View` as a integer termination measure.
+It might be tempting to use the length of a `List` or the length of the sequence from the abstraction function `View` as an integer termination measure.
 For this, the function must be `pure`, which requires a termination measure in turn.
 
 We chose a recursive implementation for `Length`, in order to preserve access to `l.Mem()`.
 An idiomatic iterative implementation is more challenging to verify.
 When iteratively iterating over a list, we keep unfolding `current.Mem()` and lose access to the already visited elements.
-It is not directly clear, how one could fold the predicate instances back such that `l.Mem()` is preserved by `LengthIterative`.
+It is not directly clear how one could fold the predicate instances back such that `l.Mem()` is preserved by `LengthIterative`.
 A common approach is to define a predicate that denotes access to a segment of a list instead of the entire tail.
 Alternatively, [magic wands](./magic-wands.md) are applicable in this situation.
 ``` go
@@ -61,7 +61,7 @@ Alternatively, [magic wands](./magic-wands.md) are applicable in this situation.
 
 [^1]: Technically, a predicate instance with no finite unfolding is still accepted as a termination measure by Gobra.
 For example, the recursive predicate `stream` represents access to an infinite list, and a predicate instance `stream(l)` has no finite unfolding.
-Nevertheless it can be used as a termination measure, with the unexpected behavior that we can prove that `streaming` terminates.
+Nevertheless, it can be used as a termination measure, with the unexpected behavior that we can prove that `streaming` terminates.
 <!-- One cannot obtain `stream(l)` without already holding such a predicate instance. -->
 <!-- Such an instance cannot be obtained in practice and the function `streaming` with precondition `stream(l)` not called. -->
 ``` go

@@ -86,7 +86,7 @@ func (l *List) Head() (value int) {
 // ANCHOR_END: head
 
 // ANCHOR: get
-// Get returns the element at index i in the list
+// Get returns the element at index i in the list.
 // @ preserves acc(l.Mem(), 1/2)
 // @ preserves 0 <= i && i < len(l.View())
 // @ ensures value == l.View()[i]
