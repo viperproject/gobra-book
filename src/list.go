@@ -87,10 +87,9 @@ func (l *List) Head() (value int) {
 
 // ANCHOR: get
 // Get returns the element at index i in the list
-// @ requires acc(l.Mem(), 1/2)
-// @ requires 0 <= i && i < len(l.View())
-// @ ensures acc(l.Mem(), 1/2)
-// @ ensures value == old(l.View()[i])
+// @ preserves acc(l.Mem(), 1/2)
+// @ preserves 0 <= i && i < len(l.View())
+// @ ensures value == l.View()[i]
 // @ decreases l.Mem()
 func (l *List) Get(i int) (value int) {
 	// @ unfold acc(l.Mem(), 1/2)
