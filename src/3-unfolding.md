@@ -6,4 +6,14 @@ For example, the `pure` function `Head` uses `unfolding` in its body in order to
 ``` go
 {{#include listMem.go:head}}
 ```
-Due to the syntactical restrictions of `pure` functions, there is no other way of using the `fold` and `unfold` statements instead.
+Due to the syntactic restrictions of `pure` functions, there is no other way of using the `fold` and `unfold` statements instead.
+
+Please also note, the predicate instance `l.Mem()` is transferred back implicitly for the `pure` function.
+
+<!-- ``` go -->
+<!-- 	ll = New(11, Empty()) -->
+<!-- 	// @ assert ll.Mem() -->
+<!-- 	// @ assert ll.Head() == 11 -->
+<!-- 	// @ assert ll.Mem() -->
+<!-- ``` -->
+

@@ -266,8 +266,8 @@ func client1() {
 	// ANCHOR_END: fold3
 }
 
+// ANCHOR: fractional
 func fractional() {
-	// ANCHOR: fractional
 	l := New(1, Empty())
 	// @ assert l.Mem()
 	// @ assert acc(l.Mem())
@@ -278,8 +278,9 @@ func fractional() {
 	// @ assert acc(l, 1/2) && acc(l.next.Mem(), 1/2)
 	// @ fold acc(l.Mem(), 1/2)
 	// @ assert l.Mem()
-	// ANCHOR_END: fractional
 }
+
+// ANCHOR_END: fractional
 
 // ANCHOR: pred2
 /*@

@@ -1,17 +1,17 @@
 # Predicates and fractional permissions
 
-Predicate instances are _resources_, i.e. permissions are used to track access to them.
+Predicate instances are _resources_, i.e., permissions are used to track access to them.
 So far, we were using `l.Mem()`, which is a shorthand for specifying a permission amount of `1` to the predicate instance `l.Mem()`.
 Equivalently we can write `acc(l.Mem())` or `acc(l.Mem(), 1)` using the access predicate.
 
 
-``` go
-{{#include list.go:mem}}
-```
+<!-- ``` go -->
+<!-- {{#include list.go:mem}} -->
+<!-- ``` -->
 
 For `fold`, `unfold`, and `unfolding` we may specify a permission amount `p`.
 Then any permission amount in the body of the predicate is multiplied by `p`.
-For example, the body of `l.Mem()` contains the resources `acc(l)` and `l.next.Mem()`.
+For example, the body of `l.Mem()` contains `acc(l)` and `l.next.Mem()`.
 After `unfold acc(l.Mem())`, only `acc(l, 1/2)` and `acc(l.next.Mem(), 1/2)` is held.
 
 ``` go
@@ -20,7 +20,7 @@ After `unfold acc(l.Mem())`, only `acc(l, 1/2)` and `acc(l.next.Mem(), 1/2)` is 
 
 `List` methods such as `Head` and `Get` do not need write permissions.
 Hence we change their contracts to only require `acc(l.Mem(), 1/2)`, and update any fold operations to use the correct permission amount.
-For methods like `Remove` that modify the `List` we still require write access.
+For methods like `Remove` that modify the `List`, we still require write access.
 Please ignore `l.View()` in the contracts for now.
 ``` go
 {{#include list.go:head}}

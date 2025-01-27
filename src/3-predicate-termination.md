@@ -4,7 +4,7 @@ Predicate instances can be used as [termination](./termination.md) measures.
 They decrease if an instance if nested within another predicate instance.
 This measure is lower bounded since the predicate instance has a finite unfolding.
 
-TODO: why we implement it recusively
+TODO: why we implement it recursively
 
 ``` go
 {{#include list.go:length1}}

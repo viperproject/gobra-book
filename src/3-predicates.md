@@ -1,8 +1,55 @@
 # Predicates
 
 <!-- similar to gobra tutorial -->
-Predicates abstract over assertions, i.e. giving a name to a parametrized assertion.
-They are suitable to denote access to recursive datastructures.
+Predicates abstract over assertions, i.e., giving a name to a parametrized assertion.
+Predicates can be used for representing memory access to data structures of possibly unbounded size, such as linked lists or binary trees.
+While quantified permission are often used to specify point wise access, e.g. to elements of a slice, predicates are suitable to denote access to recursive data structures.
+
+## Running example: `List`
+Throughout the sections of this chapter we will follow the example of a `List` data structure for storing integer values,
+implemented as a singly linked list[^1].
+
+``` go
+{{#include list.go:type}}
+```
+
+We will implement the following public API for the construction and manipulation of lists:
+``` go
+// Returns the empty list.
+func Empty() (l *List)
+
+// New creates a new List node with the specified value and tail.
+func New(value int, tail *List) (out *List)
+
+// Tail returns a new list that is the tail of the original list,
+// excluding the first element.
+func (l *List) Tail() (out *List)
+
+// Remove returns the list with the element at index i deleted.
+func (l *List) Remove(i int) (out *List)
+
+// Head returns the value of the first element in the list.
+func (l *List) Head() (value int)
+
+// Get returns the element at index i in the list
+func (l *List) Get(i int) (value int)
+
+// Returns true iff the list is empty.
+func (l *List) IsEmpty() (empty bool) {
+
+// Returns the length of the list.
+func (l *List) Length() (length int)
+```
+
+In a first step, we focus only on specifying memory access.
+Then in the second step, the contracts are completed for functional correctness.
+The contracts and the following client code will be verified in the final example:
+``` go
+{{#include list.go:client}}
+```
+
+
+## Defining predicates
 Here we define the predicate `elements` to represent access to all elements in a the list `l`:
 ``` go
 {{#include list.go:type}}
@@ -79,3 +126,7 @@ Please note that we lose access when traversing the list to sum the elements, wh
 > The `fold` statement exchanges the body of a predicate for a predicate instance. If the assertion in the body does not hold, an error is reported.
 >
 > The `unfold` statement exchanges a predicate instance with its body. If the predicate instance is not held, an error is reported.
+
+
+[^1]: Go's standard library comes with a [doubly linked list](https://pkg.go.dev/container/list).
+While it has been verified ([Verifying Go’s Standard Library (Jenny)](https://ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/documents/Education/Theses/Adrian_Jenny_PW_Report.pdf)), we use a much simpler API for our exposition.
