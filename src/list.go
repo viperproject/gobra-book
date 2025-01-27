@@ -123,7 +123,6 @@ func (l *List) IsEmpty() (empty bool) {
 // @ preserves acc(l.Mem(), 1/2)
 // @ ensures length == len(l.View())
 // @ decreases l.Mem()
-// ANCHOR: length1
 func (l *List) Length() (length int) {
 	if l == nil {
 		return 0
@@ -135,7 +134,6 @@ func (l *List) Length() (length int) {
 	}
 }
 
-// ANCHOR_END: length1
 // ANCHOR_END: length
 
 /*@
@@ -298,3 +296,42 @@ func client2() {
 }
 
 // ANCHOR_END: pred2
+
+// ANCHOR: LengthIterative
+// @ requires l.Mem()
+// @ decreases l.Mem()
+func (l *List) LengthIterative() (length int) {
+	current := l
+	// @ invariant current.Mem()
+	// @ decreases current.Mem()
+	for current != nil {
+		// @ unfold current.Mem()
+		length += 1
+		current = current.next
+	}
+	return
+}
+
+// ANCHOR_END: LengthIterative
+
+// ANCHOR: stream
+/*@
+pred stream(l *List) {
+	acc(l) && stream(l.next)
+}
+@*/
+
+// @ requires stream(l)
+// @ decreases
+func streaming(l *List) {
+	a := 0
+	// @ invariant stream(l)
+	// @ decreases stream(l)
+	for {
+		// @ unfold stream(l)
+		a += l.Value
+		l = l.next
+	}
+}
+
+// ANCHOR_END: stream
