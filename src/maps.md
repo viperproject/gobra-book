@@ -126,7 +126,6 @@ func main() {
 		3: {"Cars", 5},
 	}
 	produceSequels(movies)
-	// fmt.Println(movies)
 }
 ```
 ``` text
