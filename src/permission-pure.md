@@ -1,4 +1,4 @@
-Endtext# Pure functions and permissions
+# Pure functions and permissions
 
 Recall that [pure functions](./basic-ghost-pure.md) have no side effects.
 Hence, they must not leak any permissions and implicitly return all permissions mentioned in the precondition.
