@@ -64,10 +64,10 @@ func swap(x *int, y *int) {
 func client() {
 	x := new(int)
 	y := new(int)
-    // @ assert acc(x)
-    // @ assert acc(y)
-    *x = 1
-    *y = 2
+	// @ assert acc(x)
+	// @ assert acc(y)
+	*x = 1
+	*y = 2
 	swap(x, y)
 	// @ assert *x == 2 // fail
 	// @ assert *y == 1

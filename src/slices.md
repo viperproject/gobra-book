@@ -54,11 +54,11 @@ To check slicing does not panic, Gobra checks as part of the contract of the sli
 We may create two overlapping slices `l` and `r` but run into a permission error:
 ``` go
 func overlappingFail() {
-    s := make([]int, 3)
-    l := s[:2]
-    r := s[1:]
-    addToSlice(l, 1)
-    addToSlice(r, 1) // error
+	s := make([]int, 3)
+	l := s[:2]
+	r := s[1:]
+	addToSlice(l, 1)
+	addToSlice(r, 1) // error
 }
 ```
 ``` go
@@ -129,11 +129,11 @@ This simple example shows the usage of `copy` and `append`:
 ``` go
 s1 := []int{1, 2}
 s2 := []int{3, 4, 5}
-                                                                         
+
 s0 := make([]int, len(s1))
 copy(s0, s1 /*@, perm(1/2) @*/)
 // @ assert forall i int :: {&s0[i]} {&s1[i]} 0 <= i && i < len(s0) ==> s0[i] == s1[i]
-                                                                         
+
 s3 := append(/*@ perm(1/2), @*/ s1, s2...)
 s4 := append(/*@ perm(1/2), @*/ s0, 3, 4, 5)
 // @ assert forall i int :: {&s3[i]} {&s4[i]} 0 <= i && i < len(s3) ==> s3[i] == s4[i]

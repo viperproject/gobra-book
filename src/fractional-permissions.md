@@ -116,7 +116,7 @@ func (p *pair) sum() (s int) {
 func client() {
 	p := &pair{3, 5}
 	res := p.sum()
-    // @ assert p.left == 3 && p.right == 5
+	// @ assert p.left == 3 && p.right == 5
 	// @ assert res == 8
 }
 ```

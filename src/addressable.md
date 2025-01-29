@@ -18,7 +18,7 @@ For a variable `b` we either write `b /*@@@*/` using an inline annotation or equ
 func main() {
 	b /*@@@*/ := 1
 	// b@ := 1 // .gobra version
-    x := &b
+	x := &b
 }
 ```
 
@@ -26,13 +26,13 @@ Otherwise, if we try to take the address of a non-shared variable, Gobra reports
 ``` go
 func main() {
 	b := 1
-    x := &b
+	x := &b
 }
 ```
 ``` text
 property error: got b that is not effective addressable
-        x := &b
-      ^
+	x := &b
+		^
 ```
 
 ## Shared structs and arrays

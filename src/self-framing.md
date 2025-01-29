@@ -72,9 +72,9 @@ However, Gobra reports an error if `acc(x)` is not held in the state.
 ``` go
 func client() {
 	x := new(int)
-    *x = 1
-    // @ assert *x == 1
-    // @ assert acc(x) && *x == 1
+	*x = 1
+	// @ assert *x == 1
+	// @ assert acc(x) && *x == 1
 }
 ```
 
