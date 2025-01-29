@@ -31,6 +31,10 @@ The statement `inhale ASSERTION`
 1. adds all permissions mentioned by `ASSERTION`
 2. assumes all value constraints in `ASSERTION` hold
 
+<div class="warning">
+Inhaling can result in an inconsistent state.
+Do not use it without a good reason, except for debugging and learning.
+</div>
 
 ``` gobra
 requires acc(x, 1/2)
