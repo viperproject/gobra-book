@@ -28,7 +28,7 @@ Permission to *x might not suffice.
 We can make it _self-framing_ by returning the permissions `acc(x)` and `acc(y)`:
 ``` go
 // @ requires acc(x) && acc(y)
-// @ ensures acc(x) && acc(x)   // <------ added
+// @ ensures acc(x) && acc(y)   // <------ added
 // @ ensures *x == old(*y) && *y == old(*x)
 func swap(x *int, y *int) {
 	tmp := *x
