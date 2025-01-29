@@ -1,13 +1,11 @@
 # Abstraction functions
 
 An idiomatic verification pattern is to map structures to their essential representation with an _abstraction function_. 
-Functional correctness is specified as the effect of functions or methods on the abstract representation.
+One way to specify functional correctness is by describing the effect of functions or methods on the abstract representation.
 For the abstract representation, we use _mathematical types_, i.e., ghost types representing mathematical objects, such as sequences or sets.
 For example, if we were to design a `Set` data structure, adding an element to a concrete `Set` shall have the same effect as the operation on an abstract, mathematical set.
 
-<!-- convention to call View -->
-<!-- To specify functional correctness, we provide a mapping from our Go types to a mathematical object. -->
-## Abstraction function `View`
+## Abstraction function for `List`
 So far, our contracts for `List` were concerned with memory access.
 Now, we want to complete them with functional correctness requirements.
 
