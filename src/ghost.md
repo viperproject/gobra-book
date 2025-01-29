@@ -31,17 +31,17 @@ const N = 10
 // @ ensures forall i int :: 0 <= i && i < len(arr) ==> arr[i] <= res
 // @ ensures 0 <= idx && idx < len(arr) && arr[idx] == res
 func Max(arr [N]int) (res int /*@ , ghost idx int @*/) {
-	res = arr[0]
-	// @ invariant 0 <= i0 && i0 <= N
-	// @ invariant forall j int :: 0 <= j && j < i0 ==> arr[j] <= res
-	// @ invariant 0 <= idx && idx < N && arr[idx] == res
-	for i, a := range arr /*@ with i0 @*/ {
-		if a > res {
-			res = a
-			// @ ghost idx = i
-		}
-	}
-	return res /*@ , idx @*/
+    res = arr[0]
+    // @ invariant 0 <= i0 && i0 <= N
+    // @ invariant forall j int :: 0 <= j && j < i0 ==> arr[j] <= res
+    // @ invariant 0 <= idx && idx < N && arr[idx] == res
+    for i, a := range arr /*@ with i0 @*/ {
+        if a > res {
+            res = a
+            // @ ghost idx = i
+        }
+    }
+    return res /*@ , idx @*/
 }
 
 func client() {
@@ -63,18 +63,18 @@ Recall that ghost code cannot change the visible behavior of a program.
 Hence, ghost code cannot modify non-ghost locations.
 For example, the ghost statement `x = 1` causes an error since `x` is a normal variable:
 ``` go
-	var x int
-	// @ ghost x = 1
-	// ...
+    var x int
+    // @ ghost x = 1
+    // ...
 ```
 ``` text
 ERROR ghost error: only ghost locations can be assigned to in ghost code
 ```
 <!-- TODO Limitation: if the statement is not made ghost, there is no error but it updates the variable!
-	var x int
-	// @ x = 1
-	// @ assert x == 1
-	// @ assert x == 0  // ERROR
+    var x int
+    // @ x = 1
+    // @ assert x == 1
+    // @ assert x == 0  // ERROR
 -->
 
 To make a statement ghost, add `ghost` before it.
@@ -82,8 +82,8 @@ Although not all statements can appear in ghost code.
 For example, there is no ghost `return` statement, because it can change the visible behavior of a program:
 ``` go
 func loop() {
-	// @ ghost return
-	for {}
+    // @ ghost return
+    for {}
 }
 ```
 ``` text
@@ -99,19 +99,19 @@ For example, the function `boo` does not terminate with ghost code but returns i
 /*@
 ghost
 func inf() {
-	for {}
+    for {}
 }
 @*/
 
 // @ decreases
 func boo() int {
-	// @ ghost inf()
-	return 42
+    // @ ghost inf()
+    return 42
 }
 ```
 ``` text
 ERROR loop occurring in ghost context does not have a termination measure
-	for {}
+    for {}
  ^
 ```
 

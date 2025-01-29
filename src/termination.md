@@ -66,27 +66,27 @@ We can easily construct a termination measure that decreases instead by subtract
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 // @ decreases
 func LinearSearch(arr [10]int, target int) (idx int, found bool) {
-	// @ invariant 0 <= i && i <= len(arr)
-	// @ invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
-	// @ decreases len(arr) - i
-	for i := 0; i < len(arr); i += 1 {
-		if arr[i] == target {
-			return i, true
-		}
-	}
+    // @ invariant 0 <= i && i <= len(arr)
+    // @ invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
+    // @ decreases len(arr) - i
+    for i := 0; i < len(arr); i += 1 {
+        if arr[i] == target {
+            return i, true
+    }
+    }
    return -1, false
 }
 
 // @ decreases
 func client() {
-	arr := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
-	i10, found := LinearSearch(arr, 10)
-	// @ assert !found
-	// @ assert forall i int :: 0 <= i && i < len(arr) ==> arr[i] != 10
-	// @ assert arr[4] == 4
-	i4, found4 := LinearSearch(arr, 4)
-	// @ assert found4
-	// @ assert arr[i4] == 4
+    arr := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+    i10, found := LinearSearch(arr, 10)
+    // @ assert !found
+    // @ assert forall i int :: 0 <= i && i < len(arr) ==> arr[i] != 10
+    // @ assert arr[4] == 4
+    i4, found4 := LinearSearch(arr, 4)
+    // @ assert found4
+    // @ assert arr[i4] == 4
 }
 ```
 We can also prove that `client` terminates since besides the calls to `LinearSearch`, which terminate, there is no diverging control flow.
@@ -199,23 +199,23 @@ low mid high
 // @ ensures found == (idx < len(arr) && arr[idx] == target)
 // @ decreases  // <--- added for termination checking
 func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
-	low := 0
-	high := len(arr)
-	mid := 0
-	// @ invariant 0 <= low && low <= high && high <= len(arr)
-	// @ invariant 0 <= mid && mid < len(arr)
-	// @ invariant low > 0 ==> arr[low-1] < target
-	// @ invariant high < len(arr) ==> target <= arr[high]
-	// @ decreases high - low   // <-- added for termination checking
-	for low < high {
-		mid = (low + high) / 2
-		if arr[mid] < target {
-			low = mid // <--- Implementation Error, should be low=mid+1
-		} else {
-			high = mid
-		}
-	}
-	return low, low < len(arr) && arr[low] == target
+    low := 0
+    high := len(arr)
+    mid := 0
+    // @ invariant 0 <= low && low <= high && high <= len(arr)
+    // @ invariant 0 <= mid && mid < len(arr)
+    // @ invariant low > 0 ==> arr[low-1] < target
+    // @ invariant high < len(arr) ==> target <= arr[high]
+    // @ decreases high - low   // <-- added for termination checking
+    for low < high {
+        mid = (low + high) / 2
+        if arr[mid] < target {
+            low = mid // <--- Implementation Error, should be low=mid+1
+        } else {
+            high = mid
+        }
+    }
+    return low, low < len(arr) && arr[low] == target
 }
 
 ```

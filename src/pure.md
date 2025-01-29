@@ -8,19 +8,19 @@ If we try to call a normal Go function `Cube` in an assert statement, Gobra repo
 package main
 
 func Cube(x int) int {
-	return x * x * x
+    return x * x * x
 }
 
 func client() {
-	// @ assert 8 == Cube(2)
+    // @ assert 8 == Cube(2)
 }
 ```
 ``` text
 ERROR /tmp/playground.go:8:9:error: expected pure expression, but got '8 ==  Cube(3)'
-	assert 8 == Cube(3)
+    assert 8 == Cube(3)
         ^
 ERROR /tmp/playground.go:8:14:error: ghost error: Found call to non-ghost impure function in ghost code
-	assert 8 == Cube(3)
+    assert 8 == Cube(3)
              ^
 ```
 Let us mark the function `Cube` as `pure`, and also with `decreases`, since a termination measure is a requirement for a pure function.
@@ -29,15 +29,15 @@ Gobra enforces the syntactic requirement that the body of `pure` functions must 
 // @ pure
 // @ decreases
 func Cube(x int) int {
-	return x * x * x
+    return x * x * x
 }
 
 // @ requires n >= 0
 func client(n int) {
-	// @ assert 8 == Cube(2)
-	// @ assert Cube(2) >= 8 && Cube(2) <= 8
-	r := Cube(2)
-	// @ assert Cube(n) >= 0
+    // @ assert 8 == Cube(2)
+    // @ assert Cube(2) >= 8 && Cube(2) <= 8
+    r := Cube(2)
+// @ assert Cube(n) >= 0
 }
 ```
 Note that we may call pure functions in normal (non-ghost) code, unlike ghost functions.
@@ -124,11 +124,11 @@ Hence, we are unable to define `fibonacci` with an `if` statement:
 // @ pure
 // @ decreases n
 func fibonacci(n int) (res int) {
-	if n <= 1 {
-		return n
-	} else {
-		return fibonacci(n-1) + fibonacci(n-2)
-	}
+    if n <= 1 {
+        return n
+    } else {
+        return fibonacci(n-1) + fibonacci(n-2)
+    }
 }
 ```
 ``` text
@@ -189,8 +189,8 @@ Note that this does not automatically happen for the recursive calls in the body
 For example, we can assert `fibonacci(3) == fibonacci(2) + fibonacci(1)`, but not `fibonacci(3) == 2`.
 ``` go
 func client2() {
-	// @ assert fibonacci(3) == fibonacci(2) + fibonacci(1)
-	// @ assert fibonacci(3) == 2
+    // @ assert fibonacci(3) == fibonacci(2) + fibonacci(1)
+    // @ assert fibonacci(3) == 2
 }
 ```
 ``` text
@@ -201,10 +201,10 @@ By providing additional proof goals, we can to assert `fibonacci(3) == 2`.
 Having previously asserted `fibonacci(1) == 1` and `fibonacci(2) == 1`, these can be substituted in `fibonacci(3) == fibonacci(2) + fibonacci(1)`.
 ``` go
 func client3() {
-	// @ assert fibonacci(0) == 0
-	// @ assert fibonacci(1) == 1
-	// @ assert fibonacci(2) == 1
-	// @ assert fibonacci(3) == 2
+    // @ assert fibonacci(0) == 0
+    // @ assert fibonacci(1) == 1
+    // @ assert fibonacci(2) == 1
+    // @ assert fibonacci(3) == 2
 }
 ```
 
@@ -237,7 +237,7 @@ To prevent inconsistencies, termination measures must be provided for `pure` fun
 pure
 ensures res != 0
 func incons(x int) (res int) {
-	return 2 * incons(x)
+    return 2 * incons(x)
 }
 ```
 ``` text
@@ -252,14 +252,14 @@ pure
 decreases _ // assuming termination
 ensures res != 0
 func incons(x int) (res int) {
-	return 2 * incons(x)
+    return 2 * incons(x)
 }
 
 func foo() {
-	assert incons(1) == 2 * incons(1) // (1)
-	assert incons(1) / incons(1) == 2 // (2)
-	assert 1 == 2                     // (3)
-	assert false
+    assert incons(1) == 2 * incons(1) // (1)
+    assert incons(1) / incons(1) == 2 // (2)
+    assert 1 == 2                     // (3)
+    assert false
 }
 ```
 The assertions all pass since
