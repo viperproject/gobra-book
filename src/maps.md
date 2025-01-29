@@ -163,7 +163,7 @@ Permission to m might not suffice.
 ```
 
 ## `delete` and `clear`
-Gobra does not support Go's built-in function `delete` for removing map entries or `clear` for removing all map entries.
+At the moment, Gobra does not support Go's built-in function `delete` for removing map entries or `clear` for removing all map entries.
 
 
 [^1]: [https://go.dev/ref/spec#For_range](https://go.dev/ref/spec#For_range) 
