@@ -36,7 +36,7 @@ For example, the method `Get` must return the `i`th element of the sequence corr
 | `Remove`  | `0 <= i && i < len(l.View())` | `out.View() == old(l.View()[:i] ++ l.View()[i+1:])`                |
 | `Head`    |                               | `value == l.View()[0]`                                             |
 | `Get`     | `0 <= i && i < len(l.View())` | `value == l.View()[i]`                                        |
-| `IsEmpty` |                               | `(!empty ==> len(l.View()) > 0) && (empty ==> len(l.View()) == 0)` |
+| `IsEmpty` |                               | `empty == (len(l.View()) == 0)` |
 | `Length`  |                               | `length == len(l.View())`                                                                   |
 
 <!-- framing, when because of fractional must not say that sequence stays the same -->

@@ -108,8 +108,7 @@ func (l *List) Get(i int) (value int) {
 // Returns true iff the list is empty.
 // @ pure
 // @ requires acc(l.Mem(), 1/2)
-// @ ensures !empty ==> len(l.View()) > 0
-// @ ensures empty ==> len(l.View()) == 0
+// @ ensures empty == (len(l.View()) == 0)
 // @ decreases
 func (l *List) IsEmpty() (empty bool) {
 	return l == nil
@@ -206,7 +205,7 @@ func folder0() {
 // @ ensures elements(l)
 func newFail(value int, tail *List) (l *List) {
 	l := &List{Value: value, next: tail}
-	// @ fold elements(l)
+	// @ fold elements(l) // error
 	return l
 }
 
