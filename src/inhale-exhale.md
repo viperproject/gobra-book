@@ -45,7 +45,7 @@ func breatheIn(x *int) {
 }
 ```
 
-If we inhale too much permission, `false` can be asserted:
+By inhaling a permission amount of 1 for the pointer `x` while already holding `acc(x, 1/2)`, we reach an inconsistent state, and `false` can be asserted:
 ``` gobra
 requires acc(x, 1/2)
 func breatheMore(x *int) {
