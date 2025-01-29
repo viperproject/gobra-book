@@ -66,7 +66,6 @@ Now if `Cube` were nondeterministic, the calls `Cube(2)` and `Cube(2)` with the 
 Hypothetically, if we could call non-deterministic functions in proof annotations, the verification verdict would become nondeterministic in turn.
 This is clearly undesirable; the same program shall either verify or not.
 To be precise, specifications are not executed like normal Go code, so we could not simply run a nondeterministic function and use its output.
-A call to a pure function is best thought as inlining the function, with the parameters substituted.
 The arguments might not be concrete, as in the above example, where we assert `Cube(n) >= 0` for an arbitrary positive integer `n`.
 
 If `Cube` had side-effects, `assert Cube(2) == 8` and `assert Cube(2) >= 8 && Cube(2) <= 8` could again not be treated as equivalent.
@@ -172,7 +171,7 @@ func fibonacci(n int) (res int) {
 
 ## Pure functions are transparent
 Unlike normal functions, where we cannot peek inside their body, 
-calls to `pure` functions can be thought of as inlined.
+Gobra learns the body of `pure` functions when calling them.
 The following assertions pass, without having specified a postcondition.
 ``` go
 func client1(n int) {
