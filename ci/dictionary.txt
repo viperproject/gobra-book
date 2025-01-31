@@ -31,6 +31,7 @@ Wireguard
 addToSlice
 addToSliceClient
 addressability
+amongst
 arity
 binarySearch
 bool
@@ -39,10 +40,12 @@ callee
 cardinality
 chan
 clientChannel
+codebase
 concurrentInc
 cond
 const
 dereference
+docstring
 duplicable
 forall
 frac
@@ -57,6 +60,8 @@ incr
 injective
 injectivity
 inlined
+instantiation
+instantiations
 invariants
 isComparable
 isContained

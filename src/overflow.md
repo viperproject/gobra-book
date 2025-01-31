@@ -1,33 +1,75 @@
 # Overflow Checking
 <div class="warning">
-Overflow checking is an experimental feature.
-It is currently buggy and should be used with care.
+Overflow checking is still an experimental feature under development.
+You may encounter bugs and observe unexpected results.
 </div>
 
 ## Usage
-On the command line you can enable overflow checking with the `--overflow` or `-o` flag.
-
+By default, Gobra performs no overflow checking.
+On the command line, you can enable overflow checking with the `--overflow` or `-o` flag.
 The size of `int` is [implementation-specific](https://go.dev/ref/spec#Numeric_types)  in Go and either 32 or 64 bits.
-For overflow checking Gobra assumes 64 bit integers.
-This can be overridden with the `--int32` flag.
+For overflow checking, Gobra assumes that `int`s have 64 bits by default.
+We may change the behavior of Gobra to consider `int`s with 32 bits by passing the `--int32` flag.
+In a file, we can enable overflow checking by adding the following line:
+```go
+// ##(--overflow)
+```
 
-## Binary Search Example
+## Overflow in binary search
+If we check our [binary search](./loops-binarysearch.md) program for large arrays with overflow checking enabled, Gobra detects a potential overflow.
+``` go
+package binarysearch
 
-If we check our binary search program with overflow checking enabled, Gobra reports that
+// ##(--overflow)
 
+const MaxInt64 = 1<<63 - 1
+const N = MaxInt64
+
+// @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
+// @ ensures 0 <= idx && idx <= len(arr)
+// @ ensures idx > 0 ==> arr[idx-1] < target
+// @ ensures idx < len(arr) ==> target <= arr[idx]
+// @ ensures found == (idx < len(arr) && arr[idx] == target)
+func BinarySearchOverflow(arr [N]int, target int) (idx int, found bool) {
+	low := 0
+	high := len(arr)
+	mid := 0
+	// @ invariant 0 <= low && low <= high && high <= len(arr)
+	// @ invariant 0 <= mid && mid < len(arr)
+	// @ invariant low > 0 ==> arr[low-1] < target
+	// @ invariant high < len(arr) ==> target <= arr[high]
+	for low < high {
+		mid = (low + high) / 2  // <--- problematic expression
+		if arr[mid] < target {
+			low = mid + 1
+		} else {
+			high = mid
+		}
+	}
+	if low < len(arr) {
+	 	return low, arr[low] == target
+	} else {
+	 	return low, false
+	}
+}
+```
 ``` text
+ERROR Expression may cause integer overflow.
 Expression (low + high) / 2 might cause integer overflow.
 ```
-For example if `low = 2` and `high = MaxInt64 - 1`
-their sum cannot be represented by an `int64` and the result will be negative.
-
-The solution is to replace the offending statement with
-`mid = (high-low)/2 + low`.
-
+<!-- TODO if it works without error use: `return low, low < len(arr) && arr[low] == target` otherwise explain why not
+Relevant issue: https://github.com/viperproject/gobra/issues/816 -->
+For example, for `low = N/2` and `high = N`, the sum `low + high` cannot be represented by an `int` and the result will be negative.
+The solution is to replace the offending statement `mid = (low + high) / 2` with:
+``` go
+mid = (high-low)/2 + low
+```
+The subtraction does not overflow since `high >= low` and `low >= 0` holds.
 After this change, Gobra reports no errors.
 
-If we tweak the `const N` that denotes the array length to `2147483648` which is larger than `MaxInt32` we get an error if we check with the `--int32` flag but otherwise verification succeeds.
 
-This bug was actually in Java's standard library ([Read All About It: Nearly All Binary Searches and Mergesorts are Broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)).
-We think this highlights why heavily used code should be verified.
+If we tweak the `const N` that denotes the array length to `1<<31` which is larger than `MaxInt32`, we get an error when checking with `--int32 --overflow`.
+Verification succeeds when only check with `--overflow`.
 
+A similar bug was present in Java's standard library ([Read All About It: Nearly All Binary Searches and Mergesorts are Broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)).
+This highlights why heavily used code such as packages from the standard library should be verified.

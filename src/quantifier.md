@@ -1,38 +1,61 @@
 # Quantifiers and Implication
 
-Let us try to write an assertion that states that an array is sorted.
-We can later use this as a precondition for a  [binary search](./loops-binarysearch.md) function.
-As a first attempt we might write
-`requires arr[0] <= arr[1] <= arr[2] <= ... <= arr[N-1]`
-Of course, we do not want to write specifications like this since this does not scale and would not work for different lengths `N`.
+Programs often deal with data structures of unbounded size, such as linked lists and slices, or with data structures that have a fixed size, but which are too large to describe point-wise.
+As an example, let's assume we want to write a function `sort` that takes an array `arr` of type `[1000]int` and returns a sorted array [^1].
 
-Another way of specifying that an array is sorted
-is that for any two elements of the array,
-the first element must be less than or equal to the second element.
-
-## Universal quantifier `forall`
-In Gobra, *for any* is realized by the `forall` quantifier.
-We cannot directly pick any two elements,
-but we can state that for any indices `i` and `j` of type `int`, `arr[i] <= arr[j]` as
-`requires forall i, j int :: arr[i] <= arr[j]`
-Note that we can quantify `i` and `j` at the same time, 
- instead of the more cumbersome
-`requires forall i int :: forall j int :: arr[i] <= arr[j]`
-
-Array indices must also be in bounds for specifications.
-We need to constrain that `i` and `j` are valid indices, otherwise, we see errors like:
-``` text
-Method contract is not well-formed. 
-Index i into arr[i] might be negative.
+``` go
+func sort(arr [1000]int) (res [1000]int)
 ```
 
-## Implication `==>`
-In Gobra the operator for the implication[^1]  *if P then Q* is `==>`.
-This gives our final version for the precondition:
+If we want to state that the output of this function is sorted, we could write the postcondition `res[0] <= res[1] && res[1] <= .... && res[998] <= res[999]`.
+However, this is extremely impractical to write, debug, and maintain.
+In this section, we show how we can use quantifiers to concisely capture these properties.
 
-```gobra
-requires forall i, j int :: 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
-func search(arr [N]int)
+Gobra supports the universal quantifier `forall`.
+The existential quantifier `exists` is available, but its use is discouraged.
+Additionally, we introduce the logical operator for the implication (`==>`), which is commonly (but not only) used together with quantifiers.
+
+## Universal quantifier `forall`
+To get started, we write an assertion that checks that an array is initialized with zero values:
+``` go
+~func client1() {
+    var a [1000]int
+    // @ assert forall i int :: 0 <= i && i < len(a) ==> a[i] == 0
+~}
+```
+We make use of the `forall` quantifier to use an arbitrary `i` of type `int`.
+After double colons (`::`) follows an assertion in which we can use the quantified variable `i`.
+Gobra checks that this assertion holds for all instantiations of `i` and reports an error otherwise.
+
+Here we use an implication (`==>`) [^2] to specify that only if `i` is a valid index (`0 <= i && i < len(a)`), then the element at this index is zero.
+All array accesses must be within bounds, as well as in specifications and proof annotations.
+Without constraining `i`, the assertion states that `a[i] == 0` holds for all possible integers `i`, which includes amongst others `i=-1` and we face the error:
+``` go
+~func client2() {
+    var a [1000]int
+    // @ assert forall i int :: a[i] == 0
+~}
+```
+``` text
+ERROR Assert might fail. 
+Index i into a[i] might be negative.
+```
+<!-- Of course, we do not want to write specifications like this since this does not scale and would not work for different lengths `N`. -->
+<!-- We can later use this as a precondition for a  [binary search](./loops-binarysearch.md) function. -->
+
+Returning to the introductory example, let us apply `forall` to write the postcondition of `sort`:
+Another way of specifying that an array is sorted
+is that for any two array elements,
+the first element must be smaller than or equal to the second element.
+So for any integers `i` and `j` with `i < j` it must hold that `res[i] <= res[j]`,
+again enforcing that the indices `i` and `j` are within bounds:
+``` go
+// @ ensures forall i, j int :: 0 <= i && i < j && j < len(res) ==> res[i] <= res[j]
+func sort(arr [1000]int) (res [1000]int)
+```
+Note that we can quantify `i` and `j` at the same time instead of using two `forall` quantifiers:
+``` go
+// @ requires forall i int :: forall j int ::  0 <= i && i < j && j < len(res) ==> res[i] <= res[j]
 ```
 
 <!-- conceptual:
@@ -45,24 +68,85 @@ Testing all of those values is already infeasible.
 In general, the syntax
 `forall IDENTIFIER [,IDENTIFIER]* T :: ASSERTION` -->
 
-## Existential Quantifier `exists`
-The existential quantifier `exists` uses the same syntax (`exists IDENTIFIER [,IDENTIFIER]* T :: ASSERTION`).
-As the name suggests, `exists` requires the assertion to be true for *at least one* value.
+## Efficient verification with triggers
+While a universal quantifier states that an assertion holds for all instantiations of a variable, proofs often require knowing the body of a quantifier for concrete instantiations.
+Triggers are syntactical patterns that, when matched, trigger Gobra to learn the body of a quantifier with concrete instantiations.
+They are crucial for ensuring efficient verification.
 
-For example, we could state `arr` contains the value `0` as
+Trigger expressions are enclosed in curly braces at the beginning of the quantified expression.
+For example, we add `a[i]` as a trigger:
 ``` gobra
-exists i int :: 0 <= i && i < len(arr) ==> arr[i] == 0
+forall i int :: { a[i] } 0 <= i && i < len(a) ==> a[i] == 0`
+```
+Now when `a[3]` matches `a[i]`, for example in `assert a[3] == 0`, Gobra learns the body of the quantifier where `i` is instantiated with `3`:
+``` gobra
+0 <= 3 && 3 < len(a) ==> a[3] == 0
 ```
 
-`exists` should be used sparingly.
-It can be a heavy burden for the verifier to find a witness among many possible values.
-We show later how we could use a `ghost` return value instead.
+<div class="warning">
+While we include triggers in the following examples as a best practice, readers may disregard them for now.
+Choosing the right trigger expressions may require careful consideration.
+This advanced topic will be addressed in the section on [triggers](./triggers.md).
+</div>
 
-## Footnotes
+## Existential quantifier `exists`
+<!-- syntax (`exists IDENTIFIER [,IDENTIFIER]* TYPE :: ASSERTION`). -->
+For the existential quantifier, Gobra checks that the assertion holds for _at least one_ instantiation of the quantified variable.
 
-[^1]: The implication operator has the following truth table:
+<div class="warning">
+Existential quantifiers tend to lead to slow and unpredictable verification times.
+As such, we recommend using them sparingly.
+Later, we show how we might avoid having to use explicit existential quantifiers through the introduction of ghost state.
+</div>
+<!-- We can only specify the _existence_ of such a value but do not obtain a witness (an instantiation such that the assertion holds). -->
+
+For completeness, we still show an example:
+The function `Contains` returns whether the value `target` is contained in the input array.
+We can specify with an implication that if `target` is found there must exist an index `idx` with `arr[idx] == target`:
+``` go
+// @ ensures found ==> exists idx int :: 0 <= idx && idx < len(arr) && arr[idx] == target
+func Contains(arr [10]int, target int) (found bool) {
+    for i := range arr {
+        if arr[i] == target {
+            return true
+        }
+    }
+    return false
+}
+
+func client3() {
+    arr := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+    found := Contains(arr, 10)
+    // @ assert !found
+    found4 := Contains(arr, 4)
+}
+```
+<!-- there is no guaranteed that if target is contained that then found is true -->
+<!-- // @ ensures (exists idx int :: 0 <= idx && idx < len(arr) && arr[idx] == target) ==> found -->
+Note we can only assert that 10 is contained since there does not exist a `idx` with `arr[idx] = 10`, indirectly `!found` must hold.
+To fully capture the intended behavior of `Contains`, the contract should include a postcondition for the case where `target` is not found:
+``` go
+// @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
+```
+So far, we cannot prove this without adding additional proof annotations. <!-- without using [loop invariants](./loops-invariant.md). -->
+
+
+[^1]: In practice, we may not want to write such a function, as the array must be copied every time we call this function - after all, arrays are passed by value. On another note: the contract of `sort` only specifies that the returned array is sorted. An implementation returning an array full of zeros adheres to this contract. To properly specify `sort`, one should include a postcondition stating that the _multiset_ of elements in the returned array is the same as the multiset of elements of the array passed to the function.
+
+<!-- TODO(add forward link, there is no clear example. In addressable.md we mention shared arrays and in quantified permission we have an example with a pointer to an array in the context of injective resources) In section ..., we look at how to reason about functions that receive a reference to the array instead.  -->
+
+[^2]: In Gobra the operator for the implication _if P then Q_ is `P ==> Q`.
+It has the following truth table:
 
 | `P ==> Q` | `Q=false` | `Q=true` |
 |-----------|-----------|----------|
 | `P=false` | 1         | 1        |
 | `P=true`  | 0         | 1        |
+
+
+<!--
+Note that if `P` is `false`, `P ==> Q` holds independent of whether `Q` holds.
+In the above example we had
+`forall i int :: 0 <= i && i < len(a) ==> a[i] == 0`.
+So whenever `i` is not a valid index then the entire assertion holds.
+`forall i int :: 0 <= i && i < len(a) && a[i] == 0` -->
