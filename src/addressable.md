@@ -1,28 +1,6 @@
 # Addressability, `@` and sharing
 
-Variables are called _shared_ if their address is taken.
-This could allow them to be modified concurrently.
-Hence, to prove the absence of data races, Gobra reasons with permissions.
-Gobra requires us to mark variables as shared explicitly,
-with the intention that the programmer is aware in which cases, permission based reasoning is employed.
-
-<!-- We distinguish _shared arrays_ and _shared structs_ from their _exclusive_ counterparts.
-Since if the address of an array or struct is never taken, we do not have to worry about data races, and reasoning about them is much easier. -->
-
-
-## Shared variables with `@`
-
-Variables are marked as _shared_ by appending the ampersand symbol to a variable name.
-For a variable `b` we either write `b /*@@@*/` using an inline annotation or equivalently `b@` in `.gobra` files.
-``` go
-func main() {
-	b /*@@@*/ := 1
-	// b@ := 1 // .gobra version
-	x := &b
-}
-```
-
-Otherwise, if we try to take the address of a non-shared variable, Gobra reports an error:
+If we try to take the address of a local variable, Gobra reports an error:
 ``` go
 func main() {
 	b := 1
@@ -34,10 +12,33 @@ property error: got b that is not effective addressable
 	x := &b
 		^
 ```
+To reference local variables, they must be marked as _shared_ by appending the ampersand symbol to a variable name.
+Then Gobra uses permissions to track access to this location.
+For a variable `b`, we either write `b /*@@@*/` using an inline annotation, or equivalently as `b@` in `.gobra` files.
 
-## Shared structs and arrays
-For _shared arrays_ and _shared structs_, their elements or fields can be addressed individually.
-Access can be specified for example to the first element of a shared array with `acc(&a[0])` or to the field `x` of a shared struct `c` with `acc(&c.x)`.
+``` go
+func main() {
+	b /*@@@*/ := 1
+	// b@ := 1 // .gobra version
+	x := &b
+	inc(x)
+	// @ assert b == 2
+}
+
+// @ preserves acc(p)
+// @ ensures *p == old(*p) + 1
+func inc(p *int) {
+	*p = *p + 1
+}
+```
+With a pointer, a variable can be modified outside the function where it is defined.
+Note that otherwise, permissions are not required to reason about local variables.
+When passed as arguments to functions, the values are copied, and the original variables are not modified.
+
+Sharing applies to local variables of any type.
+In this section, we specifically look at _shared structs_.
+An example with _shared arrays_ is shown in a [following section](./quantified-permission.md).
+
 ## Shared structs
 The fields of structs can be addressed individually.
 For example, access can be specified to the field `x` of a shared struct `c` with `acc(&c.x)`.
@@ -86,8 +87,6 @@ func client2() {
 	// @ assert *c == Coord{5, 10}
 }
 ```
-
-Shared arrays are similar, we will see an example in a [following section](./quantified-permission.md).
 
 ## Shared parameters (`share`)
 
