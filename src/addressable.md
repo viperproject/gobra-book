@@ -72,7 +72,8 @@ The error message is instructive, and we can fix this by marking `c` as shared:
 	c /*@@@*/ := Coord{1, 2}
 ```
 
-As an exception, taking the address of a composite literal is allowed:
+Composite literals are addressable.
+We may reference them directly without errors:
 ``` go
 func client2() {
 	c := &Coord{1, 2}
