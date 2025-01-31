@@ -2,15 +2,19 @@
 
 So far we have seen permissions of the form `acc(x)` for a pointer `x`.
 We can be more specific and give a permission amount as the second argument to `acc`, as a fractional number.
-In this case we speak of _fractional permissions_:
+In this case, we speak of _fractional permissions_:
 - A permission amount of `1` allows us to read and write (e.g. `acc(x, 1)`, or equivalently `acc(x)`, `acc(x, writePerm)`, `acc(x, 1/1)`)
 - A positive amount `< 1` allows only reading (e.g. `acc(x, 1/2)`, `acc(x, 3/4)`)
 - No access is denoted as `acc(x, 0)` or equivalently `acc(x, noPerm)`.
 - A permission amount `> 1` for a pointer is a contradiction and implies `false`. <!-- not for predicates -->
 
-Permission amounts to the same location can be summed up, for example `acc(x, 3/4)` is equivalent to `acc(x, 1/4) && acc(x, 1/4) && acc(x, 1/4)`.
-For concurrency this will be useful since it allows us to split read permissions to multiple threads and guaranteeing that there can only be one thread alive with exclusive write permission to a location [^1].
-In the remainder of this section we study how to use fractional permissions with examples.
+If a function requires write permission, and yet we want to guarantee that the value stored at the locations remains unchanged, an extra postcondition must be added.
+Requiring only read permission, a caller retaining a positive permission amount can guarantee across the call that the value remained unchanged.
+
+Permission amounts to the same location can be split up, for example `acc(x, 3/4)` is equivalent to `acc(x, 1/4) && acc(x, 1/4) && acc(x, 1/4)`.
+Moreover, this is useful for concurrency since it allows us to split read permissions to multiple threads and guarantee that there can only be one thread alive with exclusive write permission to a location [^1].
+
+In the remainder of this section, we study how to use fractional permissions with examples.
 
 Previously we saw the function `swap` that needs `write` access to both variables.
 In the following example, we sum the fields `left` and `right` of a struct `pair`.
