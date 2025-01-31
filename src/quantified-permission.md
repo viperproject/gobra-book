@@ -12,12 +12,13 @@ For example, the following precondition specifies write access to all elements o
 func addToSlice(s []int, n int)
 ```
 
-## Injective resources
+## Injectivity requirement
 
 As a requirement, the mapping between instances of the quantified variable and the receiver expression must be injective.
-In the above example, this injective mapping is from `i` to `&s[i]`.
-Gobra reports an error if it cannot prove this.
+In the example `addToSlice`, this injective mapping is from `i` to `&s[i]`.
+
 In the following example, the postcondition of `getPointers` does not specify that the returned pointers are all distinct.
+Gobra cannot prove that the mapping is injective and reports an error.
 ``` go
 // @ ensures acc(ps[0],1/2) && acc(ps[1],1/2) && acc(ps[2],1/2)
 func getPointers() (ps [3]*int) {
