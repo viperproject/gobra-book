@@ -39,7 +39,7 @@ Source code can be included in either in markdown code blocks
 ````markdown
 ``` go
 package main
-//@ requires
+// @ requires
 func foo() {
 
 }
@@ -50,7 +50,7 @@ or included
 {{#include examples/dutchflag.gobra}}
 ```
 
-The source files used in this project have the extensions `.go` or `.gobra`. `.go` files consist of compilable Go files with specifications written in comments: `//@ ` signals a single line of specification, whereas comments within delimiters`/*@` and `@*/` signal multi-line specifications.
+The source files used in this project have the extensions `.go` or `.gobra`. `.go` files consist of compilable Go files with specifications written in comments: `// @ ` signals a single line of specification, whereas comments within delimiters`/*@` and `@*/` signal multi-line specifications.
 
 
 ### Code Block Attributes
@@ -93,12 +93,12 @@ type = "MultipleChoice"
 prompt.prompt = """
 **Program 1:**
 ```go
-//@ ensures res >= 0
+// @ ensures res >= 0
 func square(x int) (res int) {
 	return x * x
 }
 r := square(a)
-//@ assert r == a*a
+// @ assert r == a*a
 What is the verification result of **Program 1**?
 """
 prompt.distractors = [
