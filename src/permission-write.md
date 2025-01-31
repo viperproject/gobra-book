@@ -1,28 +1,64 @@
 # Permission to write
 
-Permissions allow us to reason about mutable data.
-Reading and writing to a location is permitted based on the permission amount held.
+Permissions allow us to reason about aliased data in a modular way.
+Reading from and writing to a location is permitted based on the permission amount held.
 Write access is _exclusive_, i.e. permission to write to a location can only be held once.
-Permissions can be transferred between functions/methods, loop iterations, and are gained on allocation.
+Permissions can be transferred between functions/methods, loop iterations, and they are gained on allocation.
 
-This is crucial for concurrency, as a short teaser, Gobra can reject the following program with a _data race_, i.e. concurrent access to the same memory location with at least one modifying access:
+Consider the following program.
+Should the assertion `snapshotX == *x` pass?
 ``` go
-func inc(p *int) {
-	*p = *p + 1
-}
+{{#include frame.go:inc}}
+{{#include frame.go:client}}
+```
+If `x` and `y` were aliases, `*x` might be modified.
+Even if they are not aliases, we could not exclude the possibility that `*x` could somehow get modified since the body of `inc` is unknown when modularly verifying `client`.
 
-func driver(p *int) {
-	go inc(p)
-	go inc(p)
-}
+Therefore it is important that the contract of a function specifies what might be modified by this function.
+In particular, this tells us what does not change without us having to explicitly specify it.
+Given `x != y` and that `inc(y)` might only modify `*y`, the assertion `snapshotX == *x` shall hold before and after the call `inc(y)`.
+
+So far, the program is rejected by Gobra:
+``` text
+ERROR Assignment might fail. 
+Permission to *x might not suffice.
+```
+``` text
+ERROR Assignment might fail. 
+Permission to *p might not suffice.
+```
+In order to read and write the value stored at the memory address `x`, we must hold full access to this location.
+This is denoted by the accessibility predicate `acc(x)`.
+``` go
+{{#include frame.go:inc_full}}
+{{#include frame.go:client_full}}
+```
+<!-- TODO which problem https://en.wikipedia.org/wiki/Frame_problem -->
+Permissions are a solution to the problem described above.
+Now `inc` requires `acc(p)`, which gives us an upper bound on what could be modified after the call.
+In the function `client`, the permissions `acc(x)` and `acc(y)` are held from the precondition.
+`acc(y)` is transferred when calling `inc(y)`.
+Because `acc(x)` is kept, and write permission is exclusive, we can _frame_ the condition `snapshotX == *x` holds across the call `inc(y)`.
+
+<!-- - As write permission is exclusive, the case where `x` and `y` are aliases is -->
+<!-- e.g. with *x = y , and alternative body: **p += 1; *p+=1 -->
+
+Moreover, permissions are used by Gobra to ensure that programs do not have _data races_, i.e., concurrent accesses to the same memory location with at least one modifying access.
+As a short teaser for concurrency:
+``` go
+{{#include frame.go:inc}}
+{{#include frame.go:driver}}
+```
+``` text
+ERROR Precondition of call might not hold. 
+
+go inc(p) might not satisfy the precondition of the callee.
 ```
 
-Permissions are held for _resources_.
-Pointers are the first kind of resource we introduce.
+## Permission for pointers
 <!-- The following chapter will also introduce access to predicates but for now, we are concerned only with pointers. -->
-
-For a pointer to an integer `x *int`,
-the accessibility predicate `acc(x)` denotes write (and read) access to `x`.
+Permissions are held for _resources_.
+For now, we only consider pointers.
 Having access `acc(x)` to a pointer `x` implies `x != nil`, so reading (e.g. `tmp := *x`) and writing (e.g. `*x = 1`) do not panic.
 Let us illustrate this with a function that swaps the values of two integer pointers:
 ``` go
@@ -114,8 +150,8 @@ func swap(x *int, y *int) {
 func client2() {
 	x := new(int)
 	y := new(int)
-    *x = 1
-    *y = 2
+	*x = 1
+	*y = 2
 	swap(x, x)
 	// @ assert *x == 1
 }
