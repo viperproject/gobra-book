@@ -45,7 +45,7 @@ main.main()
         /gobra/swap.go:14 +0x3
 exit status 2
 ```
-Gobra can detect this statically.
+Gobra detects this statically.
 Without holding access yet, we get the error:
 ``` text
 Assignment might fail. 
@@ -179,7 +179,7 @@ In our example, `acc(x)` and `x != y ==> acc(y)` is both required and ensured:
 // @ ensures acc(x)
 // @ ensures x != y ==> acc(y)
 ```
-We can simplify this using the keyword `preserves`, which is syntactical sugar for the above.
+We can simplify this using the keyword `preserves`, which is syntactical sugar for requiring and ensuring the same assertion.
 ``` go
 // @ preserves acc(x)
 // @ preserves x != y ==> acc(y)
@@ -200,8 +200,8 @@ func swap(x *int, y *int) {
 func client2() {
 	x := new(int)
 	y := new(int)
-    *x = 1
-    *y = 2
+	*x = 1
+	*y = 2
 	swap(x, x)
 	// @ assert *x == 1
 	swap(x, y)
