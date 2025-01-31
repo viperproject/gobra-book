@@ -45,18 +45,7 @@ For example, access can be specified to the field `x` of a shared struct `c` wit
 
 In the following example, we use structs representing 2D coordinates and implement a method `Scale` to multiply them by a scalar factor.
 ``` go
-type Coord struct {
-	x, y int
-}
-
-// @ requires acc(&c.x) && acc(&c.y)
-// @ ensures acc(&c.x) && acc(&c.y)
-// @ ensures c.x == old(c.x) * factor
-// @ ensures c.y == old(c.y) * factor
-func (c *Coord) Scale(factor int) {
-	c.x = c.x * factor
-	c.y = c.y * factor
-}
+{{#include shared_struct.go:Scale}}
 
 func client1() {
 	c := Coord{1, 2}
@@ -71,36 +60,37 @@ Gobra reports an error if we try to call `Scale` on a non-shared struct.
 `Scale` is defined for a pointer receiver, and here the address of the struct is taken implicitly.
 The error message is instructive, and we can fix this by marking `c` as shared:
 ``` go
-func client1() {
-	c /*@@@*/ := Coord{1, 2}  // changed
-	c.Scale(5)
-	// @ assert c == Coord{5, 10}
-}
+{{#include shared_struct.go:client1}}
 ```
 
 Composite literals are addressable.
 We may reference them directly without errors:
 ``` go
-func client2() {
-	c := &Coord{1, 2}
-	c.Scale(5)
-	// @ assert *c == Coord{5, 10}
-}
+{{#include shared_struct.go:client2}}
 ```
 
 ## Shared parameters (`share`)
-
-Parameters of a function or method can be shared with the `share` statement at the beginning of the body.
-
 It is not possible to mark parameters with `@`, as whether a parameter is shared is local to the function and should not be exposed in its signature.
-
+Gobra reports errors as we cannot reference the non-shared `c1` and `c2` to call `Scale` on a pointer receiver.
 ``` go
 func client3(c1, c2 Coord) {
-	// @ share c1, c2
-	c1.Scale(5)
-	c2.Scale(-1)
+	c1.Scale(5) // error
+	c2.Scale(-1) // error
 }
 ```
+``` text
+ERROR Scale requires a shared receiver ('share' or '@' annotations might be missing).
+	c1.Scale(5)
+    ^
+ERROR Scale requires a shared receiver ('share' or '@' annotations might be missing).
+	c2.Scale(-1)
+    ^
+```
+Parameters of a function or method can be shared with the `share` statement at the beginning of the body.
+``` go
+{{#include shared_struct.go:client3}}
+```
+This resolves the errors above.
 
 
 <!-- [^1]: In Go, there is the notion of [addressability](https://go.dev/ref/spec#Address_operators) which clearly defines which operands are addressable. -->
