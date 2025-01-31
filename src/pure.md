@@ -65,7 +65,7 @@ Still, if only ghost state is affected, keeping track of the side effects would 
 ## Specifying functional correctness with pure functions
 We define a `pure` function `fibonacci` as a mathematical reference implementation, following the recursive definition of the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence).
 While recursion is not idiomatic in Go, recursion is often used for specifications.
-In the end, our goal is to verify the functional correctness of an iterative implementation that can be definen in terms of the pure function.
+In the end, our goal is to verify the functional correctness of an iterative implementation that can be defined in terms of the pure function.
 ``` go
 // @ requires n >= 0
 // @ ensures res == fibonacci(n)
