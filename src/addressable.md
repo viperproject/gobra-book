@@ -38,6 +38,9 @@ property error: got b that is not effective addressable
 ## Shared structs and arrays
 For _shared arrays_ and _shared structs_, their elements or fields can be addressed individually.
 Access can be specified for example to the first element of a shared array with `acc(&a[0])` or to the field `x` of a shared struct `c` with `acc(&c.x)`.
+## Shared structs
+The fields of structs can be addressed individually.
+For example, access can be specified to the field `x` of a shared struct `c` with `acc(&c.x)`.
 
 In the following example, we use structs representing 2D coordinates and implement a method `Scale` to multiply them by a scalar factor.
 ``` go
@@ -55,8 +58,7 @@ func (c *Coord) Scale(factor int) {
 }
 
 func client1() {
-	// c := Coord{1, 2}
-	c /*@@@*/ := Coord{1, 2} // fix: mark c shared
+	c := Coord{1, 2}
 	c.Scale(5)
 	// @ assert c == Coord{5, 10}
 }
@@ -68,8 +70,11 @@ Gobra reports an error if we try to call `Scale` on a non-shared struct.
 `Scale` is defined for a pointer receiver, and here the address of the struct is taken implicitly.
 The error message is instructive, and we can fix this by marking `c` as shared:
 ``` go
-	// c := Coord{1, 2}
-	c /*@@@*/ := Coord{1, 2}
+func client1() {
+	c /*@@@*/ := Coord{1, 2}  // changed
+	c.Scale(5)
+	// @ assert c == Coord{5, 10}
+}
 ```
 
 Composite literals are addressable.
@@ -81,6 +86,8 @@ func client2() {
 	// @ assert *c == Coord{5, 10}
 }
 ```
+
+Shared arrays are similar, we will see an example in a [following section](./quantified-permission.md).
 
 ## Shared parameters (`share`)
 
