@@ -46,20 +46,6 @@ Unlike normal functions, Gobra may peek inside the body of a function.
 For example, `Cube(n)` can be treated as `n * n * n`
 
 ## Side effects and nondeterminism
-<!-- make clear why this is not desirable for specs -->
-<!-- given the same input, produce the same output -->
-<!-- Having a non-deterministic function call in specifications is undesirable. -->
-<!-- not depending on a coin toss, or on the time of the day -->
-<!--``` go
-import "time"
-
-func nonDeterministic() int {
-    return int(time.Now().UnixNano() % 100)
-} ``` -->
-<!-- E.g., consider the following function whose return value depends on the current time. -->
-<!-- Now if we were to define the correctness of another function in terms of this non-deterministic function, it is not even clear how to interpret it. -->
-<!-- Would the verdict of Gobra depend on the time when we verify the function? -->
-<!-- Would the verdict change, if we verify the function again? -->
 Pure functions correspond to mathematical functions, which we use when reasoning about them.
 For example, `assert Cube(2) == 8` and `assert Cube(2) >= 8 && Cube(2) <= 8` are equivalent.
 Now if `Cube` were nondeterministic, the calls `Cube(2)` and `Cube(2)` with the same output might produce different outputs.
@@ -74,30 +60,6 @@ Consider the hypothetical example where a pure function `sideEffect` could incre
 Now if another function `foo` had the precondition `a == sideEffect()`, would we need to account for the side effect once, or for every call of `foo`?
 This is not allowed in any case, since specifications are ghost code, so non-ghost state must not be modified.
 Still, if only ghost state is affected, keeping track of the side effects would break modular reasoning.
-
-<!-- ``` go
-var x = 0
-
-func sideEffect() int {
-    x += 1
-    return 0
-}
-
-// @ requires a == sideEffect()
-func foo(a)
-```
-- modifying memory
-- is ghost code, so should not modify non-ghost state
-- what is more
-- allocating memory: not clear how to interpret this
-
-Although the function `sideEffect` is deterministic, it is not suited for specifications.
-Again, it not clear how a side effect, e.g. modifying or allocating memory, would be interpreted in specifications.
-Also for side effects, e.g. IO, modifying or allocating memory, it is not clear how to interpret them in specs.
-To account, one would need to keep track of global state, which breaks modular reasoning.
-In any case, specifications changing the program state would introduce unsoundness. (non-ghost state)
-Taking side effects into account would break modular 
--->
 
 ## Specifying functional correctness with pure functions
 We define a `pure` function `fibonacci` as a mathematical reference implementation, following the recursive definition of the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence).
