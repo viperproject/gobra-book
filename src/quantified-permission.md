@@ -17,8 +17,6 @@ For shared arrays, using quantified permissions is not compulsory.
 As an array has a fixed number of elements, we could simply list access to each element.
 In the following example, we look at how we can concisely specify access to the elements of a shared array.
 
-functions reversing the elements in arrays and 
-
 We mark the array `a` as [shared with `/*@@@*/`](./addressable.md).
 Now, we may reference it and pass its address to the function `reverseInplace`.
 This function reverses the elements by swapping the first element with the last one, the second element with the second last element, and so on, until the entire array is reversed.
