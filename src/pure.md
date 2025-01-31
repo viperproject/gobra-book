@@ -44,7 +44,7 @@ Note that we may call pure functions in normal (non-ghost) code, unlike ghost fu
 The assertion passes, even without a postcondition.
 Unlike normal functions, Gobra may peek inside the body of a function.
 For example, `Cube(n)` can be treated as `n * n * n`
-
+<!--
 ## Side effects and nondeterminism
 Pure functions correspond to mathematical functions, which we use when reasoning about them.
 For example, `assert Cube(2) == 8` and `assert Cube(2) >= 8 && Cube(2) <= 8` are equivalent.
@@ -60,6 +60,7 @@ Consider the hypothetical example where a pure function `sideEffect` could incre
 Now if another function `foo` had the precondition `a == sideEffect()`, would we need to account for the side effect once, or for every call of `foo`?
 This is not allowed in any case, since specifications are ghost code, so non-ghost state must not be modified.
 Still, if only ghost state is affected, keeping track of the side effects would break modular reasoning.
+-->
 
 ## Specifying functional correctness with pure functions
 We define a `pure` function `fibonacci` as a mathematical reference implementation, following the recursive definition of the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence).
