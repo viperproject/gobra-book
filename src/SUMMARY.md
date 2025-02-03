@@ -34,5 +34,16 @@
 - [Maps](./maps.md)
 - [Variadic functions]()
 
+# Abstraction and Information Hiding
+- [Predicates, `fold`, and `unfold`](./3-predicates.md)
+- [Abstracting memory access with predicates](./3-abstracting-memory.md)
+- [`unfolding` predicates](./3-unfolding.md)
+- [Predicates and fractional permissions](./3-predicates-fractional.md)
+- [Abstraction functions](./3-abstraction-view.md)
+- [Predicates as termination measures](./3-predicate-termination.md)
+- [Full linked list example](./3-full-example.md)
+- [Abstract predicates]()
+
 # Advanced topics
 - [Quantifier Triggers](./triggers.md)
+- [Magic Wands](./magic-wands.md)
