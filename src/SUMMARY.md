@@ -20,5 +20,19 @@
 - [Ghost code](./ghost.md)
 - [Pure functions](./pure.md)
 
+# Reasoning about Memory Accesses with Permissions
+- [Permission to write](./permission-write.md)
+- [Self-framing assertions](./self-framing.md)
+- [Addressability, `@` and sharing](./addressable.md)
+- [Permission to read](./fractional-permissions.md)
+  - [Wildcard permission](./wildcard-permission.md)
+  - [Permission type and parameters](./permission-type.md)
+- [Inhaling and exhaling](./inhale-exhale.md)
+- [Quantified permissions](./quantified-permission.md)
+- [Pure functions and permissions](./permission-pure.md)
+- [Slices](./slices.md)
+- [Maps](./maps.md)
+- [Variadic functions]()
+
 # Advanced topics
 - [Quantifier Triggers](./triggers.md)

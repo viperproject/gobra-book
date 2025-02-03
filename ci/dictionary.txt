@@ -1,4 +1,5 @@
-personal_ws-1.1 en 109 utf-8
+personal_ws-1.1 en 110 utf-8
+Addressability
 Collatz
 Datatypes
 Errorf
@@ -29,6 +30,7 @@ Viper
 Wireguard
 addToSlice
 addToSliceClient
+addressability
 amongst
 arity
 binarySearch
@@ -42,6 +44,7 @@ codebase
 concurrentInc
 cond
 const
+dereference
 docstring
 duplicable
 forall
@@ -54,6 +57,8 @@ halfRoundedUp
 hasNext
 incChannel
 incr
+injective
+injectivity
 inlined
 instantiation
 instantiations
@@ -106,5 +111,6 @@ uintptr
 unapplied
 unbuffered
 untyped
+variadic
 verifier
 vous
