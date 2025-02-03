@@ -8,7 +8,7 @@ ghost
 requires n >= 0
 decreases n
 pure
-func fibonacci(n int) (ghost res int) {
+func fibonacci(n int) int {
     return n <= 1 ? n : fibonacci(n-1) + fibonacci(n-2)
 }
 @*/
@@ -17,7 +17,7 @@ func fibonacci(n int) (ghost res int) {
 // @ ensures res == fibonacci(n)
 func fibIterative(n int) (res int) {
 	a, b := 0, 1
-	//@ (1)
+	// @ (1)
 	for i := 0; i < n; i++ {
 		a, b = b, a+b
 	}
