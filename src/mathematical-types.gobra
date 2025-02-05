@@ -97,9 +97,11 @@ func dicts() {
 	assert len(m1) == 2
 	assert domain(m1) == set[string]{"one", "two"}
 	assert range(m1) == set[int]{1, 2}
-	m2 := m1["three" = 3, "zwei" = 2]
-	// update the map
-	m2["zwei"] = 1
-	assert m2["zwei"] == 1
+	// update dict
+	m2 := m1["three" = 3, "four" = 4]
+	// syntactic sugar for
+	m2 = m2["zwei" = 2]
+	m2["zwei"] = 2
+	assert m2["zwei"] == 2 && m2["three"] == 3 && m2["four"] == 4
 	// ANCHOR_END: dict
 }

@@ -5,7 +5,7 @@ Examples illustrate the syntax and the operations.
 Note that mathematical types are ghost types and may only be used in ghost code.
 
 ## Sequences (`seq`)
-The type `seq[T]` represents an immutable and finite sequence with elements of type `T`.
+The type `seq[T]` represents a finite sequence with elements of type `T`.
 
 | expression `E` | type of `x` | type of `y` | result type of `E` | description                                                                             |
 |----------------|-------------|-------------|--------------------|--------------------------------------------------------------------------------------------|
@@ -41,8 +41,7 @@ The type `seq[T]` represents an immutable and finite sequence with elements of t
 <!-- [gobra-libs for sequences](https://github.com/viperproject/gobra-libs/blob/main/seqs/seqs.gobra) -->
 
 ## Sets (`set`)
-The type `set[T]` represents a [mathematical set](https://en.wikipedia.org/wiki/Set_(mathematics)) with elements of type `T`.
-Sets are immutable.
+The type `set[T]` represents [mathematical sets](https://en.wikipedia.org/wiki/Set_(mathematics)) with elements of type `T`.
 
 | expression `E`     | type of `x` | type of `y` | result type of `E` | description                            |
 |--------------------|-------------|-------------|--------------------|------------------------------------------------|
@@ -73,7 +72,7 @@ Sets are immutable.
 
 
 ## Multisets (`mset`)
-The type `mset[T]` represents immutable [multisets](https://en.wikipedia.org/wiki/Multiset) with elements of type `T`.
+The type `mset[T]` represents [multisets](https://en.wikipedia.org/wiki/Multiset) with elements of type `T`.
 Multisets are like sets but may contain the same element multiple times.
 The multiset operations respect the multiplicities of the elements.
 
@@ -100,7 +99,7 @@ The multiset operations respect the multiplicities of the elements.
 
 
 ## Dictionaries (`dict`)
-The type `dict[K]V` represents a **mutable** dictionary with keys of type `K` and values of type `V`.
+The type `dict[K]V` represents dictionaries with keys of type `K` and values of type `V`.
 
 | expression `E` | type of `x` | type of `y` | result type of `E` | description                                                     |
 |----------------|-------------|-------------|--------------------|-----------------------------------------------------------------|
@@ -109,7 +108,6 @@ The type `dict[K]V` represents a **mutable** dictionary with keys of type `K` an
 | `x == y`       | `dict[K]V`  | `dict[K]V`  | `bool`             | equality                                                        |
 | `x[y]`         | `dict[K]V`  | `K`         | `V`                | lookup the value associated with key `y` [^6]                                                    |
 | `m[x = y]`     | `K`         | `V`         | `dict[K]V`         | dict with additional mapping `(x, y)`, otherwise identical to the dict `m` |
-| `m[x] = y`     | `K`         | `V`         | `dict[K]V`         | mutate the dict `m` by updating/adding the mapping `(x, y)`               |
 | `len(x)`       | `dict[K]V`  |             | int                | number of keys                                                 |
 | `domain(x)`    | `dict[K]V`  |             | `set[K]`           | set of keys                                                     |
 | `range(x)`     | `dict[K]V`  |             | `set[V]`           | set of values                                                   |
