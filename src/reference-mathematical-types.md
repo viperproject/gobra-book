@@ -5,26 +5,26 @@ Examples illustrate the syntax and the operations.
 Note that mathematical types are ghost types and may only be used in ghost code.
 
 ## Sequences (`seq`)
-The type `seq[T]` represents a finite sequence with elements of type `T`.
+The type `seq[T]` represents finite sequences with elements of type `T`.
 
-| expression `E` | type of `x` | type of `y` | result type of `E` | description                                                                             |
-|----------------|-------------|-------------|--------------------|--------------------------------------------------------------------------------------------|
-| `x ++ y`       | `seq[T]`    | `seq[T]`    | `seq[T]`           | concatenation                                                                            |
-| `x == y`       | `seq[T]`    | `seq[T]`    | `bool`             | equality                                                                                   |
-| `x in y`       | `T`         | `seq[T]`    | `bool`             | `true` if and only if `x` is an element of `y`                                              |
-| `seq[T]{}`     |             |             | `seq[T]`           | empty sequence                                                                    |
-| `seq[T]{x, y}` | `T`         | `T`         | `seq[T]`           | literal[^1]                                                                     |
-| `seq[x..y]`    | `I`       | `I`       | `seq[I]` [^2]        | integer sequence \\( [i, i+1, \ldots, j-1] \\)                                             |
-| `len(x)`       | `seq[T]`    |             | `int`              | length                                                                                     |
-| `x[i]`         | `seq[T]`    |             | `T`                | lookup element at index `i` [^3]                                        |
-| `x[i = y]`     | `seq[T]`    | `T`         | `seq[T]`           | creates a sequence with element `y` at index `i`, otherwise identical to `x`. [^3] |
-| `x[i:j]`       | `seq[T]`    |             | `seq[T]`           | sub-sequence [^4] |
-| `seq(x)`       | `seq[T]`    |             | `seq[T]`           | conversion from a sequence                                                                 |
-| `seq(x)`       | `seq[T]`    |             | `[N]T`             | conversion from an array of length `N`                                                     |
+| expression `E` | type of `x` | type of `y` | result type of `E` | description                                                                        |
+|----------------|-------------|-------------|--------------------|------------------------------------------------------------------------------------|
+| `x ++ y`       | `seq[T]`    | `seq[T]`    | `seq[T]`           | concatenation                                                                      |
+| `x[i]`         | `seq[T]`    |             | `T`                | lookup the element at index `i` [^1]                                               |
+| `x == y`       | `seq[T]`    | `seq[T]`    | `bool`             | equality                                                                           |
+| `x in y`       | `T`         | `seq[T]`    | `bool`             | `true` if and only if `x` is an element of `y`                                     |
+| `seq[T]{}`     |             |             | `seq[T]`           | empty sequence                                                                     |
+| `seq[T]{x, y}` | `T`         | `T`         | `seq[T]`           | literal[^2]                                                                        |
+| `seq[x..y]`    | `I`         | `I`         | `seq[I]` [^3]      | integer sequence \\( [x, x+1, \ldots, y-1] \\)                                     |
+| `len(x)`       | `seq[T]`    |             | `int`              | length                                                                             |
+| `x[i = y]`     | `seq[T]`    | `T`         | `seq[T]`           | creates a sequence with element `y` at index `i`, otherwise identical to `x`. [^1] |
+| `x[i:j]`       | `seq[T]`    |             | `seq[T]`           | sub-sequence [^4]                                                                  |
+| `seq(x)`       | `seq[T]`    |             | `seq[T]`           | conversion from a sequence                                                         |
+| `seq(x)`       | `seq[T]`    |             | `[N]T`             | conversion from an array of length `N`                                             |
 
-[^1]: Sequence literals can be constructed with an arbitrary number of elements. The table only contains an example for two elements.
-[^2]: `I` is an arbitrary [integer type](https://go.dev/ref/spec#Numeric_types) (`byte`, `uint8`, `int`, ...)
-[^3]: The indices `i` and `j` are of _integer_ type. Requires `0 <= i && i < len(x)`.
+[^1]: The indices `i` and `j` are of _integer_ type. Requires `0 <= i && i < len(x)`.
+[^2]: Sequence literals can be constructed with an arbitrary number of elements. The table only contains an example for two elements.
+[^3]: `I` is an arbitrary [integer type](https://go.dev/ref/spec#Numeric_types) (`byte`, `uint8`, `int`, ...)
 [^4]: Sub-sequence with elements between index `i` (inclusive) and index `j` (exclusive). If `i < 0` or `i` is omitted, the lower index is treated as 0. If `j > len(x)` or `j` is omitted, the upper index is treated as `len(x)`.
 
 <!-- | `x[i:j]`       | `seq[T]`    |             | `seq[T]`           | sub-sequence \\( [x[i], x[i + 1], \ldots, x[j-1]] \\) | -->
