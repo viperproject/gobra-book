@@ -4,30 +4,45 @@ func sequences()  {
 	// ANCHOR: seq
 	// The empty sequence
 	empty := seq[int]{}
-	// len gives the length of the sequence
+	// Length of the sequence
 	assert len(empty) == 0
 	// Constructing from a literal
 	s := seq[int]{0, 1, 1, 2, 3}
-	// Constructing from a range
+	// Membership check
+	assert 1 in s && !(4 in s)
+	// Lookup
+	assert s[4] == 3
+	// Integer sequence shorthand
 	s1 := seq[0..5]
-	// Comparison with ==
+	// Comparison
 	assert seq[0..5] == seq[int]{0, 1, 2, 3, 4}
-
+	// Works also with other integer types such as byte
+	assert seq[0..2] == seq[byte]{byte(0), byte(1)}
+	assert seq[4..2] == seq[int]{}
 	s2 := seq[5..10]
 	s3 := seq[0..10]
 	// Concatentation of sequences with ++
 	assert s1 ++ s2 == s3
-
-	// Slicing sequences
+	// Subsequences
+	assert s3[0:5] == s1
+	// Omitting the first index
 	assert s3[:5] == s1
-
-	arr := [5]int{0, 1, 2, 3, 4}
+	// Omitting both indices
+	assert s3[:] == s3
+	// No well-defined requirements for sub-sequence indices
+	assert len(s3[5:1]) == 0
+	assert len(s3[-10:20]) == 10
 	// Conversion from an array
+	arr := [5]int{0, 1, 2, 3, 4}
 	s4 := seq(arr)
 	// Conversion from another sequence
-	s5 := seq(s4)
-	assert s4 == s5
-
+	assert s4 == seq(s4)
+	s5 := seq[int]{0, 0, 0}
+	// Create from sequence with update
+	s6 := s5[0 = 2]
+	// The original sequence is not modified (it is immutable)
+	assert s6[0] == 2 && s5[0] == 0
+	assert s5[0 = 2][1 = 4][2 = 8] == seq[int]{2, 4, 8}
 	// ANCHOR_END: seq
 }
 
@@ -41,27 +56,18 @@ func sets() {
 	assert s1 == s2
 	// Cardinality
 	assert len(s1) == len(s2)
-
 	// Conversion from a sequence
 	s3 := set(seq[int]{ 1, 2})
 	// Conversion from a set
 	s4 := set(s1)
-
 	// Membership
-	assert 1 in set[int]{1, 2}
-	assert !(0 in set[int]{1, 2})
-
-	// Subset
+	assert 1 in set[int]{1, 2} && !(0 in set[int]{1, 2})
+	// Set operations
 	assert set[int]{0, 2} subset set[int]{0, 1, 2}
-	// Union
 	assert set[int]{0, 2} union set[int]{1} == set[int]{0, 1, 2}
-	// Intersection
 	assert set[int]{0, 1} intersection set[int]{1, 2} == set[int]{1}
-	// Set difference
 	assert set[int]{0, 1} setminus set[int]{1, 2} == set[int]{0}
-
 	// ANCHOR_END: set
-
 	// TODO Conversion from an option
 }
 
@@ -69,29 +75,33 @@ func multisets() {
 	// ANCHOR: mset
 	m1 := mset[int]{1, 2, 3}
 	m2 := mset[int]{1, 2, 2, 3, 3, 3}
-	assert len(m1) == 3
-	assert len(m2) == 6
-	assert m1 != m2
-
+	assert len(m1) == 3 && len(m2) == 6
 	// Multiplicity
-	assert 2 # m2 == 2
-	assert 3 # m2 == 3
-	assert 4 # m2 == 0
-
-	// TODO conversion form sequence, multiset or option
-
-	// TODO some set operations
-
-	arr := [5]int{0, 1, 2, 3, 4}
-	// Conversion from an array
-	s4 := mset(arr)
-
+	assert 3 # m1 == 1 && 3 # m2 == 3
+	assert 4 # m1 == 0
+	// multiset operations
+	assert mset[int]{0, 1} union mset[int]{1} == mset[int]{0, 1, 1}
+	assert mset[int]{1, 1, 1} intersection mset[int]{1, 1, 2} == mset[int]{1, 1}
+	assert mset[int]{1, 1, 2} setminus mset[int]{1, 2, 2} == mset[int]{1}
+	assert mset[int]{1} subset mset[int]{1, 1}
+	assert !(mset[int]{1, 1} subset mset[int]{1})
 	// ANCHOR_END: mset
+	// TODO Conversion from sequence, multiset or option
 }
 
 
 func dicts() {
-	// TODO
 	// ANCHOR: dict
+	m1 := dict[string]int{ "one": 1, "two": 2}
+	assert m1["one"] == 1
+	assert len(m1) == 2
+	assert domain(m1) == set[string]{"one", "two"}
+	assert range(m1) == set[int]{1, 2}
+	// update dict
+	m2 := m1["three" = 3, "four" = 4]
+	// syntactic sugar for
+	m2 = m2["zwei" = 2]
+	m2["zwei"] = 2
+	assert m2["zwei"] == 2 && m2["three"] == 3 && m2["four"] == 4
 	// ANCHOR_END: dict
 }

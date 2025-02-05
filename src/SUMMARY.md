@@ -47,3 +47,6 @@
 # Advanced topics
 - [Quantifier Triggers](./triggers.md)
 - [Magic Wands](./magic-wands.md)
+
+---
+- [Mathematical types](./reference-mathematical-types.md)
