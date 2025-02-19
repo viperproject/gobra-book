@@ -16,10 +16,10 @@ The following snippet shows the expected results for a test cases:
 ``` go
 ~func main() {
 	arr := [7]int{0, 1, 1, 2, 3, 5, 8}
-	fmt.Println(BinarySearchArr(arr, 2))   // 3 true
-	fmt.Println(BinarySearchArr(arr, 4))   // 5 false
-	fmt.Println(BinarySearchArr(arr, -1))  // 0 false
-	fmt.Println(BinarySearchArr(arr, 10))  // 7 false
+	BinarySearchArr(arr, 2)   // 3 true
+	BinarySearchArr(arr, 4)   // 5 false
+	BinarySearchArr(arr, -1)  // 0 false
+	BinarySearchArr(arr, 10)  // 7 false
 ~}
 ```
 
@@ -222,7 +222,6 @@ func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
 	// @ invariant low > 0 ==> arr[low-1] < target
 	// @ invariant high < len(arr) ==> target <= arr[high]
 	for low < high {
-		// fmt.Println(low, high, arr[:low], arr[low:high], arr[high:])
 		mid = (low + high) / 2
 		if arr[mid] < target {
 			low = mid + 1
@@ -230,7 +229,6 @@ func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
 			high = mid
 		}
 	}
-	// fmt.Println(low, high, arr[:low], arr[low:high], arr[high:])
 	return low, low < len(arr) && arr[low] == target
 }
 ```

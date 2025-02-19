@@ -11,13 +11,11 @@ Go can find out-of-bounds indices for constant values when compiling a program.
 ``` go
 package main
 
-import "fmt"
-
 func main() {
 	a := [5]int{2, 3, 5, 7, 11}
-	fmt.Println(a[-1]) // invalid index (too small)
-	fmt.Println(a[1])  // valid index
-	fmt.Println(a[10]) // invalid index (too large)
+	b1 := a[-1] // invalid index (too small)
+	b2 := a[1]  // valid index
+	b3 := a[10] // invalid index (too large)
 }
 ```
 ``` text
@@ -28,17 +26,15 @@ Unfortunately, the checks that the Go compiler performs may miss simple out-of-b
 ```go
 package main
 
-import "fmt"
-
 func main() {
 	a := [5]int{2, 3, 5, 7, 11}
-	getItem(a, -1)
-	getItem(a, 1)
-	getItem(a, 10)
+	readArr(a, -1)
+	readArr(a, 1)
+	readArr(a, 10)
 }
 
-func getItem(a [5]int, i int) {
-	fmt.Println(a[i]) // error
+func readArr(a [5]int, i int) {
+	b := a[i] // error
 }
 ```
 Go is memory-safe and checks at _runtime_ whether the index is within bounds:
@@ -46,7 +42,7 @@ Go is memory-safe and checks at _runtime_ whether the index is within bounds:
 panic: runtime error: index out of range [-1]
 
 goroutine 1 [running]:
-main.getItem(...)
+main.readArr(...)
         /home/gobra/array.go:20
 ```
 Now if we check the program with Gobra we can find the error statically at _verification time_.
@@ -58,17 +54,14 @@ Index i into a[i] might be negative.
 <!-- and postcondition `ensures v == a[i]`. -->
 The indexing operation `a[i]` implicitly has the precondition
 `requires 0 <= i && i < len(a)`.
-By propagating this precondition to the contract of `getItem`, Gobra accepts the function.
+By propagating this precondition to the contract of `readArr`, Gobra accepts the function.
 ``` go
 // @ requires 0 <= i && i < len(a)
-func getItem(a [5]int, i int) {
+func readArr(a [5]int, i int) {
 	fmt.Println(a[i])
 }
 ```
-Then the calls `getItem(a, -1)` and `getItem(a, 10)` will get rejected.
-<!-- TODO fmt stubs missing (error: got unknown identifier Println)
-There is a punchline missing here. We should show how to fix the verification error for the `getItem` function by adding a precondition and then show that we now have a verification error in the client
--->
+Then the calls `readArr(a, -1)` and `readArr(a, 10)` will get rejected.
 
 > Gobra statically checks that every access to arrays is within bounds.
 

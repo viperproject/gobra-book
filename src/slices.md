@@ -165,7 +165,7 @@ s := []int{1, 2, 3, 4}
 s1 := s[1:]
 // @ assert acc(s1)
 copy(s, s1 /*@, perm(1/2) @*/)
-// fmt.Println(s) // [2 3 4 4]
+// s = [2 3 4 4]
 ```
 ``` text
 ERROR Precondition of call copy(s, s1 , perm(1/2) ) might not hold. 
@@ -257,7 +257,6 @@ func BinarySearch(s []int, target int) (idx int, found bool) {
 	// @ invariant low > 0 ==> s[low-1] < target
 	// @ invariant high < len(s) ==> target <= s[high]
 	for low < high {
-		// fmt.Println(low, high, s[:low], s[low:high], s[high:])
 		mid = (low + high) / 2
 		if s[mid] < target {
 			low = mid + 1
@@ -265,7 +264,6 @@ func BinarySearch(s []int, target int) (idx int, found bool) {
 			high = mid
 		}
 	}
-	// fmt.Println(low, high, s[:low], s[low:high], s[high:])
 	return low, low < len(s) && s[low] == target
 }
 
