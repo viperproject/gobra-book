@@ -44,6 +44,17 @@
 - [Full linked list example](./3-full-example.md)
 - [Abstract predicates]()
 
+# Interfaces
+- [Behavioral subtypes](./04/behavioral.md)
+- [Type assertions, `typeOf`](./04/type.md)
+- [Predicate interface members](./04/predicates.md)
+- [Implementation proofs (`implements`)](./04/implements.md)
+- [Case study: `sort.Interface`](./04/sort.md)
+- [Interfaces and termination](./04/termination.md)
+- [Comparable interfaces, `isComparable`](./04/comparable.md)
+- [The `error` interface]()
+- [Full example: `image`](./04/image.md)
+
 # Advanced topics
 - [Quantifier Triggers](./triggers.md)
 - [Magic Wands](./magic-wands.md)
