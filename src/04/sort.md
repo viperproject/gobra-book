@@ -1,6 +1,10 @@
 # Case study: `sort.Interface`
 
-In this section, we deepen the concepts introduced in the previous sections on interfaces on a larger example from the Go standard library.
+> TODO
+> This section might change.
+> To specify a sort algorithm we might have to change the specs for `View` and the requirements for `Less`.
+
+In this section, we deepen the concepts introduced in the previous sections on interfaces with a larger example from the Go standard library.
 
 The interface `Interface` is used for various sorting routines in the [sort package](https://pkg.go.dev/sort).
 This interface describes a collection with a length, where elements can be compared and swapped.
@@ -12,7 +16,7 @@ We extend the interface with a `View` method abstracting the collection to a seq
 ``` go
 {{#include ./sort.go:Interface}}
 ```
-A pure and ghost analogue `LessSpec` of the `Less` method is defined such that we can use it in specifications.
+A pure and ghost analogue, `LessSpec`, of the `Less` method is defined so that we can use it in specifications.
 To couple them together, the result of calling `Less` is equivalent to the result of calling `LessSpec` in that state (`res == old(LessSpec(i, j))`).
 
 
@@ -28,7 +32,7 @@ The `ghost` methods `LessIsConnected` and `LessIsTransitive` formalize the requi
 ``` go
 {{#include ./sort.go:LessDoc}}
 ```
-To implement the interface, one must implement these ghost methods, or equivalently proof the lemmas that the ordering is [connected](https://en.wikipedia.org/wiki/Connected_relation) and transitive.
+To implement the interface, one must implement these ghost methods, or equivalently prove the lemmas that the ordering is [connected](https://en.wikipedia.org/wiki/Connected_relation) and transitive.
 
 ``` go
 {{#include ./sort.go:InterfaceLessIsConnected}}
@@ -36,8 +40,8 @@ To implement the interface, one must implement these ghost methods, or equivalen
 {{#include ./sort.go:InterfaceLessIsTransitive}}
 ```
 
-Note that in the postcondition of `LessIsConnected` we compare the sequence elements with the ghost comparison `===` which compares values of arbitrary types by identity.
-If we used the normal equality `==` instead, Gobra reports an error since the sequence contains elements of type `any` which might not be comparable.
+Note that in the postcondition of `LessIsConnected` we compare the sequence elements using the ghost comparison `===` which compares values of arbitrary types by identity.
+If we used the normal equality `==` instead, Gobra reports an error since the sequence contains elements of type `any` which might not be directly comparable.
 ``` go
 // ...
 // @ ensures let view := old(View()) in view[i] == view[j]
@@ -82,7 +86,7 @@ With the helper function `viewAux` we recursively construct the sequence while b
 {{#include ./sort.go:IntSliceView}}
 ```
 
-`Len` and `Swap` are implemented straightforward as the corresponding operations on the `IntSlice`.
+`Len` and `Swap` are implemented straightforwardly as the corresponding operations on the `IntSlice`.
 We only have to add `fold` and `unfold` statements to convert between the `Mem` predicate and the permissions to the slice.
 ``` go
 {{#include ./sort.go:IntSliceLen}}
@@ -96,7 +100,7 @@ As the contracts of the implementation methods match the contracts of the interf
 {{#include ./sort.go:IntSliceImplements}}
 ```
 
-Having implemented `Interface` we may now call `IsSorted(x)` with `IntSlice` values:
+Having implemented `Interface`, we may now call `IsSorted(x)` with `IntSlice` values:
 ``` go
 {{#include ./sort.go:client}}
 ```
