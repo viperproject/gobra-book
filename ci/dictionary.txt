@@ -1,4 +1,4 @@
-personal_ws-1.1 en 116 utf-8
+personal_ws-1.1 en 117 utf-8
 Addressability
 Collatz
 Datatypes
@@ -102,6 +102,7 @@ struct
 structs
 subarray
 subtype
+subtypes
 sumPair
 testPred
 testPredFail
