@@ -30,9 +30,36 @@ package image
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ANCHOR: Color
+/*@
+ghost type rgba ghost struct {
+	r, g, b, a uint32
+}
+
+ghost
+pure
+decreases
+func (c rgba) ColorRange() bool {
+	return 0 <= c.r && c.r <= c.a && 0 <= c.g && c.g <= c.a &&
+		0 <= c.b && c.b <= c.a && c.a <= 0xffff
+}
+@*/
+
 // Color can convert itself to alpha-premultiplied 16-bits per channel RGBA.
 // The conversion may be lossy.
 type Color interface {
+	// Returns true if the implementation holds a valid color.
+	// @ ghost
+	// @ pure
+	// @ decreases
+	// @ Valid() bool
+
+	// @ ghost
+	// @ requires Valid()
+	// @ ensures c.ColorRange()
+	// @ pure
+	// @ decreases
+	// @ RGBASpec() (ghost c rgba)
+
 	// RGBA returns the alpha-premultiplied red, green, blue and alpha values
 	// for the color. Each value ranges within [0, 0xffff], but is represented
 	// by a uint32 so that multiplying by a blend factor up to 0xffff will not
@@ -40,13 +67,13 @@ type Color interface {
 	//
 	// An alpha-premultiplied color component c has been scaled by alpha (a),
 	// so has valid values 0 <= c <= a.
-	// @ ensures r <= 0xffff && g <= 0xffff && b <= 0xffff && a <= 0xffff
-	// @ ensures 0 <= r && r <= a && 0 <= g && g <= a && 0 <= b && b <= a
+	// @ preserves Valid()
+	// @ ensures RGBASpec() == rgba{r, g, b, a}
 	RGBA() (r, g, b, a uint32)
 }
 
-// source: https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/image/color/color.go;l=10
 // ANCHOR_END: Color
+// source: https://cs.opensource.google/go/go/+/refs/tags/go1.24.0:src/image/color/color.go;l=10
 
 // ANCHOR: Alpha16
 // Alpha16 represents a 16-bit alpha color.
@@ -54,56 +81,45 @@ type Alpha16 struct {
 	A uint16
 }
 
-// @ ensures r <= 0xffff && g <= 0xffff && b <= 0xffff && a <= 0xffff
-// @ ensures 0 <= r && r <= a && 0 <= g && g <= a && 0 <= b && b <= a
+/*@
+ghost
+pure
+requires c.Valid()
+ensures res.ColorRange()
+decreases
+func (c Alpha16) RGBASpec() (res rgba) {
+	return let a := uint32(c.A) in rgba{a, a, a, a}
+}
+@*/
+
+/*@
+ghost
+decreases
+pure func (c Alpha16) Valid() bool {
+	return 0 <= c.A && c.A <= 0xffff
+}
+@*/
+
+// @ preserves c.Valid()
+// @ ensures c.RGBASpec() == rgba{r, g, b, a}
 func (c Alpha16) RGBA() (r, g, b, a uint32) {
-	// TODO: can we do this without the inhale?
-	// @ inhale 0 <= c.A && c.A <= 0xffff // c.A : uint16
 	a = uint32(c.A)
 	return a, a, a, a
 }
 
 // ANCHOR_END: Alpha16
 
-// ANCHOR: client1
-func client1Alpha() {
-	var c Color
-	c = Alpha16{0xffff}
-	r, _, _, a := c.RGBA()
-	// @ assert 0 <= a && r <= a
-}
-
-// ANCHOR_END: client1
-
-// ANCHOR: Constant
-type Constant struct{}
-
-// @ ensures r == 0x0 && g == 0xffff && b == 0xffff && a == 0xffff
-func (c Constant) RGBA() (r, g, b, a uint32) {
-	return 0x0, 0xffff, 0xffff, 0xffff
-}
-
-func client1Constant() {
-	var c Color
-	c = Constant{}
-	r, _, _, a := c.RGBA()
-	// @ assert 0 <= a && r <= a
-}
-
-// ANCHOR_END: Constant
-// @ Constant implements Color
-
 // ANCHOR: Model
 // Model can convert any [Color] to one from its own color model. The conversion
 // may be lossy.
 type Model interface {
-	// @ requires c != nil
-	Convert(c Color) Color
+	// @ requires c != nil && c.Valid()
+	// @ ensures res != nil && res.Valid()
+	Convert(c Color) (res Color)
 }
 
 // ANCHOR_END: Model
 
-// TODO can we better represent this?
 // Go stdlib uses the following, which is not legal in Gobra.
 // var Alpha16Model Model = ModelFunc(alpha16Model)
 
@@ -112,7 +128,8 @@ type alpha16Model struct{}
 
 var Alpha16Model alpha16Model
 
-// @ requires c != nil
+// @ requires c != nil && c.Valid()
+// @ ensures res != nil && res.Valid()
 // @ ensures typeOf(res) == type[Alpha16]
 func (_ alpha16Model) Convert(c Color) (res Color) {
 	if _, ok := c.(Alpha16); ok {
@@ -123,6 +140,7 @@ func (_ alpha16Model) Convert(c Color) (res Color) {
 }
 
 // ANCHOR_END: alpha16Model
+// @ alpha16Model implements Model
 
 // ANCHOR: Geometry
 // A Point is an X, Y coordinate pair. The axes increase right and down.
@@ -130,17 +148,9 @@ type Point struct {
 	X, Y int
 }
 
-/*@
-pure
-decreases
-func (p Point) InSpec(r Rectangle) bool {
-	return r.Min.X <= p.X && p.X < r.Max.X &&
-		r.Min.Y <= p.Y && p.Y < r.Max.Y
-}
-@*/
-
 // In reports whether p is in r.
-// @ ensures res == p.InSpec(r)
+// @ pure
+// @ decreases
 func (p Point) In(r Rectangle) (res bool) {
 	return r.Min.X <= p.X && p.X < r.Max.X &&
 		r.Min.Y <= p.Y && p.Y < r.Max.Y
@@ -161,46 +171,44 @@ type Rectangle struct {
 // ANCHOR_END: Geometry
 
 // ANCHOR: Image
-// Image is a finite rectangular grid of [color.Color] values taken from a color
+// Image is a finite rectangular grid of [Color] values taken from a color
 // model.
 type Image interface {
 	// Mem represents the access to the memory of the Image
-	// @ pred Mem()
+	// @ pred Mem()	// <----- Predicate member
 
+	// Invariant that holds for valid images
 	// @ ghost
 	// @ pure
-	// @ requires acc(Mem(), 1/2)
+	// @ requires acc(Mem(), _)
 	// @ decreases
 	// @ Inv() bool
 
 	// ColorModel returns the Image's color model.
-	ColorModel() Model // color.Model
+	ColorModel() Model
+
 	// ANCHOR: ImageBounds
 	// Bounds returns the domain for which At can return non-zero color.
 	// The bounds do not necessarily contain the point (0, 0).
-	// @ preserves acc(Mem(), 1/2)
-	// @ preserves Inv()
+	// @ requires acc(Mem(), _)
+	// @ pure
+	// @ decreases
 	Bounds() (r Rectangle)
 	// ANCHOR_END: ImageBounds
+
 	// At returns the color of the pixel at (x, y).
 	// At(Bounds().Min.X, Bounds().Min.Y) returns the upper-left pixel of the grid.
 	// At(Bounds().Max.X-1, Bounds().Max.Y-1) returns the lower-right one.
-
 	// @ preserves acc(Mem(), 1/2)
 	// @ preserves Inv()
-	At(x, y int) Color // color.Color
+	// @ ensures c != nil && c.Valid()
+	// @ ensures !Point{x, y}.In(Bounds()) ==> (c.RGBASpec() == rgba{})
+	At(x, y int) (c Color)
 }
 
 // ANCHOR_END: Image
 
 // ANCHOR: RectImpl
-// ANCHOR: standard
-var (
-	Transparent = Alpha16{0}
-	Opaque      = Alpha16{0xffff}
-)
-
-// ANCHOR_END: standard
 /*@
 // Mem implements the [Image] interface.
 pred (r Rectangle) Mem() {
@@ -221,24 +229,35 @@ func (r Rectangle) ColorModel() Model {
 }
 
 // Bounds implements the [Image] interface.
-// @ preserves acc(r.Mem(), 1/2)
-// @ preserves r.Inv()
-func (r Rectangle) Bounds() Rectangle {
+// @ requires acc(r.Mem(), _)
+// @ pure
+// @ decreases
+func (r Rectangle) Bounds() (res Rectangle) {
 	return r
 }
 
 // At implements the [Image] interface.
 // @ preserves acc(r.Mem(), 1/2)
 // @ preserves r.Inv()
+// @ ensures c != nil && c.Valid()
+// @ ensures Point{x, y}.In(r.Bounds()) == (c.RGBASpec() != rgba{})
 func (r Rectangle) At(x, y int) (c Color) {
 	if (Point{x, y}).In(r) {
-		return Opaque
+		return Alpha16{0xffff} // Opaque
 	}
-	return Transparent
+	return Alpha16{0} // Transparent
 }
 
-// ANCHOR_END: RectImpl
 // @ Rectangle implements Image
+// ANCHOR_END: RectImpl
+
+var (
+	Transparent = Alpha16{0}
+	Opaque      = Alpha16{0xffff}
+)
+
+// cannot return them in (r Rectangle) At
+// Valid might not be asserted for these global variables
 
 // ANCHOR: Alpha16Image
 
@@ -264,11 +283,11 @@ pred (p *Alpha16Image) Mem() {
 // ANCHOR: Alpha16ImageInv
 /*@
 ghost
-requires acc(p.Mem(), 1/2)
+requires acc(p.Mem(), _)
 pure
 decreases
 func (p *Alpha16Image) Inv() bool {
-	return unfolding acc(p.Mem(), 1/2) in (2 * (p.Rect.Max.X - p.Rect.Min.X) == p.Stride && p.Stride * (p.Rect.Max.Y - p.Rect.Min.Y) == len(p.Pix))
+	return unfolding acc(p.Mem(), _) in (2*(p.Rect.Max.X-p.Rect.Min.X) == p.Stride && p.Stride * (p.Rect.Max.Y-p.Rect.Min.Y) == len(p.Pix))
 }
 @*/
 // ANCHOR_END: Alpha16ImageInv
@@ -277,20 +296,20 @@ func (p *Alpha16Image) Inv() bool {
 
 func (p *Alpha16Image) ColorModel() Model { return Alpha16Model }
 
-// @ preserves acc(p.Mem(), 1/2)
-// @ preserves p.Inv()
+// @ requires acc(p.Mem(), _)
+// @ pure
+// @ decreases
 func (p *Alpha16Image) Bounds() (r Rectangle) {
-	// @ unfold acc(p.Mem(), 1/2)
-	r = p.Rect
-	// @ fold acc(p.Mem(), 1/2)
-	return
+	return /*@ unfolding acc(p.Mem(), _) in @*/ p.Rect
 }
 
 // @ requires acc(p.Mem(), 1/2)
 // @ requires p.Inv()
 // @ ensures acc(p.Mem(), 1/2)
 // @ ensures p.Inv()
-func (p *Alpha16Image) At(x, y int) (res Color) {
+// @ ensures c != nil && c.Valid()
+// @ ensures !Point{x, y}.In(p.Bounds()) ==> (c.RGBASpec() == rgba{})
+func (p *Alpha16Image) At(x, y int) (c Color) {
 	// @ unfold acc(p.Mem(), 1/2)
 	if !(Point{x, y}.In(p.Rect)) {
 		// @ fold acc(p.Mem(), 1/2)
@@ -299,37 +318,25 @@ func (p *Alpha16Image) At(x, y int) (res Color) {
 	// @ fold acc(p.Mem(), 1/2)
 	i := p.PixOffset(x, y)
 	// @ unfold acc(p.Mem(), 1/2)
-	// @ assert 0 <= i && i < len(p.Pix)
-	res = Alpha16{uint16(p.Pix[i+0])<<8 | uint16(p.Pix[i+1])}
+	c = Alpha16{uint16(p.Pix[i+0])<<8 | uint16(p.Pix[i+1])}
+	// @ inhale c.Valid()	// TODO
 	// @ fold acc(p.Mem(), 1/2)
 	return
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
 // the pixel at (x, y).
-// @ requires acc(p.Mem(), 1/2)
-// @ requires unfolding acc(p.Mem(), 1/2) in Point{x, y}.InSpec(p.Rect)
+// @ requires acc(p.Mem(), 1/4)
 // @ requires p.Inv()
-// @ ensures acc(p.Mem(), 1/2)
+// @ requires Point{x, y}.In(p.Bounds())
+// @ ensures acc(p.Mem(), 1/4)
 // @ ensures p.Inv()
-// @ ensures unfolding acc(p.Mem(), 1/2) in 0 <= offset && offset < len(p.Pix) - 1
+// @ ensures unfolding acc(p.Mem(), 1/4) in 0 <= offset && offset < len(p.Pix)-1
 func (p *Alpha16Image) PixOffset(x, y int) (offset int) {
-	// @ unfold acc(p.Mem(), 1/2)
+	// @ unfold acc(p.Mem(), 1/4)
 	offset = (y-p.Rect.Min.Y)*p.Stride + (x-p.Rect.Min.X)*2
-	// @ ghost var height = p.Rect.Max.Y - p.Rect.Min.Y
-	// @ ghost var dy = y-p.Rect.Min.Y
-	// @ ghost var dx = (x-p.Rect.Min.X) * 2
-	// @ assert offset == dy * p.Stride + dx
-	// @ assert 0 <= dx && 0 <= dy && 0 <= offset
-	// @ assert dy <= height - 1
-	// @ assert dx <= p.Stride - 2
-	// @ LemmaMulPos(dy, height - 1, p.Stride)
-	// @ assert dy * p.Stride <= (height - 1) * p.Stride
-	// @ assert dy * p.Stride + dx <= (height - 1) * p.Stride + dx
-	// @ assert offset <= (height - 1) * p.Stride + p.Stride - 2
-	// @ assert offset <= height * p.Stride - 2
-	// @ assert offset <= len(p.Pix) - 2
-	// @ fold acc(p.Mem(), 1/2)
+	// @ LemmaMulPos(y-p.Rect.Min.Y, p.Rect.Max.Y-p.Rect.Min.Y-1, p.Stride)
+	// @ fold acc(p.Mem(), 1/4)
 	return
 }
 
@@ -341,8 +348,26 @@ ensures a * c <= b * c
 decreases
 func LemmaMulPos(a, b, c int) {}
 @*/
+
 // ANCHOR_END: Alpha16ImageMethods
 
-// @ (*Alpha16Image) implements Image
+// ANCHOR: Alpha16Client
+func clientAlpha() {
+	var i Image
+	a := &Alpha16Image{
+		Pix:    []uint8{0x0, 0x0, 0xff, 0xff, 0xff, 0xff, 0x0, 0x0},
+		Stride: 4,
+		Rect:   Rectangle{Point{0, 0}, Point{2, 2}},
+	}
+	// @ fold a.Mem()
+	i = a
+	i.ColorModel()
+	// @ assert i.Inv()
+	c := i.At(-1, 0)
+	// @ assert(c.RGBASpec() == rgba{})
+}
+
+// ANCHOR_END: Alpha16Client
 
 // ANCHOR_END: all
+// @ (*Alpha16Image) implements Image

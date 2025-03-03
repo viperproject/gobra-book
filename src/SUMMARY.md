@@ -48,7 +48,7 @@
 - [Behavioral subtypes](./04/behavioral.md)
 - [`nil` interface values](./04/nil.md)
 - [Type assertions, `typeOf`](./04/type.md)
-- [Predicate interface members](./04/predicates.md)
+- [Abstracting memory with predicate interface members](./04/mem.md)
 - [Implementation proofs (`implements`)](./04/implements.md)
 - [Case study: `sort.Interface`](./04/sort.md)
 - [Interfaces and termination](./04/termination.md)
