@@ -37,10 +37,12 @@ func (l *List) Comparable() bool {
 // @ requires l.Comparable()
 // @ pure
 // @ decreases l.Mem()
+// ANCHOR: Contains1
 func (l *List) Contains(value interface{}) bool {
 	return /*@ unfolding acc(l.Mem(), 1/2) in @*/ l != nil && (l.Value == value || l.next.Contains(value))
 }
 
+// ANCHOR_END: Contains1
 // ANCHOR_END: Contains
 
 // ANCHOR: client
@@ -60,11 +62,20 @@ func client() {
 
 // ANCHOR: isComparable
 func compare(x any) {
-	x = 5
 	// @ assert !isComparable(type[[]int])
 	// @ assert isComparable(type[string])
+	x = 5
 	// @ assert isComparable(x)
 }
 
 // ANCHOR_END: isComparable
+// ANCHOR: main
+func main() {
+	var x any = []int{1, 2}
+	var y any = []int{3}
+	if x == y { // error
+	}
+}
+
+// ANCHOR_END: main
 // ANCHOR_END: all
