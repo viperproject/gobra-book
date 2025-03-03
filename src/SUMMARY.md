@@ -46,6 +46,7 @@
 
 # Interfaces
 - [Behavioral subtypes](./04/behavioral.md)
+- [`nil` interface values](./04/nil.md)
 - [Type assertions, `typeOf`](./04/type.md)
 - [Predicate interface members](./04/predicates.md)
 - [Implementation proofs (`implements`)](./04/implements.md)

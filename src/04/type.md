@@ -1,55 +1,5 @@
 # Type assertions, `typeOf`
 
-## `nil` interface values
-A `nil` interface value holds neither value nor concrete type [[1]](https://go.dev/tour/methods/13).
-In the following example, the variable `c` is not assigned.
-``` go
-{{#include ./imageFail.go:ConvertFail}}
-```
-Go panics with a run-time error if a method is called on a `nil` interface value.
-Holding no concrete type, there is no way to lookup which concrete method to call.
-``` text
-panic: runtime error: invalid memory address or nil pointer dereference
-```
-Gobra statically reports an error instead:
-``` text
-ERROR Precondition of call c.RGBA() might not hold. 
-
-The receiver might be nil
-```
-
-Note that an interface variable holding a concrete type is non-nil, even when the concrete value is `nil`.
-In the following example, `*S` implements the interface `I`.
-The first two assertion pass since `i` has the dynamic type `*S`.
-Hence, it is legal to call the method `M`.
-The receiver `(s *S)` might be nil, so the last assertion fails:
-``` go
-package main
-
-type I interface {
-	M()
-}
-
-func main() {
-	var i I = (*S)(nil)
-	// @ assert i != nil
-	// @ assert typeOf[i] == type[*S]
-	i.M()
-}
-
-type S struct{ x int }
-
-func (s *S) M() {
-	// @ assert s != nil	// error
-}
-```
-``` text
-ERROR Assert might fail.
-Assertion s != nil might not hold.
-```
-
-
-## TODO good name
 Another interface from the image package of the Go standard library is the `Model`, to convert between different color models (possibly lossy).
 
 ``` go
