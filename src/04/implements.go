@@ -47,7 +47,6 @@ func (p *Alpha16Image) Bounds() (r Rectangle) {
 }
 
 // ANCHOR_END: Alpha16Bounds
-
 // ANCHOR_END: Alpha16ImageImpl
 
 // ANCHOR: BoundsProof
@@ -63,8 +62,10 @@ func (p *Alpha16Image) Bounds() (r Rectangle) {
 @*/
 // ANCHOR_END: BoundsProof
 
+// @ requires a.Mem()
 func client(a *Alpha16Image) {
-	var i Bounded = a
+	var b Bounded = a
+	b.Bounds()
 }
 
 // ANCHOR_END: all
