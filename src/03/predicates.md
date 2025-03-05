@@ -65,7 +65,7 @@ A predicate instance is not equivalent to its body
 and we must explicitly exchange between the two with the `fold` and `unfold` statements, which we study next.
 
 
-## Constructing predicates with `fold`
+## Creating predicate instances with `fold`
 The `fold` statement exchanges the body of a predicate for a predicate instance.
 In the following example we allocate a new list and highlight with `assert`s that the assertion from the body of `elements` holds for `l`.
 With the statement `fold elements(l)` we exchange these for the predicate instance `elements(l)` as a token representing access to the list.
@@ -92,7 +92,7 @@ We can fix this by requiring `elements(tail)` if `tail != nil`.
 {{#include list.go:foldsucceed}}
 ```
 
-## Unwrapping predicates with `unfold`
+## Unwrapping predicate instances with `unfold`
 The `unfold` statement exchanges a predicate instance with its body.
 ``` go
 {{#include list.go:unfold}}
