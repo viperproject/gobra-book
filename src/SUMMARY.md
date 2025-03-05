@@ -55,6 +55,14 @@
 - [The `error` interface]()
 - [Full example: `image`](./04/image.md)
 
+# Concurrency
+- [Goroutines](./05/goroutine.md)
+- [First-class predicates](./05/first-class-predicates.md)
+- [Reasoning about mutual exclusion with `sync.Mutex`](./05/mutex.md)
+- [`defer`](./05/defer.md)
+- [Share memory by communicating over channels]()
+- [Waiting on goroutines with `sync.WaitGroup`]()
+
 # Advanced topics
 - [Quantifier Triggers](./triggers.md)
 - [Magic Wands](./magic-wands.md)
