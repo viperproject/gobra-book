@@ -59,7 +59,7 @@
 - [Goroutines](./05/goroutine.md)
 - [First-class predicates](./05/first-class-predicates.md)
 - [Reasoning about mutual exclusion with `sync.Mutex`](./05/mutex.md)
-- [`defer`](./05/defer.md)
+- [`defer` statements](./05/defer.md)
 - [Share memory by communicating over channels]()
 - [Waiting on goroutines with `sync.WaitGroup`]()
 
