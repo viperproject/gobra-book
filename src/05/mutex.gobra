@@ -1,0 +1,48 @@
+// ANCHOR: all
+// Copyright 2009 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in https://golang.org/LICENSE
+
+// ANCHOR: Mutex
+package sync
+
+type Mutex struct {
+	state int32
+	stema uint32
+}
+// ANCHOR_END: Mutex
+
+// ANCHOR: LockP
+pred (m *Mutex) LockP()
+pred (m *Mutex) UnlockP()
+// ANCHOR_END: LockP
+
+// ANCHOR: LockInv
+ghost
+requires acc(m.LockP(), _)
+decreases _
+pure func (m *Mutex) LockInv() pred()
+// ANCHOR_END: LockInv
+
+// ANCHOR: SetInv
+ghost
+requires inv() && acc(m) && *m == Mutex{}
+ensures m.LockP() && m.LockInv() == inv
+decreases
+func (m *Mutex) SetInv(ghost inv pred())
+// ANCHOR_END: SetInv
+
+// ANCHOR: Lock
+requires acc(m.LockP(), _)
+ensures m.LockP() && m.UnlockP() && m.LockInv()()
+func (m *Mutex) Lock()
+// ANCHOR_END: Lock
+
+// ANCHOR: Unlock
+requires acc(m.LockP(), _) && m.UnlockP() && m.LockInv()()
+ensures m.LockP()
+decreases
+func (m *Mutex) Unlock()
+// ANCHOR_END: Unlock
+
+// ANCHOR_END: all
