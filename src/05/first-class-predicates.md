@@ -14,8 +14,9 @@ A first-class predicate of type `pred(T1, ..., Tn)` has an arity of `n` with cor
 
 To instantiate a first-class predicate, Gobra provides *predicate constructors*.
 A predicate constructor `P!<d1, ..., dn!>` partially applies a declared predicate `P` with the constructor arguments `d1, ..., dn`.
-A constructor argument is either an expression or a wildcard `_`, symbolizing that this argument of `P` remains unapplied.
-In particular, the type of `P!<d1, ..., dn!>` is `pred(u1,...,uk)`, where `u1,...,uk` are the types of the unapplied arguments.
+A constructor argument is either a pure expression or a wildcard `_`, symbolizing that this argument of `P` remains unapplied.
+In particular, the type of `P!<d1, ..., dn!>` is `pred(u1, ..., uk)`, where `u1, ..., uk` are the types of the unapplied arguments.
+
 As an example, consider the declared predicate `pred sameValue(i1 int8, i2 uint32){ ... }`.
 The predicate constructor `sameValue!<int8(1), _!>` has type `pred(uint32)`, since the first argument is applied and the second is not.
 Conversely, `sameValue!<_, uint32(1)!>` has type `pred(int8)`.
