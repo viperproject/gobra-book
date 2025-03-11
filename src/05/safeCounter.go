@@ -36,21 +36,6 @@ func (c *SafeCounter) Increment() {
 
 // ANCHOR_END: Increment
 
-// ANCHOR: Get
-// @ requires acc(c.Mem(), 1/4)
-// @ ensures acc(c.Mem(), 1/4)
-func (c *SafeCounter) Get() int {
-	// @ unfold acc(c.Mem(), 1/4)
-	// @ defer fold acc(c.Mem(), 1/4) // <-----
-	c.mu.Lock()
-	defer c.mu.Unlock() // <-----
-	// @ unfold mutexInvariant!<&c.count!>()
-	// @ defer fold mutexInvariant!<&c.count!>() // <-----
-	return c.count
-}
-
-// ANCHOR_END: Get
-
 // ANCHOR: New
 // @ ensures s.Mem()
 func New() (s *SafeCounter) {
@@ -71,6 +56,8 @@ func main() {
 
 // ANCHOR_END: main
 
+// ANCHOR_END: all
+
 // ANCHOR: client
 func client() {
 	ctr := New()
@@ -81,8 +68,20 @@ func client() {
 }
 
 // ANCHOR_END: client
+// ANCHOR: Get
+// @ requires acc(c.Mem(), 1/4)
+// @ ensures acc(c.Mem(), 1/4)
+func (c *SafeCounter) Get() int {
+	// @ unfold acc(c.Mem(), 1/4)
+	// @ defer fold acc(c.Mem(), 1/4) // <-----
+	c.mu.Lock()
+	defer c.mu.Unlock() // <-----
+	// @ unfold mutexInvariant!<&c.count!>()
+	// @ defer fold mutexInvariant!<&c.count!>() // <-----
+	return c.count
+}
 
-// ANCHOR_END: all
+// ANCHOR_END: Get
 
 // ANCHOR: WG
 // func client2() {

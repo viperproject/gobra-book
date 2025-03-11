@@ -1,19 +1,21 @@
 # Reasoning about mutual exclusion with `sync.Mutex`
 
-In this section, we study the lock [`Mutex`](https://pkg.go.dev/sync#Mutex) from Go's standard library, providing mutual exclusion.
+In this section, we study the [`Mutex` lock from Go's standard library](https://pkg.go.dev/sync#Mutex).
 As an example, we implement and specify `SafeCounter`, a variation of the `Counter` from the [goroutines example](./goroutine.md) that is safe to use concurrently.
-Hence, at most one goroutine can modify the field `count` at a time.
+We use `Mutex` to guarantee mutual exclusion, ensuring that at most one goroutine can modify the field `count` at a time.
 ``` go
 {{#include ./safeCounter.go:import}}
 {{#include ./safeCounter.go:SafeCounter}}
 ```
 
-The `mutexInvariant` predicate defines resources that are protected by the `Mutex`.
-In this case, it specifies the memory location where `count` is stored.
-
 The `Mem` predicate for `*SafeCounter` does not directly contain access permissions, 
-but access to the resource `c.mu.LockP()` that will allow us to `Lock` the lock.
-Additionally, `c.mu.LockInv() == mutexInvariant!<&c.count!>` specifies which invariant is associated with the mutex.
+but access to the resource `c.mu.LockP()` that will allow us to `Lock` the mutex.
+Additionally, `c.mu.LockInv() == mutexInvariant!<&c.count!>` specifies the invariant associated with the mutex.
+`LockInv` returns a [first-class predicate](./first-class-predicates.md) which we compare with the predicate constructor applied with the memory location where `count` is stored.
+If we unlock we will get access to an instance of this predicate, allowing us to modify `&c.count`.
+To lock, we will have to give up this a predicate instance again.
+
+<!-- TODO get the permissions only between Lock and Unlock -->
 <!-- first-class predicate comparison -->
 
 When we import the `sync` package, the 
@@ -42,10 +44,10 @@ Since no bodies are provided, the contracts are assumed to hold.
 In the case of `Mutex`, the specification models the mutual exclusion property.
 
 The ghost method `SetInv` can be called to initialize a mutex.
-Access to the mutex (`acc(m)`) is required and the mutex is zero-valued (`*m == Mutex{}`).
-This access is lost, so we may not "tamper" the lock after initialization.
-To associate the predicate `inv` with the lock, we need to give up access to `inv()`.
-Afterwards, `LockInv` returns the predicate `inv` and we obtain access to the resource `m.LockP()`.
+Access to the mutex (`acc(m)`) is required and the mutex is zero-valued (`*m == Mutex{}`, it has not been locked yet).
+`acc(m)` is lost, so we may not "tamper" the lock after initialization.
+To associate the first-class predicate `inv` with the lock, we need to give up access to an instance `inv()` of it.
+Afterwards, `LockInv` returns the first-class predicate `inv` and we obtain access to the resource `m.LockP()`.
 ``` go
 {{#include ./safeCounter.go:New}}
 ```
@@ -54,16 +56,16 @@ we first fold the first-class predicate `mutexInvariant<!&c.count!>` that denote
 Then, we associate this invariant with the mutex using `SetInv`.
 Finally, we can fold the `Mem` predicate for the `SafeCounter`.
 
-This way, clients again only require holding `s.Mem()` predicates and we can hide the implementation detail of how access is synchronized with a Mutex, enforcing the information hiding principle.
+This way, clients only require holding `s.Mem()` predicates and we can hide the implementation detail of how access is synchronized with a Mutex, again enforcing the information hiding principle.
 
-Before we can annotate the `Increment` method, consider the specifications of `Lock` and `Unlock`:
+Before we annotate the `Increment` method, consider the specifications of `Lock` and `Unlock`:
 ``` gobra
 {{#include ./mutex.gobra:Lock}}
 
 {{#include ./mutex.gobra:Unlock}}
 ```
-To call either `Lock` or `Unlock`, `acc(m.LockP(), _)` is required and must have been obtained by `SetInv`.
-Since the predicate `LockP` is abstract (it has no body), there is no way for a client to obtain an instance by folding.
+To call either `Lock` or `Unlock`, `acc(m.LockP(), _)` is required.
+Since the predicate `LockP` is abstract (it has no body), there is no way for a client to obtain an instance by folding and must have been obtained by `SetInv`.
 We may only call `Unlock` after previously calling `Lock`.
 This is modeled by the predicate instance `m.UnlockP()`, which is required to call `Unlock` and can only be obtained by calling `Lock`
 ``` go
@@ -87,10 +89,10 @@ The program verifies.
 <!-- - TODO unlock without Lock: quiz? -->
 <!-- - (TODO termination limitation, Lock has no decreases, may never call Unlock) -->
 
-<!-- ## Full example -->
-<!-- ``` go -->
-<!-- {{#include ./safeCounter.go:all}} -->
-<!-- ``` -->
+## Full example
+``` go
+{{#include ./safeCounter.go:all}}
+```
 
 ## Full `sync.Mutex` stubs
 ``` gobra
