@@ -10,8 +10,7 @@
 
 <!-- tutorial.md  -->
 Gobra has support for first-class predicates, i.e., expressions with a predicate type.
-First-class predicates are of type `pred(x1 T1, ..., xn Tn)`.
-The types `T1, ..., Tn` define that the predicate has an arity of `n` with the corresponding parameter types. 
+A first-class predicate of type `pred(T1, ..., Tn)` has an arity of `n` with corresponding parameter types `T1, ..., Tn`.
 
 To instantiate a first-class predicate, Gobra provides *predicate constructors*.
 A predicate constructor `P!<d1, ..., dn!>` partially applies a declared predicate `P` with the constructor arguments `d1, ..., dn`.
