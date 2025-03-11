@@ -49,7 +49,7 @@ The following client code will be verified in the final example:
 ```
 
 
-## Defining predicates
+## Declaring predicates
 Here we define the predicate `elements` to represent access to all elements in a list `l`:
 ``` go
 {{#include list.go:type}}
