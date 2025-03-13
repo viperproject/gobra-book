@@ -269,7 +269,7 @@ But when the condition held for a tuple measure, this same measure must decrease
 > A *naked* `decreases` is equivalent to `decreases 0`, i.e. TODO -->
 
 
-{{#quiz ../quizzes/termination.toml}}
+{{#quiz ../../quizzes/termination.toml}}
 
 <!-- In the next section, we discuss why `pure` and `ghost` functions must have termination measures. -->
 

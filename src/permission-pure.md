@@ -1,6 +1,6 @@
 # Pure functions and permissions
 
-Recall that [pure functions](./basic-ghost-pure.md) have no side effects.
+Recall that [pure functions](../01/pure.md) have no side effects.
 Hence, they must not leak any permissions and implicitly return all permissions mentioned in the precondition.
 While pure functions can require write permission, they cannot actually modify values, as this would be a side effect.
 

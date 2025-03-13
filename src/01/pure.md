@@ -182,7 +182,7 @@ func client3() {
 ## Exercise: iterative Fibonacci
 We leave it as an exercise to provide invariants for an iterative implementation satisfying the specification.
 
-{{#quiz ../quizzes/basic-ghost-pure.toml}}
+{{#quiz ../../quizzes/basic-ghost-pure.toml}}
 
 ## Ghost and pure functions
 Often, we will mark a function both `ghost` and `pure`.

@@ -218,7 +218,7 @@ func addToSlice(s []int, n int) {
 ```
 
 ## Binary search over slices
-We conclude this section by revisiting the [binary search example](./loops-binarysearch.md).
+We conclude this section by revisiting the [binary search example](../01/loops-binarysearch.md).
 Now we can perform a `BinarySearch` sorted slices of arbitrary length for a target value.
 This version is more efficient because no arrays need to be copied.
 

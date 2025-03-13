@@ -1,6 +1,6 @@
 # Predicates as termination measures
 
-Predicate instances can be used as [termination measures](./termination.md).
+Predicate instances can be used as [termination measures](../01/termination.md).
 The measure decreases if an instance is nested within another predicate instance.
 For example, `l1.Mem()` is nested within `l2.Mem()` and `l2.Mem()` is nested within `l3.Mem()`.
 ``` go
