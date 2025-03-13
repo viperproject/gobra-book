@@ -35,6 +35,8 @@ This invariant states that the entire entire size of the pixel slice is given by
 `p.Stride*(p.Rect.Max.Y-p.Rect.Min.Y) == len(p.Pix)`,
 where the `stride` is the distance in bytes between vertically adjacent pixels.
 Note that the factor `2` in `p.Stride == 2*(p.Rect.Max.X-p.Rect.Min.X)` is due to the fact that each pixel uses 2 elements of the `Pix` slice for storage.
+Additionally, the elements of the pixel slice are of type `uint8`, so they have values in the range from `0` to `0xff`.
+While this could be inferred from the type alone, we have to state this due to a current limitation in Gobra.
 
 ``` go
 {{#include ./image.go:Alpha16ImageInv}}
@@ -59,7 +61,13 @@ The remaining methods:
 ``` go
 {{#include ./image.go:Alpha16ImageMethods}}
 ```
-We `inhale c.Valid()`, since due to current limitations with bit operations and type conversions, Gobra cannot show that the constructed `Alpha16` color is valid.
+
+Due to current limitations with bit operations, we replaced the bit-shift (`<<`) and bitwise OR (`|`) operations with arithmetic operations.
+The original source used the following line.
+``` go
+c = Alpha16{uint16(p.Pix[i+0])<<8 | uint16(p.Pix[i+1])}
+```
+Note that the rewrite works because `p.Pix` has elements of type `uint8`.
 
 We must show that `PixOffset` returns an offset satisfying `0 <= offset && offset < len(p.Pix) - 1`.
 As `Point{x, y}` is contained in the rectangle `p.Rect`, `(y-p.Rect.Min.Y) >= 0` and `(x-p.Rect.Min.X) >= 0`.

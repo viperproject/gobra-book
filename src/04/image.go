@@ -287,7 +287,9 @@ requires acc(p.Mem(), _)
 pure
 decreases
 func (p *Alpha16Image) Inv() bool {
-	return unfolding acc(p.Mem(), _) in (2*(p.Rect.Max.X-p.Rect.Min.X) == p.Stride && p.Stride * (p.Rect.Max.Y-p.Rect.Min.Y) == len(p.Pix))
+	return unfolding acc(p.Mem(), _) in (2*(p.Rect.Max.X-p.Rect.Min.X) == p.Stride &&
+    	p.Stride * (p.Rect.Max.Y-p.Rect.Min.Y) == len(p.Pix)) &&
+    	forall i int :: {&p.Pix[i]} 0 <= i && i < len(p.Pix) ==> 0 <= p.Pix[i] && p.Pix[i] <= 0xff
 }
 @*/
 // ANCHOR_END: Alpha16ImageInv
@@ -318,8 +320,7 @@ func (p *Alpha16Image) At(x, y int) (c Color) {
 	// @ fold acc(p.Mem(), 1/2)
 	i := p.PixOffset(x, y)
 	// @ unfold acc(p.Mem(), 1/2)
-	c = Alpha16{uint16(p.Pix[i+0])<<8 | uint16(p.Pix[i+1])}
-	// @ inhale c.Valid()	// TODO
+	c = Alpha16{uint16(p.Pix[i+0])*256 + uint16(p.Pix[i+1])}
 	// @ fold acc(p.Mem(), 1/2)
 	return
 }
