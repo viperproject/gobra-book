@@ -1,6 +1,6 @@
 # Pure functions and permissions
 
-Recall that [pure functions](./01/pure.md) have no side effects.
+Recall that [pure functions](../01/pure.md) have no side effects.
 Hence, they must not leak any permissions and implicitly transfer back all permissions mentioned in the precondition.
 While pure functions can require write permission, they cannot actually modify values, as this would be a side effect.
 It is idiomatic to use [wildcard permissions](wildcard-permission.md) since all the permissions held before a `pure` function call are still held after the call.

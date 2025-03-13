@@ -1,7 +1,7 @@
 # `defer` statements
 
 A `defer` statement invokes a function whose execution is deferred to the moment the surrounding function returns
- ([spec](ev/ref/spec#Defer_statements)).
+ ([spec](https://go.dev/ref/spec#Defer_statements)).
  
 Defer statements are not directly related to concurrency but we include them in this chapter because they frequently occur in concurrent code.
 For example, a common pattern is to defer the call of the `Unlock` method for a mutex.
