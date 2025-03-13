@@ -22,7 +22,7 @@ In the following example, we assign the numeric constant `5` to `x`, which makes
 {{#include comparable.go:isComparable}}
 ```
 
-As an example, we change the linked [`List`](../3-full-example.md) type to store values of type `any` (which is a shorthand for the empty interface `interface{}`).
+As an example, we change the linked [`List`](../03/full-example.md) type to store values of type `any` (which is a shorthand for the empty interface `interface{}`).
 ``` go
 {{#include comparable.go:type}}
 ```

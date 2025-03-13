@@ -10,7 +10,7 @@ So far, our contracts for `List` were concerned with memory access.
 Now, we want to complete them with functional correctness requirements.
 
 The essence of a `List` is captured by a sequence.
-We will not fully introduce sequences at this point, but refer the reader to the [mathematical types reference](./reference-mathematical-types.md) if questions arise.
+We will not fully introduce sequences at this point, but refer the reader to the [mathematical types reference](../reference-mathematical-types.md) if questions arise.
 
 A sequence of integers `seq[int]` is constructed recursively from the list, concatenating (`++`) the sequences.
 By convention, the abstraction function is called `View`.
@@ -41,4 +41,4 @@ For example, the method `Get` must return the `i`th element of the sequence corr
 
 <!-- framing, when because of fractional must not say that sequence stays the same -->
 
-The full example can be found here: [full linked list example](./3-full-example.md).
+The full example can be found here: [full linked list example](./full-example.md).

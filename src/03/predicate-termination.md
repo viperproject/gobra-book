@@ -12,7 +12,7 @@ l3 := New(3, l2)
 // @ fold l3.Mem()
 ```
 
-![](./assets/nested-predicates.svg)
+![](../assets/nested-predicates.svg)
 
 The termination measure is lower bounded for predicate instances with a finite unfolding [^1].
 For example, `l3.Mem()` has two predicate instances nested within, whereas `l1.Mem()` has no other predicate instance nested within.
@@ -37,7 +37,7 @@ An idiomatic iterative implementation is more challenging to verify.
 When iteratively iterating over a list, we keep unfolding `current.Mem()` and lose access to the already visited elements.
 It is not directly clear how one could fold the predicate instances back such that `l.Mem()` is preserved by `LengthIterative`.
 A common approach is to define a predicate that denotes access to a segment of a list instead of the entire tail.
-Alternatively, [magic wands](./magic-wands.md) are applicable in this situation.
+Alternatively, [magic wands](../magic-wands.md) are applicable in this situation.
 ``` go
 {{#include list.go:LengthIterative}}
 ```
