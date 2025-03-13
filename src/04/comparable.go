@@ -69,6 +69,7 @@ func compare(x any) {
 }
 
 // ANCHOR_END: isComparable
+// ANCHOR_END: all
 // ANCHOR: main
 func main() {
 	var x any = []int{1, 2}
@@ -78,4 +79,3 @@ func main() {
 }
 
 // ANCHOR_END: main
-// ANCHOR_END: all

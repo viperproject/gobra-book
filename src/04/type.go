@@ -39,16 +39,6 @@ type Model interface {
 
 // ANCHOR_END: Model
 
-// ANCHOR: TypeAssertionFail
-// @ requires c != nil
-func TypeAssertion(c Color) {
-	c1 := c.(Alpha16) // error
-	r, g, b, a := c1.RGBA()
-	// @ assert r == g
-}
-
-// ANCHOR_END: TypeAssertionFail
-
 // ANCHOR: ConvertClient
 func converting() {
 	c1 := Constant{}
@@ -79,3 +69,12 @@ func (_ alpha16Model) Convert(c Color) (res Color) {
 // @ alpha16Model implements Model
 
 // ANCHOR_END: all
+// ANCHOR: TypeAssertionFail
+// @ requires c != nil
+func TypeAssertion(c Color) {
+	c1 := c.(Alpha16) // error
+	r, g, b, a := c1.RGBA()
+	// @ assert r == g
+}
+
+// ANCHOR_END: TypeAssertionFail

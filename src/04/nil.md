@@ -32,7 +32,7 @@ Assertion s != nil might not hold.
 ```
 
 ## Full section example
-
+Gobra is expected to find 2 errors.
 ``` go
 {{#include ./nil.go:all}}
 ```

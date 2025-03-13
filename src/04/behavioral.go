@@ -86,6 +86,8 @@ func client1Constant() {
 
 // ANCHOR_END: Constant
 
+// ANCHOR_END: all
+
 // ANCHOR: fail1
 type Fail1 struct {
 	p *uint32
@@ -141,4 +143,3 @@ func client3() {
 }
 
 // ANCHOR_END: fail2
-// ANCHOR_END: all
