@@ -228,5 +228,5 @@ A postcondition `true` provides no information about the return values.
 >
 > If no postcondition is specified by the user, it defaults to `true`.
 
-{{#quiz ../quizzes/basic-specs.toml}}
+{{#quiz ../../quizzes/basic-specs.toml}}
 
