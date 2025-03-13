@@ -56,7 +56,7 @@
 - [Full example: `image`](./04/image.md)
 
 # Concurrency
-- [Goroutines](./05/goroutine.md)
+- [Goroutines and data races](./05/goroutine.md)
 - [First-class predicates](./05/first-class-predicates.md)
 - [Reasoning about mutual exclusion with `sync.Mutex`](./05/mutex.md)
 - [`defer` statements](./05/defer.md)
