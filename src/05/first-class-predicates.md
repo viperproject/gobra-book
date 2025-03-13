@@ -43,7 +43,7 @@ Assertion OtherMem!<a, c!> == Mem!<a, c!> might not hold.
 
 ## `fold` and `unfold` first-class predicates
 The body of the predicate `P!<d1, ..., dn!>` is the body of `P` with the arguments applied accordingly.
-Like with other [predicates](../3-predicates.md), the first-class predicate `P!<d1, ..., dn!>` can be instantiated and its instances may occur in assertions and in `fold` and `unfold` statements.
+Like with other [predicates](../03/predicates.md), the first-class predicate `P!<d1, ..., dn!>` can be instantiated and its instances may occur in assertions and in `fold` and `unfold` statements.
 The `fold` statement `fold P!<d1, ..., dk!>(e1, ..., en)` exchanges the first-class predicate instance with its body.
 The `unfold` statement does the reverse.
 
