@@ -21,17 +21,17 @@
 - [Pure functions](./01/pure.md)
 
 # Reasoning about Memory Accesses with Permissions
-- [Permission to write](./permission-write.md)
-- [Self-framing assertions](./self-framing.md)
-- [Addressability, `@` and sharing](./addressable.md)
-- [Permission to read](./fractional-permissions.md)
-  - [Wildcard permission](./wildcard-permission.md)
-  - [Permission type and parameters](./permission-type.md)
-- [Inhaling and exhaling](./inhale-exhale.md)
-- [Quantified permissions](./quantified-permission.md)
-- [Pure functions and permissions](./permission-pure.md)
-- [Slices](./slices.md)
-- [Maps](./maps.md)
+- [Permission to write](./02/permission-write.md)
+- [Self-framing assertions](./02/self-framing.md)
+- [Addressability, `@` and sharing](./02/addressable.md)
+- [Permission to read](./02/fractional-permissions.md)
+  - [Wildcard permission](./02/wildcard-permission.md)
+  - [Permission type and parameters](./02/permission-type.md)
+- [Inhaling and exhaling](./02/inhale-exhale.md)
+- [Quantified permissions](./02/quantified-permission.md)
+- [Pure functions and permissions](./02/permission-pure.md)
+- [Slices](./02/slices.md)
+- [Maps](./02/maps.md)
 - [Variadic functions]()
 
 # Abstraction and Information Hiding

@@ -2,7 +2,7 @@
 
 Besides traditional `for` loops, Go supports iterating over data structures with for-range loops.
 In this section, we consider range clauses for arrays.
-We show how to reason about for-range loops that iterate over [slices](./slices.md) and [maps](./maps.md) in their corresponding sections.
+We show how to reason about for-range loops that iterate over [slices](../02/slices.md) and [maps](../02/maps.md) in their corresponding sections.
 These data structures pose additional challenges, as they may be concurrently accessed, and thus, we need to employ permissions when reasoning about them.
 Gobra does not support range clauses for integers, strings, and functions.
 
