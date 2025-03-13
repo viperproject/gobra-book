@@ -3,7 +3,8 @@
 Gobra has support for first-class predicates, i.e., expressions with a predicate type.
 A first-class predicate of type `pred(T1, ..., Tn)` has arity `n` with corresponding parameter types `T1, ..., Tn`.
 
-<!-- This enables us to use predicates as parameters or return values of functions or methods. -->
+This section serves as a prerequisite for the next section where we associate a predicate as the invariant of a lock.
+First-class predicates enables us to use predicates as parameters or return values of functions or methods.
 
 ## Predicate constructors `P!<...!>`
 To instantiate a first-class predicate, Gobra provides _predicate constructors_.
