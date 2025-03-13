@@ -1,51 +1,55 @@
-# Goroutines
+# Goroutines and data races
 
-- introduce example
-- define data race
+This section covers goroutines, Go's lightweight threads, and how Gobra excludes _data races_, i.e., concurrent accesses to the same memory location with at least one modifying access.
+
+As an example, we use the type `Counter` with a method to `Increment` its count.
 
 ``` go
 {{#include ./counter.go:Counter}}
 {{#include ./counter.go:Increment}}
 ```
 
-- permissions not transferred back after `go ...`
-
-``` go
-{{#include ./counter.go:main}}
-```
-
-``` text
-ERROR Precondition of call might not hold.
-
-go ctr.Increment() might not satisfy the precondition of the callee.
-```
-
-- explain the error
-
-<!--
-// Printing `ctr.Get()`
+Goroutines run in the same address space and concurrent calls to `Increment` cause data races for `c.count`.
+For example, running the following snippet a few times, one may observe different values for `c.count` afterwards.
 ``` go
 for i := 0; i < 1000; i++ {
 	go ctr.Increment()
 }
 ```
-``` text
-> $ go run counter.go
-978
+
+When a goroutine is dispatched with the `go` keyword, Gobra checks that the precondition of the function or method holds.
+After starting the goroutine, we do not know the state of the goroutine; it may be in the middle of execution, or may have already finished.
+Hence, we do not get to assume the postcondition of the dispatched function or method.
+
+``` go
+{{#include ./counter.go:main}}
 ```
--->
+``` text
+ERROR Precondition of call might not hold.
 
--  maybe show concurrent reads are ok
+go ctr.Increment() might not satisfy the precondition of the callee.
+```
+In the above example, the permission `acc(&c.count)` is not transferred back after the first `go ctr.Increment()` statement.
+But to start the second goroutine, `acc(&c.count)` is required.
 
+
+With fractional permissions we can split read permissions to multiple goroutines.
+It is guaranteed that only one thread can have exclusive write permission to a memory location at a time.
+Concurrent reads do not constitute a data race.
 
 ``` go
 {{#include ./counter.go:Get}}
 {{#include ./counter.go:client1}}
 ```
 
-- mention `go run -race`
-  - highlight difference to Gobra
+## Go's data race detector
+Go comes with a built-in [data race detector](https://go.dev/doc/articles/race_detector) which can be enabled with the `-race` flag.
+Note that only data races are found by dynamically running code.
+Therefore not all data races are guaranteed to be found by this detector. <!-- unsound -->
 
+On the other hand, Gobra can statically prove the absence of data races in a program by reasoning with permissions.
+
+In our example, a data race is detected.
 ``` text
 > $ go run -race counter.go
 ==================
