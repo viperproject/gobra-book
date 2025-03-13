@@ -27,7 +27,7 @@ Permission to p might not suffice.
 ```
 
 One option is to use the [wildcard permission](./wildcard-permission.md) amount, as previously studied, which comes with its own drawbacks.
-In this section, we show how to abstract the exact permission amount by introducing a ghost parameter of type `perm`, i.e. Gobra's type for permission amounts:
+In this section, we show how to abstract the exact permission amount by introducing a ghost parameter of type `perm`, i.e., Gobra's type for permission amounts:
 ``` go
 type pair struct {
 	left, right int

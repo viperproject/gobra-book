@@ -12,7 +12,6 @@ If a function requires write permission, and yet we want to guarantee that the v
 Requiring only read permission, a caller retaining a positive permission amount can guarantee across the call that the value remained unchanged.
 
 Permission amounts to the same location can be split up, for example `acc(x, 3/4)` is equivalent to `acc(x, 1/4) && acc(x, 1/4) && acc(x, 1/4)`.
-Moreover, this is useful for concurrency since it allows us to split read permissions to multiple threads and guarantee that there can only be one thread alive with exclusive write permission to a location [^1].
 
 In the remainder of this section, we study how to use fractional permissions with examples.
 
@@ -144,20 +143,3 @@ In classical logic, if the proposition \\( P \\) holds then clearly the proposit
 For assertions containing access predicates, this does no longer hold.
 Consider `acc(p, 1/2)`, which denotes read permission, and `acc(p, 1/2) && acc(p, 1/2)`, which implies write permission `acc(p, 1)`.
 
-
-
-[^1]: As a simple illustration; for more please refer to the chapter on concurrency.
-With the permission `acc(p, 1)` we can start two goroutines requiring `acc(p, 1/2)`.
-There is no data race, as the value of `p` is only concurrently read but not modified.
-``` go
-// @ requires acc(p, 1/2)
-func reader(p *int) {
-	// ...
-}
-
-// @ requires acc(p, 1)
-func driver(p *int) {
-	go reader(p)
-	go reader(p)
-}
-```

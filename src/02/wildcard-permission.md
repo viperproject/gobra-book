@@ -24,7 +24,7 @@ func client1(p1, p2 *pair) {
 	p2.sum()
 }
 ```
-
+<!-- TODO: ensures acc(p, _) is unnecessary -->
 However, this comes with the drawback that we cannot recover the exact permission amounts.
 As seen in the following `client` code, where we lose write access, meaning `p.left` and `p.right` can no longer be modified.
 The postcondition `acc(p, _)` ensures only that an unspecified positive permission amount is transferred back to the caller, but does not guarantee that it matches the unspecified positive permission amount that the caller initially transferred.
