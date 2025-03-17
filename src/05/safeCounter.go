@@ -31,7 +31,7 @@ func (c *SafeCounter) Increment() {
 	// @ unfold mutexInvariant!<&c.count!>()
 	c.count += 1
 	// @ fold mutexInvariant!<&c.count!>()
-	// @ c.mu.Unlock()
+	c.mu.Unlock()
 }
 
 // ANCHOR_END: Increment

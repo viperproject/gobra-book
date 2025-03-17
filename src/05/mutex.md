@@ -19,7 +19,7 @@ To lock, we will have to give up this a predicate instance again.
 <!-- first-class predicate comparison -->
 
 When we import the `sync` package, the 
-[predefined specs](https://github.com/viperproject/gobra/blob/master/src/main/resources/stubs/sync/) for this package are provided by Gobra.
+predefined specs for this package are provided by Gobra.
 All predefined specs included in Gobra can be found [here](https://github.com/viperproject/gobra/tree/master/src/main/resources/stubs).
 
 <!-- Alternatively  you can produce the stubs folder in the current working directory by running Gobra with the `--debug` flag. -->
@@ -84,10 +84,28 @@ The program verifies.
 {{#include ./safeCounter.go:main}}
 ```
 
-
 <!-- - TODO double Lock: quiz? -->
 <!-- - TODO unlock without Lock: quiz? -->
-<!-- - (TODO termination limitation, Lock has no decreases, may never call Unlock) -->
+
+## Termination in the presence of locks
+Programs using locks to synchronize memory access might not terminate.
+For example, this may happen due to [deadlocks](https://en.wikipedia.org/wiki/Deadlock_(computer_science)), or as in the following snippet, due to forgetting to unlock a mutex.
+Another thread trying to acquire the lock will block indefinitely.
+The `Lock` stub has no `decreases` clause, so we cannot prove termination of any function, method, or loop that calls this method.
+
+``` go
+// @ requires acc(c.Mem(), _)
+func (c *SafeCounter) Increment() {
+	// @ unfold acc(c.Mem(), _)
+	c.mu.Lock()
+	// @ unfold mutexInvariant!<&c.count!>()
+	c.count += 1
+	// <----- no Unlock here
+}
+```
+Gobra also verifies the program with the modified `Increment` method.
+It is not enforced that `Unlock` must be called after `Lock`.
+Note that this is sound since mutual exclusion is not violated, and we specify only partial correctness.
 
 ## Full example
 ``` go
