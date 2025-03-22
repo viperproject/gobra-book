@@ -63,9 +63,9 @@ Recall that ghost code cannot change the visible behavior of a program.
 Hence, ghost code cannot modify non-ghost locations.
 For example, the ghost statement `x = 1` causes an error since `x` is a normal variable:
 ``` go
-    var x int
-    // @ ghost x = 1
-    // ...
+var x int
+// @ ghost x = 1
+// ...
 ```
 ``` text
 ERROR ghost error: only ghost locations can be assigned to in ghost code
