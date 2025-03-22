@@ -1,22 +1,20 @@
 "use strict";
-
-import type { Ace } from "ace-builds";
-
 const AceRange = ace.require("ace/range").Range;
+window.gobraBookEditorContext = new Map();
 
-window.gobraBookEditorContext = new Map<string, Context>();
-
-const DEFAULT_LANGUAGE = "gobra";
-const GOBRA_INLINE = /\/\*@.*@\*\//g;
-const GOBRA_COMMENT = /\/\/\s*?@/;
+//////////////////////////////////
+// Configuration
 const GOBRA_PLAYGROUND = new URL("https://gobra.void.gschall.ch/verify");
 const GO_PLAYGROUND = new URL("https://gobra.void.gschall.ch/run");
+const DEFAULT_LANGUAGE = "go";
+const GOBRA_INLINE = /\/\*@.*@\*\//g;
+const GOBRA_COMMENT = /\/\/\s*?@/;
+//////////////////////////////////
+// based on theme/book.js from mdbook
+// extracted and refactored elements
+// Added functionality to support Go and Gobra
 
-function fetch_with_timeout(
-  url: URL,
-  options: RequestInit,
-  timeout = 20000,
-): Promise<any> {
+function fetch_with_timeout(url, options, timeout = 20000) {
   return Promise.race([
     fetch(url, options),
     new Promise((_, reject) =>
@@ -24,8 +22,7 @@ function fetch_with_timeout(
     ),
   ]);
 }
-
-function verifyGobra(code: string): Promise<any> {
+function verifyGobra(code) {
   return fetch_with_timeout(GOBRA_PLAYGROUND, {
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
@@ -35,8 +32,7 @@ function verifyGobra(code: string): Promise<any> {
     method: "POST",
   });
 }
-
-function runGo(code: string): Promise<any> {
+function runGo(code) {
   return fetch_with_timeout(GO_PLAYGROUND, {
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
@@ -50,8 +46,7 @@ function runGo(code: string): Promise<any> {
     method: "POST",
   });
 }
-
-function language_of(block: HTMLElement) {
+function language_of(block) {
   let languages = Array.from(block.classList)
     .filter((cls) => cls.startsWith("language-"))
     .map((cls) => cls.replace("language-", ""));
@@ -64,55 +59,39 @@ function language_of(block: HTMLElement) {
     return languages[0];
   }
 }
-
-function preprocessHidden(code: string): [string, string] {
+function preprocessHidden(code) {
   let hiddenCode = code
     .split("\n")
-    .filter((line: string) => !/^\s*~/.test(line))
+    .filter((line) => !/^\s*~/.test(line))
     .join("\n");
   let fullCode = code.replaceAll("~", "");
   return [hiddenCode, fullCode];
 }
-
-function simpleButton(
-  class1: string,
-  title: string,
-  callback: (ctxt: Context) => any,
-  id: string,
-) {
+function simpleButton(class1, title, callback, id) {
   const button = document.createElement("button");
   button.className = "fa " + class1;
   button.title = title;
   button.setAttribute("aria-label", title);
   button.addEventListener("click", () => {
-    callback(window.gobraBookEditorContext.get(id)!);
+    callback(window.gobraBookEditorContext.get(id));
   });
   return button;
 }
-
-function toggleButton(
-  class1: string,
-  class2: string,
-  title: string,
-  callback1: (ctxt: Context) => any,
-  callback2: (ctxt: Context) => any,
-  id: string,
-): HTMLButtonElement {
+function toggleButton(class1, class2, title, callback1, callback2, id) {
   const button = document.createElement("button");
   button.className = "fa " + class1;
   button.title = title;
   button.setAttribute("aria-label", title);
-
   function toggler() {
     let toggled = true;
-    return function (e: Event) {
-      const t = e.target as HTMLButtonElement;
+    return function (e) {
+      const t = e.target;
       if (toggled) {
         t.classList.replace(class1, class2);
-        callback1(window.gobraBookEditorContext.get(id)!);
+        callback1(window.gobraBookEditorContext.get(id));
       } else {
         t.classList.replace(class2, class1);
-        callback2(window.gobraBookEditorContext.get(id)!);
+        callback2(window.gobraBookEditorContext.get(id));
       }
       toggled = !toggled;
     };
@@ -120,65 +99,47 @@ function toggleButton(
   button.addEventListener("click", toggler());
   return button;
 }
-
-const hiddenLinesToggler = (id: string) =>
+const hiddenLinesToggler = (id) =>
   toggleButton(
     "fa-eye",
     "fa-eye-slash",
     "Show hidden lines",
-    (ctxt: Context) => {
+    (ctxt) => {
       let session = ctxt.editor.getSession();
       session.setValue(ctxt.originalCode);
     },
-    (ctxt: Context) => {
+    (ctxt) => {
       let session = ctxt.editor.getSession();
       session.setValue(ctxt.hiddenCode);
     },
     id,
   );
-
-const clipboardButton = (id: string) =>
+const clipboardButton = (id) =>
   simpleButton(
     "fa-copy",
     "Copy to clipboard",
-    (ctxt: Context) => {
+    (ctxt) => {
       const code = ctxt.editor.getSession().getValue();
       navigator.clipboard.writeText(code);
     },
     id,
   );
-
-const resetButton = (id: string) =>
+const resetButton = (id) =>
   simpleButton(
     "fa-history",
     "Reset to initial example",
-    (ctxt: Context) => {
+    (ctxt) => {
       const code = ctxt.originalCode;
       ctxt.editor.getSession().setValue(code);
     },
     id,
   );
-
-interface GoPlaygroundResult {
-  Errors: string;
-  Events: {
-    Message: string;
-    Kind: string;
-    Delay: number;
-  }[];
-  Status: number;
-  IsTest: boolean;
-  TestsFailed: number;
-  VetOK: boolean;
-}
-
-const runButton = (id: string) =>
+const runButton = (id) =>
   simpleButton(
     "fa-play",
     "Run this Go code",
-    (ctxt: Context) => {
+    (ctxt) => {
       const code = ctxt.editor.getSession().getValue();
-
       const container = ctxt.editor.container.parentNode;
       let result_block = container.querySelector(".result");
       if (!result_block) {
@@ -187,10 +148,9 @@ const runButton = (id: string) =>
         container.append(result_block);
       }
       result_block.innerText = "Running...";
-
       runGo(code)
         .then((response) => response.json())
-        .then((response: GoPlaygroundResult) => {
+        .then((response) => {
           if (response.Errors) {
             throw new Error(response.Errors);
           } else if (!response.Events.length) {
@@ -211,20 +171,12 @@ const runButton = (id: string) =>
     },
     id,
   );
-interface VerificationError {
-  message: string;
-  position: {
-    line: number;
-    char: number;
-  };
-}
-const verifyButton = (id: string) =>
+const verifyButton = (id) =>
   simpleButton(
     "fa-check-circle-o",
     "Verify with Gobra",
-    (ctxt: Context) => {
+    (ctxt) => {
       const code = ctxt.editor.getSession().getValue();
-
       const container = ctxt.editor.container.parentNode;
       let result_block = container.querySelector(".result");
       if (!result_block) {
@@ -233,7 +185,6 @@ const verifyButton = (id: string) =>
         container.append(result_block);
       }
       result_block.innerText = "Verifying...";
-
       verifyGobra(code)
         .then((response) => response.json())
         .then(({ verified, timeout, errors, duration }) => {
@@ -248,7 +199,7 @@ const verifyButton = (id: string) =>
             result_block.innerHTML = `<i class="fa fa-times" aria-hidden="true"></i>`;
             result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`;
             result_block.innerHTML += errors
-              .map((err: VerificationError) => {
+              .map((err) => {
                 // let position = `(${err.Position.line}, ${err.Position.char})`
                 // TODO highlight in editor
                 return `<p>ERROR: ${err.message}</p>`;
@@ -264,23 +215,18 @@ const verifyButton = (id: string) =>
     },
     id,
   );
-
-function initBlock(code_block: HTMLElement) {
+function initBlock(code_block) {
   let uuid = crypto.randomUUID();
   code_block.id = uuid;
-
   let language = language_of(code_block);
   let noEdit = !code_block.classList.contains("editable");
-
   // supported languages
   if (language != "go" && language != "gobra") {
     return;
   }
-
   let editor = ace.edit(code_block);
   let session = editor.getSession();
   let display_line_numbers = window.playground_line_numbers || false;
-
   // Configure the editor
   editor.setOptions({
     readOnly: noEdit,
@@ -294,16 +240,13 @@ function initBlock(code_block: HTMLElement) {
   if (noEdit) {
     editor.renderer.$cursorLayer.element.style.opacity = 0;
   }
-
   editor.$blockScrolling = Infinity;
-
   // Preprocess the source code
   const [fullCode, hiddenCode] = preprocessHidden(session.getValue());
   if (noEdit) {
     session.setValue(hiddenCode);
   }
   // TODO extract error information
-
   // Bind Commands to keybindings
   editor.commands.addCommand({
     name: "highlightSpecs",
@@ -316,7 +259,7 @@ function initBlock(code_block: HTMLElement) {
       win: "Ctrl-Shift-Enter",
       mac: "Ctrl-Shift-Enter",
     },
-    exec: (editor: Ace.Editor) => runGo(editor.getSession().getValue()),
+    exec: (editor) => runGo(editor.getSession().getValue()),
   });
   editor.commands.addCommand({
     name: "verifyGobra",
@@ -324,9 +267,8 @@ function initBlock(code_block: HTMLElement) {
       win: "Ctrl-Enter",
       mac: "Ctrl-Enter",
     },
-    exec: (editor: Ace.Editor) => verifyGobra(editor.getSession().getValue()),
+    exec: (editor) => verifyGobra(editor.getSession().getValue()),
   });
-
   // the ace editor mode uses golang instead of go
   if (language === "go") {
     language = "golang";
@@ -351,13 +293,11 @@ function initBlock(code_block: HTMLElement) {
     language,
     readonly: noEdit,
   });
-
   // Add buttons
-  const pre_block = code_block.parentNode!;
+  const pre_block = code_block.parentNode;
   const buttons = document.createElement("div");
   buttons.className = "buttons";
   pre_block.insertBefore(buttons, pre_block.firstChild);
-
   buttons.appendChild(clipboardButton(uuid));
   if (noEdit) {
     if (fullCode != hiddenCode) {
@@ -369,24 +309,19 @@ function initBlock(code_block: HTMLElement) {
     buttons.appendChild(resetButton(uuid));
   }
 }
-
 function initializeCodeBlocks() {
   if (typeof ace === "undefined" || !ace) {
     console.warn("Ace editor is not avaible!");
     return;
   }
-
-  let code_nodes: HTMLElement[] = Array.from(
-    document.querySelectorAll("code"),
-  ).filter((n) => n.parentElement !== null && n.parentElement.tagName == "PRE");
-
+  let code_nodes = Array.from(document.querySelectorAll("code")).filter(
+    (n) => n.parentElement !== null && n.parentElement.tagName == "PRE",
+  );
   code_nodes.forEach(initBlock);
 }
-
 addEventListener("DOMContentLoaded", () => {
   initializeCodeBlocks();
 });
-
 // Showcases the use of Marker and Range,
 // in the following form this wont be a useful functionality
 // Toggle the display of Gobra annotations within Go files
@@ -394,8 +329,8 @@ addEventListener("DOMContentLoaded", () => {
 // and inline comments of the form /*@ ... @*/
 function specsToggler() {
   var hidden = false;
-  var markers: number[] = [];
-  return (editor: Ace.Editor) => {
+  var markers = [];
+  return (editor) => {
     console.debug("Toggling specs display");
     var session = editor.getSession();
     hidden = !hidden;
@@ -406,7 +341,7 @@ function specsToggler() {
     }
     var doc = session.getDocument();
     var lines = doc.getAllLines();
-    lines.forEach((line: string, line_number: number) => {
+    lines.forEach((line, line_number) => {
       let match = line.match(GOBRA_COMMENT);
       if (match) {
         console.debug("Found gobra line: ", line);
@@ -447,3 +382,4 @@ function specsToggler() {
     });
   };
 }
+export {};
