@@ -8,11 +8,15 @@ window.gobraBookEditorContext = new Map<string, Context>();
 
 const DEFAULT_LANGUAGE = "gobra";
 const GOBRA_INLINE = /\/\*@.*@\*\//g;
-const GOBRA_COMMENT = "//@";
-const GOBRA_PLAYGROUND = new URL("https://gobra.void.gschall.ch/verify")
-const GO_PLAYGROUND = new URL("https://gobra.void.gschall.ch/run")
+const GOBRA_COMMENT = /\/\/\s*?@/;
+const GOBRA_PLAYGROUND = new URL("https://gobra.void.gschall.ch/verify");
+const GO_PLAYGROUND = new URL("https://gobra.void.gschall.ch/run");
 
-function fetch_with_timeout(url: URL, options: RequestInit, timeout = 20000): Promise<any> {
+function fetch_with_timeout(
+  url: URL,
+  options: RequestInit,
+  timeout = 20000,
+): Promise<any> {
   return Promise.race([
     fetch(url, options),
     new Promise((_, reject) =>
