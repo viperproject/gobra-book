@@ -305,9 +305,17 @@ function initBlock(code_block: HTMLElement) {
     language = "golang";
   }
   session.setMode(`ace/mode/${language}`);
-  // TODO this should not be done here
-  editor.setTheme("ace/theme/tomorrow_night");
-
+  // Make the editor theme consistent with the mdbook-theme
+  let theme = localStorage.getItem("mdbook-theme") || "light";
+  let ace_theme = "ace/theme/dawn";
+  if (theme == "coal" || theme == "navy") {
+    ace_theme = "ace/theme/tomorrow_night";
+  } else if (theme == "ayu") {
+    ace_theme = "ace/theme/tomorrow_night";
+  } else {
+    ace_theme = "ace/theme/dawn";
+  }
+  editor.setTheme(ace_theme);
   // Update the context mapping
   window.gobraBookEditorContext.set(uuid, {
     editor,
