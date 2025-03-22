@@ -222,6 +222,8 @@ function initBlock(code_block) {
   let noEdit = !code_block.classList.contains("editable");
   // supported languages
   if (language != "go" && language != "gobra") {
+    code_block.classList.add("hljs");
+    code_block.classList.add("language-" + language);
     return;
   }
   let editor = ace.edit(code_block);
