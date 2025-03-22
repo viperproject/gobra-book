@@ -33,7 +33,7 @@ function verifyGobra(code: string): Promise<any> {
     },
     body: new URLSearchParams({ body: code }),
     method: "POST",
-  })
+  });
 }
 
 function runGo(code: string): Promise<any> {
@@ -48,7 +48,7 @@ function runGo(code: string): Promise<any> {
       withVet: "true",
     }),
     method: "POST",
-  })
+  });
 }
 
 function language_of(block: HTMLElement) {
@@ -71,26 +71,33 @@ function preprocessHidden(code: string): [string, string] {
     .filter((line: string) => !/^\s*~/.test(line))
     .join("\n");
   let fullCode = code.replaceAll("~", "");
-  return [hiddenCode, fullCode]
+  return [hiddenCode, fullCode];
 }
 
-function simpleButton(class1: string, title: string,
+function simpleButton(
+  class1: string,
+  title: string,
   callback: (ctxt: Context) => any,
-  id: string) {
+  id: string,
+) {
   const button = document.createElement("button");
   button.className = "fa " + class1;
   button.title = title;
   button.setAttribute("aria-label", title);
   button.addEventListener("click", () => {
-    callback(window.gobraBookEditorContext.get(id)!)
+    callback(window.gobraBookEditorContext.get(id)!);
   });
-  return button
+  return button;
 }
 
-function toggleButton(class1: string, class2: string, title: string,
+function toggleButton(
+  class1: string,
+  class2: string,
+  title: string,
   callback1: (ctxt: Context) => any,
   callback2: (ctxt: Context) => any,
-  id: string): HTMLButtonElement {
+  id: string,
+): HTMLButtonElement {
   const button = document.createElement("button");
   button.className = "fa " + class1;
   button.title = title;
@@ -99,180 +106,195 @@ function toggleButton(class1: string, class2: string, title: string,
   function toggler() {
     let toggled = true;
     return function (e: Event) {
-      const t = e.target as HTMLButtonElement
+      const t = e.target as HTMLButtonElement;
       if (toggled) {
         t.classList.replace(class1, class2);
-        callback1(window.gobraBookEditorContext.get(id)!)
+        callback1(window.gobraBookEditorContext.get(id)!);
       } else {
         t.classList.replace(class2, class1);
-        callback2(window.gobraBookEditorContext.get(id)!)
+        callback2(window.gobraBookEditorContext.get(id)!);
       }
       toggled = !toggled;
     };
   }
   button.addEventListener("click", toggler());
-  return button
+  return button;
 }
 
-const hiddenLinesToggler = (id: string) => toggleButton("fa-eye", "fa-eye-slash", "Show hidden lines",
-  (ctxt: Context) => {
-    let session = ctxt.editor.getSession()
-    session.setValue(ctxt.originalCode);
-  },
-  (ctxt: Context) => {
-    let session = ctxt.editor.getSession()
-    session.setValue(ctxt.hiddenCode);
-  },
-  id
-)
+const hiddenLinesToggler = (id: string) =>
+  toggleButton(
+    "fa-eye",
+    "fa-eye-slash",
+    "Show hidden lines",
+    (ctxt: Context) => {
+      let session = ctxt.editor.getSession();
+      session.setValue(ctxt.originalCode);
+    },
+    (ctxt: Context) => {
+      let session = ctxt.editor.getSession();
+      session.setValue(ctxt.hiddenCode);
+    },
+    id,
+  );
 
-const clipboardButton = (id: string) => simpleButton("fa-copy", "Copy to clipboard",
-  (ctxt: Context) => {
-    const code = ctxt.editor.getSession().getValue()
-    navigator.clipboard.writeText(code)
-  },
-  id
-)
+const clipboardButton = (id: string) =>
+  simpleButton(
+    "fa-copy",
+    "Copy to clipboard",
+    (ctxt: Context) => {
+      const code = ctxt.editor.getSession().getValue();
+      navigator.clipboard.writeText(code);
+    },
+    id,
+  );
 
-const resetButton = (id: string) => simpleButton("fa-history", "Reset to initial example",
-  (ctxt: Context) => {
-    const code = ctxt.originalCode
-    ctxt.editor.getSession().setValue(code)
-  },
-  id
-)
+const resetButton = (id: string) =>
+  simpleButton(
+    "fa-history",
+    "Reset to initial example",
+    (ctxt: Context) => {
+      const code = ctxt.originalCode;
+      ctxt.editor.getSession().setValue(code);
+    },
+    id,
+  );
 
 interface GoPlaygroundResult {
-  Errors: string,
+  Errors: string;
   Events: {
-    Message: string,
-    Kind: string,
-    Delay: number,
-  }[],
-  Status: number,
-  IsTest: boolean,
-  TestsFailed: number,
-  VetOK: boolean,
+    Message: string;
+    Kind: string;
+    Delay: number;
+  }[];
+  Status: number;
+  IsTest: boolean;
+  TestsFailed: number;
+  VetOK: boolean;
 }
 
-const runButton = (id: string) => simpleButton("fa-play", "Run this Go code",
-  (ctxt: Context) => {
-    const code = ctxt.editor.getSession().getValue()
+const runButton = (id: string) =>
+  simpleButton(
+    "fa-play",
+    "Run this Go code",
+    (ctxt: Context) => {
+      const code = ctxt.editor.getSession().getValue();
 
-    const container = ctxt.editor.container.parentNode
-    let result_block = container.querySelector(".result");
-    if (!result_block) {
-      result_block = document.createElement("code");
-      result_block.className = "result hljs language-bash";
-      container.append(result_block);
-    }
-    result_block.innerText = "Running...";
+      const container = ctxt.editor.container.parentNode;
+      let result_block = container.querySelector(".result");
+      if (!result_block) {
+        result_block = document.createElement("code");
+        result_block.className = "result hljs language-bash";
+        container.append(result_block);
+      }
+      result_block.innerText = "Running...";
 
-    runGo(code)
-      .then((response) => response.json())
-      .then((response: GoPlaygroundResult) => {
-        if (response.Errors) {
-          throw new Error(response.Errors);
-        } else if (!response.Events.length) {
-          result_block.innerText = "No output";
-          result_block.classList.add("result-no-output");
-        } else {
-          result_block.innerText = response.Events.map((e) => e.Message).join(
-            "\n",
-          );
-          result_block.classList.remove("result-no-output");
-        }
-      })
-      .catch(
-        (error) =>
-        (result_block.innerText =
-          "Playground Communication: " + error.message),
-      );
-  },
-  id
-)
+      runGo(code)
+        .then((response) => response.json())
+        .then((response: GoPlaygroundResult) => {
+          if (response.Errors) {
+            throw new Error(response.Errors);
+          } else if (!response.Events.length) {
+            result_block.innerText = "No output";
+            result_block.classList.add("result-no-output");
+          } else {
+            result_block.innerText = response.Events.map((e) => e.Message).join(
+              "\n",
+            );
+            result_block.classList.remove("result-no-output");
+          }
+        })
+        .catch(
+          (error) =>
+            (result_block.innerText =
+              "Playground Communication: " + error.message),
+        );
+    },
+    id,
+  );
 interface VerificationError {
-  message: string,
+  message: string;
   position: {
-    line: number,
-    char: number,
-  }
+    line: number;
+    char: number;
+  };
 }
-const verifyButton = (id: string) => simpleButton("fa-check-circle-o", "Verify with Gobra",
-  (ctxt: Context) => {
-    const code = ctxt.editor.getSession().getValue()
+const verifyButton = (id: string) =>
+  simpleButton(
+    "fa-check-circle-o",
+    "Verify with Gobra",
+    (ctxt: Context) => {
+      const code = ctxt.editor.getSession().getValue();
 
-    const container = ctxt.editor.container.parentNode
-    let result_block = container.querySelector(".result");
-    if (!result_block) {
-      result_block = document.createElement("code");
-      result_block.className = "result hljs language-bash";
-      container.append(result_block);
-    }
-    result_block.innerText = "Verifying...";
+      const container = ctxt.editor.container.parentNode;
+      let result_block = container.querySelector(".result");
+      if (!result_block) {
+        result_block = document.createElement("code");
+        result_block.className = "result hljs language-bash";
+        container.append(result_block);
+      }
+      result_block.innerText = "Verifying...";
 
-    verifyGobra(code)
-      .then((response) => response.json())
-      .then(({ verified, timeout, errors, duration }) => {
-        duration = Number(duration).toFixed(2) + " seconds";
-        if (verified) {
-          result_block.innerHTML = `<i class="fa fa-check-circle-o" aria-hidden="true"></i>`;
-          result_block.innerHTML += `<span> Verified successfully in ${duration}</span>`;
-        } else if (timeout) {
-          result_block.innerHTML = `<i class="fa fa-clock-o" aria-hidden="true"></i>`;
-          result_block.innerHTML += `<span> Timeout after ${duration}</span>`;
-        } else {
-          result_block.innerHTML = `<i class="fa fa-times" aria-hidden="true"></i>`;
-          result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`;
-          result_block.innerHTML += errors
-            .map((err: VerificationError) => {
-              // let position = `(${err.Position.line}, ${err.Position.char})`
-              // TODO highlight in editor
-              return `<p>ERROR: ${err.message}</p>`;
-            })
-            .join("");
-        }
-      })
-      .catch(
-        (error) =>
-        (result_block.innerText =
-          "Playground Communication: " + error.message),
-      );
-  },
-  id
-)
+      verifyGobra(code)
+        .then((response) => response.json())
+        .then(({ verified, timeout, errors, duration }) => {
+          duration = Number(duration).toFixed(2) + " seconds";
+          if (verified) {
+            result_block.innerHTML = `<i class="fa fa-check-circle-o" aria-hidden="true"></i>`;
+            result_block.innerHTML += `<span> Verified successfully in ${duration}</span>`;
+          } else if (timeout) {
+            result_block.innerHTML = `<i class="fa fa-clock-o" aria-hidden="true"></i>`;
+            result_block.innerHTML += `<span> Timeout after ${duration}</span>`;
+          } else {
+            result_block.innerHTML = `<i class="fa fa-times" aria-hidden="true"></i>`;
+            result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`;
+            result_block.innerHTML += errors
+              .map((err: VerificationError) => {
+                // let position = `(${err.Position.line}, ${err.Position.char})`
+                // TODO highlight in editor
+                return `<p>ERROR: ${err.message}</p>`;
+              })
+              .join("");
+          }
+        })
+        .catch(
+          (error) =>
+            (result_block.innerText =
+              "Playground Communication: " + error.message),
+        );
+    },
+    id,
+  );
 
 function initBlock(code_block: HTMLElement) {
   let uuid = crypto.randomUUID();
   code_block.id = uuid;
 
   let language = language_of(code_block);
-  let readonly = !code_block.classList.contains("editable");
+  let noEdit = !code_block.classList.contains("editable");
 
   let editor = ace.edit(code_block);
   let session = editor.getSession();
   let display_line_numbers = window.playground_line_numbers || false;
 
-
   // Configure the editor
   editor.setOptions({
-    readOnly: readonly,
-    highlightGutterLine: readonly,
+    readOnly: noEdit,
+    highlightGutterLine: noEdit,
     showPrintMargin: false,
     showLineNumbers: display_line_numbers,
     showGutter: display_line_numbers,
     maxLines: Infinity,
     fontSize: "0.875em", // please adjust the font size of the code in general.css
   });
-  if (readonly) {
+  if (noEdit) {
     editor.renderer.$cursorLayer.element.style.opacity = 0;
   }
 
   editor.$blockScrolling = Infinity;
 
   // Preprocess the source code
-  const [fullCode, hiddenCode] = preprocessHidden(session.getValue())
-  if (readonly) {
+  const [fullCode, hiddenCode] = preprocessHidden(session.getValue());
+  if (noEdit) {
     session.setValue(hiddenCode);
   }
   // TODO extract error information
@@ -300,7 +322,6 @@ function initBlock(code_block: HTMLElement) {
     exec: (editor: Ace.Editor) => verifyGobra(editor.getSession().getValue()),
   });
 
-
   if (language === "go") {
     language = "golang";
   }
@@ -322,7 +343,7 @@ function initBlock(code_block: HTMLElement) {
     originalCode: fullCode,
     hiddenCode,
     language,
-    readonly,
+    readonly: noEdit,
   });
 
   // Add buttons
@@ -331,33 +352,34 @@ function initBlock(code_block: HTMLElement) {
   buttons.className = "buttons";
   pre_block.insertBefore(buttons, pre_block.firstChild);
 
-  buttons.appendChild(clipboardButton(uuid))
-  if (readonly) {
-    buttons.appendChild(hiddenLinesToggler(uuid))
+  buttons.appendChild(clipboardButton(uuid));
+  if (noEdit) {
+    if (fullCode != hiddenCode) {
+      buttons.appendChild(hiddenLinesToggler(uuid));
+    }
   } else {
-    buttons.appendChild(runButton(uuid))
-    buttons.appendChild(verifyButton(uuid))
-    buttons.appendChild(resetButton(uuid))
+    buttons.appendChild(runButton(uuid));
+    buttons.appendChild(verifyButton(uuid));
+    buttons.appendChild(resetButton(uuid));
   }
 }
 
 function initializeCodeBlocks() {
   if (typeof ace === "undefined" || !ace) {
-    console.warn("Ace editor is not avaible!")
+    console.warn("Ace editor is not avaible!");
     return;
   }
 
-  let code_nodes: HTMLElement[] = Array.from(document.querySelectorAll("code")).filter(
-    (n) => n.parentElement !== null && n.parentElement.tagName == "PRE",
-  );
+  let code_nodes: HTMLElement[] = Array.from(
+    document.querySelectorAll("code"),
+  ).filter((n) => n.parentElement !== null && n.parentElement.tagName == "PRE");
 
-  code_nodes.forEach(initBlock)
+  code_nodes.forEach(initBlock);
 }
 
 addEventListener("DOMContentLoaded", () => {
   initializeCodeBlocks();
 });
-
 
 // Showcases the use of Marker and Range,
 // in the following form this wont be a useful functionality
@@ -368,7 +390,7 @@ function specsToggler() {
   var hidden = false;
   var markers: number[] = [];
   return (editor: Ace.Editor) => {
-    console.log("Toggling specs display");
+    console.debug("Toggling specs display");
     var session = editor.getSession();
     hidden = !hidden;
     markers.forEach((marker) => editor.getSession().removeMarker(marker));
@@ -384,7 +406,12 @@ function specsToggler() {
         console.debug("Found gobra line: ", line);
         markers.push(
           session.addMarker(
-            new AceRange(line_number, match.index, line_number, line.length + 1),
+            new AceRange(
+              line_number,
+              match.index,
+              line_number,
+              line.length + 1,
+            ),
             "errorHighlight",
             "fullLine",
           ),
