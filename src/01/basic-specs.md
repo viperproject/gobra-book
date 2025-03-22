@@ -212,13 +212,13 @@ Assertion res >= 0 might not hold.
 ## Default precondition and postcondition
 A `requires` or `ensures` clause may be omitted from a contract, or both clauses may be omitted. In such cases, the precondition and postcondition default to `true`.
 ``` go
-func foo() int
+func foo() {}
 ```
 is equivalent to
 ``` go
 // @ requires true
 // @ ensures true
-func foo() int
+func foo() {}
 ```
 
 Since `true` always holds, the precondition `true` does not restrict when a function can be called.
