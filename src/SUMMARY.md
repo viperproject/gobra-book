@@ -61,3 +61,5 @@
 
 ---
 - [Mathematical types](./reference-mathematical-types.md)
+- [Playground](./playground.md)
+- [Debug](./debug.md)

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "ace-builds": "^1.36.5"
+  },
+  "devDependencies": {
+    "@types/ace": "^0.0.52"
+  }
+}
