@@ -272,6 +272,11 @@ function initBlock(code_block: HTMLElement) {
   let language = language_of(code_block);
   let noEdit = !code_block.classList.contains("editable");
 
+  // supported languages
+  if (language != "go" && language != "gobra") {
+    return;
+  }
+
   let editor = ace.edit(code_block);
   let session = editor.getSession();
   let display_line_numbers = window.playground_line_numbers || false;
@@ -322,6 +327,7 @@ function initBlock(code_block: HTMLElement) {
     exec: (editor: Ace.Editor) => verifyGobra(editor.getSession().getValue()),
   });
 
+  // the ace editor mode uses golang instead of go
   if (language === "go") {
     language = "golang";
   }
