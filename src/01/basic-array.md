@@ -30,7 +30,7 @@ main.readArr(...)
         /home/gobra/array.go:20
 ```
 Now if we check the program with Gobra we can find the error statically at _verification time_.
-``` go
+``` text
 ERROR Assignment might fail. 
 Index i into a[i] might be negative.
 ```

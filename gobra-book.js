@@ -2,17 +2,15 @@
 const AceRange = ace.require("ace/range").Range;
 window.gobraBookEditorContext = new Map();
 
-//////////////////////////////////
 // Configuration
 const GOBRA_PLAYGROUND = new URL("https://gobra.void.gschall.ch/verify");
 const GO_PLAYGROUND = new URL("https://gobra.void.gschall.ch/run");
-const DEFAULT_LANGUAGE = "go";
-const GOBRA_INLINE = /\/\*@.*@\*\//g;
-const GOBRA_COMMENT = /\/\/\s*?@/;
-//////////////////////////////////
 // based on theme/book.js from mdbook
 // extracted and refactored elements
 // Added functionality to support Go and Gobra
+const DEFAULT_LANGUAGE = "text";
+const GOBRA_INLINE = /\/\*@.*@\*\//g;
+const GOBRA_COMMENT = /\/\/\s*?@/;
 
 function fetch_with_timeout(url, options, timeout = 20000) {
   return Promise.race([
@@ -232,7 +230,7 @@ function initBlock(code_block) {
   // Configure the editor
   editor.setOptions({
     readOnly: noEdit,
-    highlightGutterLine: noEdit,
+    highlightGutterLine: false,
     showPrintMargin: false,
     showLineNumbers: showLines,
     showGutter: showLines,
