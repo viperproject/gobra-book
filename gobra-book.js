@@ -226,14 +226,14 @@ function initBlock(code_block) {
   }
   let editor = ace.edit(code_block);
   let session = editor.getSession();
-  let display_line_numbers = window.playground_line_numbers || false;
+  const showLines = window.playground_line_numbers || !noEdit;
   // Configure the editor
   editor.setOptions({
     readOnly: noEdit,
     highlightGutterLine: noEdit,
     showPrintMargin: false,
-    showLineNumbers: display_line_numbers,
-    showGutter: display_line_numbers,
+    showLineNumbers: showLines,
+    showGutter: showLines,
     maxLines: Infinity,
     fontSize: "0.875em", // please adjust the font size of the code in general.css
   });
