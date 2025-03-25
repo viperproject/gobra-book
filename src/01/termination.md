@@ -135,8 +135,8 @@ This can be dangerous. With the termination measure `_` we can assume that `bugg
 Then the following program verifies, where we want to prove that the `client` code terminates.
 In practice, `buggynacci` would never return and `doSomethingVeryImportant` would never be called.
 ``` go
-~//@ decreases
-~//@ func doSomethingVeryImportant()
+~// @ decreases
+~// @ func doSomethingVeryImportant()
 ~
 // @ requires n >= 0
 // @ decreases _
@@ -148,7 +148,7 @@ func buggynacci(n int) int {
     }
 }
 
-//@ decreases
+// @ decreases
 func client() {
     x := buggynacci(n) 
     doSomethingVeryImportant()
