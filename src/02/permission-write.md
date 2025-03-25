@@ -43,18 +43,6 @@ Because `acc(x)` is kept, and write permission is exclusive, we can _frame_ the 
 <!-- - As write permission is exclusive, the case where `x` and `y` are aliases is -->
 <!-- e.g. with *x = y , and alternative body: **p += 1; *p+=1 -->
 
-Moreover, permissions are used by Gobra to ensure that programs do not have _data races_, i.e., concurrent accesses to the same memory location with at least one modifying access.
-As a short teaser for concurrency:
-``` go
-{{#include frame.go:inc}}
-{{#include frame.go:driver}}
-```
-``` text
-ERROR Precondition of call might not hold. 
-
-go inc(p) might not satisfy the precondition of the callee.
-```
-
 ## Permission for pointers
 <!-- The following chapter will also introduce access to predicates but for now, we are concerned only with pointers. -->
 Permissions are held for _resources_.
