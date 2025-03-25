@@ -9,8 +9,6 @@ As an overview we mention the important files:
 
 - `book.toml` is the mdbook configuration file
 
-- `editor.js` configures the code editor
-
 - `theme/` for the styling and interactivity (especially `theme/book.js`)
 
 - `gobra-book.js` contains modifications to configure the editors and support Go and Gobra
