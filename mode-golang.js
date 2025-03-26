@@ -101,7 +101,7 @@ ace.define(
       this.$rules = {
         start: [
           {
-            token: "assertion", // Treat lines starting with "// @" as regular text (non-comment)
+            token: "specsSingle", // Treat lines starting with "// @" as regular text (non-comment)
             regex: /\/\/\s*@/,
           },
           {
@@ -110,6 +110,15 @@ ace.define(
             // regex: "\\/\\/(?!\s*@).*"
           },
           DocCommentHighlightRules.getStartRule("doc-start"),
+          {
+            token: "specs.start",
+            regex: "\\/\\*@", // multi line specifications
+            // next: "specs",
+          },
+          {
+            token: "specs.end",
+            regex: "@\\*\\/",
+          },
           {
             token: "comment.start", // multi line comment
             regex: "\\/\\*",
@@ -194,6 +203,16 @@ ace.define(
             defaultToken: "comment",
           },
         ],
+        // specs: [
+        //   {
+        //     token: "specs.end",
+        //     regex: "@\\*\\/",
+        //     next: "start",
+        //   },
+        //   {
+        //     defaultToken: "text",
+        //   },
+        // ],
         bqstring: [
           {
             token: "string",
@@ -413,7 +432,6 @@ ace.define(
     };
     oop.inherits(Mode, TextMode);
     (function () {
-      this.lineCommentStart = "ungabung"; // TODO
       this.blockComment = { start: "/*", end: "*/" };
       this.getNextLineIndent = function (state, line, tab) {
         var indent = this.$getIndent(line);
