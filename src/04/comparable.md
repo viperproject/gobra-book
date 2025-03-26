@@ -56,6 +56,16 @@ The following client code verifies.
 > 
 > The function `isComparable` takes as input an interface value or a type and returns whether it is comparable according to Go.
 
+## Ghost equality `===`, `!==`
+The ghost comparison `===` compares values of arbitrary types by identity and does not panic.
+If we used the normal equality `==` instead in the following example, Gobra reports an error since the sequence contains elements of type `any` which might not be directly comparable.
+``` go
+{{#include comparable.go:GhostEq}}
+```
+``` text
+ERROR Comparison might panic. 
+Both operands of view[i] == view[j] might not have comparable values.
+```
 
 ## Full example
 ``` go
