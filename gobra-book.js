@@ -63,7 +63,7 @@ function preprocessHidden(code) {
     .filter((line) => !/^\s*~/.test(line))
     .join("\n");
   let fullCode = code.replaceAll("~", "");
-  return [hiddenCode.trim(), fullCode.trim()];
+  return [hiddenCode.trimRight(), fullCode.trimRight()];
 }
 function simpleButton(class1, title, callback, id) {
   const button = document.createElement("button");
