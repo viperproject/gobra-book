@@ -60,12 +60,9 @@ The source files used in this project have the extensions `.go` or `.gobra`. `.g
 
 
 ### Code Block Attributes
-> [!WARNING]
-> This behavior is likely to change
-
 Source blocks can be tagged with attributes.
 ````markdown
-``` go,editable
+``` go editable
 ...
 ```
 ````
@@ -74,6 +71,15 @@ Additional buttons are displayed for
 - resetting to the initial code
 - verifying the program with the Gobra playground
 - running the program on the Go playground
+
+The following attributes add a Gobra snake / Go gopher to the code blocks:
+- `does_not_compile`
+- `does_not_verify`
+- `not_efficient`
+- `panics`
+- `verifies`
+
+![panicking gopher](./src/assets/ferris/panics.svg)
 
 ### Style
 Before proposing extensions to the book, please make sure that your examples satisfy the following conditions:
