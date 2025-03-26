@@ -25,7 +25,7 @@ With a `ghost` out parameter `idx`, we can return the index of the maximal value
 The updated contract specifies, that the maximal value is at index `idx`.
 We update `idx` with a ghost statement to maintain the invariant that it is the index of the maximal value in the prefix of the array already iterated over.
 As `Max` has two out parameters now, clients  must assign the ghost return value to a ghost location.
-``` go
+``` go verifies
 const N = 10
 
 // @ ensures forall i int :: 0 <= i && i < len(arr) ==> arr[i] <= res
@@ -62,7 +62,7 @@ func client() {
 Recall that ghost code cannot change the visible behavior of a program.
 Hence, ghost code cannot modify non-ghost locations.
 For example, the ghost statement `x = 1` causes an error since `x` is a normal variable:
-``` go
+``` go does_not_verify
 var x int
 // @ ghost x = 1
 // ...
@@ -80,7 +80,7 @@ ERROR ghost error: only ghost locations can be assigned to in ghost code
 To make a statement ghost, add `ghost` before it.
 Although not all statements can appear in ghost code.
 For example, there is no ghost `return` statement, because it can change the visible behavior of a program:
-``` go
+``` go does_not_verify
 func loop() {
     // @ ghost return
     for {}
@@ -95,7 +95,7 @@ ERROR ghost error: expected ghostifiable statement
 Ghost functions must be proven to terminate.
 Calling a non-terminating ghost function could change the visible behavior of a program.
 For example, the function `boo` does not terminate with ghost code but returns immediately without ghost code..
-``` go
+``` go does_not_verify
 /*@
 ghost
 func inf() {

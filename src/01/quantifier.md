@@ -86,7 +86,7 @@ Now when `a[3]` matches `a[i]`, for example in `assert a[3] == 0`, Gobra learns 
 <div class="warning">
 While we include triggers in the following examples as a best practice, readers may disregard them for now.
 Choosing the right trigger expressions may require careful consideration.
-This advanced topic will be addressed in the section on [triggers](./triggers.md).
+This advanced topic will be addressed in the section on <a href="/triggers.md">triggers</a>.
 </div>
 
 ## Existential quantifier `exists`
@@ -103,7 +103,7 @@ Later, we show how we might avoid having to use explicit existential quantifiers
 For completeness, we still show an example:
 The function `Contains` returns whether the value `target` is contained in the input array.
 We can specify with an implication that if `target` is found there must exist an index `idx` with `arr[idx] == target`:
-``` go
+``` go verifies
 // @ ensures found ==> exists idx int :: 0 <= idx && idx < len(arr) && arr[idx] == target
 func Contains(arr [10]int, target int) (found bool) {
     for i := range arr {

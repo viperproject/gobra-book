@@ -4,7 +4,7 @@ A function that is deterministic and has no side effects can be marked as `pure`
 
 <!-- We are not allowed to call arbitrary functions in specifications. -->
 If we try to call a normal Go function `Cube` in an assert statement, Gobra reports errors:
-``` go
+``` go does_not_verify
 package main
 
 func Cube(x int) int {
@@ -12,20 +12,20 @@ func Cube(x int) int {
 }
 
 func client() {
-    // @ assert 8 == Cube(2)
+    // @ assert 8 == Cube(2) // error
 }
 ```
 ``` text
-ERROR /tmp/playground.go:8:9:error: expected pure expression, but got '8 ==  Cube(3)'
+ERROR expected pure expression, but got '8 ==  Cube(3)'
     assert 8 == Cube(3)
         ^
-ERROR /tmp/playground.go:8:14:error: ghost error: Found call to non-ghost impure function in ghost code
+ERROR ghost error: Found call to non-ghost impure function in ghost code
     assert 8 == Cube(3)
              ^
 ```
 Let us mark the function `Cube` as `pure`, and also with `decreases`, since a termination measure is a requirement for a pure function.
 Gobra enforces the syntactic requirement that the body of `pure` functions must be a single return with a pure expression, which is satisfied in this case.
-``` go
+``` go verifies
 // @ pure
 // @ decreases
 func Cube(x int) int {
@@ -81,11 +81,11 @@ func fibIterative(n int) (res int) {
 ## Syntactic restriction
 Gobra enforces the syntactic restriction that the body of `pure` functions must be a single return with a pure expression.
 Hence, we are unable to define `fibonacci` with an `if` statement:
-``` go
+``` go does_not_verify
 // @ requires n >= 0
 // @ pure
 // @ decreases n
-func fibonacci(n int) (res int) {
+func fibonacci(n int) (res int) { // error
     if n <= 1 {
         return n
     } else {
@@ -94,7 +94,7 @@ func fibonacci(n int) (res int) {
 }
 ```
 ``` text
-ERROR /tmp/playground.go:17:33:error: For now, the body of a pure block is expected to be a single return with a pure expression, got Vector(if n <= 1 {
+ERROR For now, the body of a pure block is expected to be a single return with a pure expression, got Vector(if n <= 1 {
   return n
 } else {
   return  fibonacci(n - 1) +  fibonacci(n - 2)
@@ -105,7 +105,7 @@ func fibonacci(n int) (res int) {
 ```
 
 Instead, we can resort to the conditional expression `cond ? e1 : e2`, which evaluates to `e1` if `cond` holds, and to `e2` otherwise:
-``` go
+``` go does_not_verify
 // @ requires n >= 0
 // @ pure
 // @ decreases n
@@ -136,7 +136,7 @@ func fibonacci(n int) (res int) {
 Unlike normal functions, where we cannot peek inside their body, 
 Gobra learns the body of `pure` functions when calling them.
 The following assertions pass, without having specified a postcondition.
-``` go
+``` go verifies
 func client1(n int) {
     if n > 1 {
         // @ assert fibonacci(n) == fibonacci(n-1) + fibonacci(n-2)
@@ -149,7 +149,7 @@ func client1(n int) {
 
 Note that this does not automatically happen for the recursive calls in the body.
 For example, we can assert `fibonacci(3) == fibonacci(2) + fibonacci(1)`, but not `fibonacci(3) == 2`.
-``` go
+``` go does_not_verify
 func client2() {
     // @ assert fibonacci(3) == fibonacci(2) + fibonacci(1)
     // @ assert fibonacci(3) == 2
@@ -161,7 +161,7 @@ Assertion fibonacci(3) == 2 might not hold.
 ```
 By providing additional proof goals, we can to assert `fibonacci(3) == 2`.
 Having previously asserted `fibonacci(1) == 1` and `fibonacci(2) == 1`, these can be substituted in `fibonacci(3) == fibonacci(2) + fibonacci(1)`.
-``` go
+``` go verifies
 func client3() {
     // @ assert fibonacci(0) == 0
     // @ assert fibonacci(1) == 1
@@ -195,7 +195,7 @@ By now we know that `pure` functions can be used in specifications,
 and since they do not have side effects nor non-determinism, they can be thought of as mathematical functions.
 To prevent inconsistencies, termination measures must be provided for `pure` functions:
 
-``` gobra
+``` gobra does_not_verify
 pure
 ensures res != 0
 func incons(x int) (res int) {
@@ -209,7 +209,7 @@ pure
 Next, we show why it is a bad idea to have non-terminating specification functions and derive `assert false`.
 For this we assume that `incons` terminates by giving it the wildcard termination measure `decreases _`.
 
-``` gobra
+``` gobra verifies
 pure
 decreases _ // assuming termination
 ensures res != 0

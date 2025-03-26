@@ -14,7 +14,7 @@ Let us explore the concept of partial correctness further.
 The function `infiniteZero` contains an infinite loop, so it will not terminate.
 It is still partially correct with respect to its contract since the postcondition `false` must only be proven to hold when it returns, which it does not.
 
-``` gobra
+``` gobra verifies
 ensures false
 func infiniteZero() res {
     for {}
@@ -36,7 +36,7 @@ We can instruct Gobra to check for termination by adding the `decreases` keyword
 It must come right before the function/loop after any preconditions/postconditions/invariants.
 Sometimes, this suffices and a termination measure can be automatically inferred. 
 For example, for simple functions like `Abs` that terminate immediately:
-``` go
+``` go verifies
 decreases
 func Abs(x int) (res int) {
     if x < 0 {
@@ -61,7 +61,7 @@ For example, integers `i, j int` are lower-bounded if `i >= 0` and decreasing if
 ## Termination of loops
 A common case is that we iterate over an array with an increasing loop variable `i`, as seen in the function `LinearSearch`.
 We can easily construct a termination measure that decreases instead by subtracting `i` from the array's length.
-``` go
+``` go verifies
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 // @ decreases
@@ -99,7 +99,7 @@ Required termination condition might not hold.
 ## Termination of recursive functions
 The function `fibonacci` recursively computes the `n`'th iterate of the Fibonacci sequence.
 As a termination measure, the parameter `n` is suitable since we recursively call `fibonacci` with smaller arguments and `n` is bounded from below.
-``` go
+``` go verifies
 // @ requires n >= 0
 // @ decreases n
 func fibonacci(n int) int {
@@ -112,7 +112,7 @@ func fibonacci(n int) int {
 ```
 
 Verification fails, if we mistype `buggynacci(n-0)` instead of `buggynacci(n-1)`.
-``` go
+``` go does_not_verify
 // @ requires n >= 0
 // @ decreases n
 func buggynacci(n int) int {
@@ -191,7 +191,7 @@ low mid high
  0 1 3
  1 1 2
     -->
-``` go
+``` go does_not_verify
 // @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 // @ ensures 0 <= idx && idx <= len(arr)
 // @ ensures idx > 0 ==> arr[idx-1] < target

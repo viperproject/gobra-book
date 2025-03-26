@@ -8,7 +8,7 @@ Programs that access arrays often suffer from subtle bugs such as off-by-one err
 Gobra prevents these by **statically** checking that every access to arrays is within bounds.
 
 Go can find out-of-bounds indices for constant values when compiling a program.
-``` go
+``` go does_not_compile
 {{#include ./array.go:client}}
 ```
 ``` text
@@ -17,7 +17,7 @@ Go can find out-of-bounds indices for constant values when compiling a program.
 ```
 Unfortunately, the checks that the Go compiler performs may miss simple out-of-bounds errors, as shown in the example below that moves the array access to a different function:
 
-``` go
+``` go panics
 {{#include ./array.go:readArr}}
 {{#include ./array.go:main}}
 ```
@@ -39,7 +39,7 @@ Index i into a[i] might be negative.
 The indexing operation `a[i]` implicitly has the precondition
 `requires 0 <= i && i < len(a)`.
 By propagating this precondition to the contract of `readArr`, Gobra accepts the function.
-``` go
+``` go verifies
 {{#include ./array.go:readArrFinal}}
 ```
 Then the calls `readArr(a, -1)` and `readArr(a, 10)` will get rejected.
