@@ -7,6 +7,9 @@ title = "Practical Program Verification in Go with Gobra (alpha)"
 
 [output.html]
 theme = "theme"
+additional-css = [
+  "gobra.css"
+]
 additional-js = [
               "gobra-book.js",
               "mode-golang.js",
