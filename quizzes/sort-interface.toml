@@ -58,8 +58,7 @@ id = "7929e903-21d4-41fa-bf47-7f146bb97d56"
 
 [[questions]]
 type = "MultipleChoice"
-prompt.prompt = """ **TODO the requirements might be changed**
-Recall the methods `LessSpec` and `Less`:
+prompt.prompt = """Recall the methods `LessSpec` and `Less`:
 ```go
 /*@
 ghost
@@ -91,22 +90,14 @@ such that `IntSlice` implements `Interface`.
 """
 prompt.distractors = [
     "s[i] % s[j] == 0",
-    "s[j] != 0 && s[i] % s[j] == 0",
+    "s[i] <= s[j]",
     "s[i] != s[j]",
 ]
-answer.answer = [
-    "s[i] <= s[j]",
-]
+answer.answer = ["s[i] < s[j]"]
 context = """
 - `s[i] % s[j] == 0`  is not well-defined: `Divisor s[j] might be zero.`
-- `s[j] != 0 && s[i] % s[j] == 0` is well-defined and gives rise to a transitive order.
-  The order is not total.
-  For example for `s := []int{2, 3}`,
-  `!LessSpec(0, 1)` and `!LessSpec(1, 0)` holds but 2 != 3.
-  Hence, we cannot prove the postcondition of `LessIsConnected`.
+- `s[i] <= s[j]` is a not valid. The relation is not irreflexive (and also not asymmetric).
 - `s[i] != s[j]`   does give rise to an ordering that is not transitive. The postcondition of `LessIsTransitive` cannot be proven.
-- `s[i] <= s[j]` is a valid. The ordering is both transitive and connected.
-   As a consequence, the slice `s := []int{2, 2}` would not be considered sorted as `!LessSpec(1,0)` does not hold.
 """
 id = "ef7234fe-f000-4db8-a0c8-eab3142d6d52"
 

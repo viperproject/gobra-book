@@ -45,13 +45,11 @@ func client() {
 	// @ assert x.LessSpec(0, 2)
 	// @ assert x.View()[1] == x.View()[2]
 	// @ assert typeOf(x.View()[1]) == type[int]
-
 	if v, ok := x.(IntSlice); ok {
 		// @ assert len(v) == 3
 	} else {
 		// @ assert false
 	}
-
 }
 
 // ANCHOR_END: client
@@ -132,19 +130,6 @@ type Interface interface {
 	// @ decreases len(View())
 	Less(i, j int) (res bool)
 
-	// ANCHOR: InterfaceLessIsConnected
-	// @ ghost
-	// @ requires acc(Mem(), _)
-	// @ requires 0 <= i && i < len(View())
-	// @ requires 0 <= j && j < len(View())
-	// @ requires !LessSpec(i, j)
-	// @ requires !LessSpec(j, i)
-	// @ ensures acc(Mem(), _)
-	// @ ensures let view := old(View()) in view[i] === view[j]
-	// @ decreases
-	// @ LessIsConnected(i, j int)
-	// ANCHOR_END: InterfaceLessIsConnected
-
 	// ANCHOR: InterfaceLessIsTransitive
 	// @ ghost
 	// @ requires acc(Mem(), _)
@@ -157,6 +142,41 @@ type Interface interface {
 	// @ decreases
 	// @ LessIsTransitive(i, j, k int)
 	// ANCHOR_END: InterfaceLessIsTransitive
+
+	// ANCHOR: InterfaceLessIsCoTransitive
+	// @ ghost
+	// @ requires acc(Mem(), _)
+	// @ requires 0 <= i && i < len(View())
+	// @ requires 0 <= j && j < len(View())
+	// @ requires 0 <= k && k < len(View())
+	// @ requires !LessSpec(i, j) && !LessSpec(j, k)
+	// @ ensures acc(Mem(), _)
+	// @ ensures old(!LessSpec(i, k))
+	// @ decreases
+	// @ LessIsCoTransitive(i, j, k int)
+	// ANCHOR_END: InterfaceLessIsCoTransitive
+
+	// ANCHOR: InterfaceLessIsIrreflexive
+	// @ ghost
+	// @ requires acc(Mem(), _)
+	// @ requires 0 <= i && i < len(View())
+	// @ ensures acc(Mem(), _)
+	// @ ensures old(!LessSpec(i, i))
+	// @ decreases
+	// @ LessIsIrreflexive(i int)
+	// ANCHOR_END: InterfaceLessIsIrreflexive
+
+	// ANCHOR: InterfaceLessIsAsymmetric
+	// @ ghost
+	// @ requires acc(Mem(), _)
+	// @ requires 0 <= i && i < len(View())
+	// @ requires 0 <= j && j < len(View())
+	// @ requires LessSpec(i, j)
+	// @ ensures acc(Mem(), _)
+	// @ ensures old(!LessSpec(j, i))
+	// @ decreases
+	// @ LessIsAsymmetric(i, j int)
+	// ANCHOR_END: InterfaceLessIsAsymmetric
 
 	// ANCHOR: InterfaceSwap
 	// Swap swaps the elements with indices i and j.
@@ -191,31 +211,27 @@ pred (s IntSlice) Mem() {
 // ANCHOR_END: IntSliceMem
 
 // ANCHOR: IntSliceView
-/*@
-ghost
-requires acc(s.Mem(), _)
-ensures len(res) == len(s)
-ensures forall i int :: {res[i]} {s[i]} 0 <= i && i < len(res) ==> unfolding acc(s.Mem(), _) in  res[i] == s[i]
-decreases
-pure func (s IntSlice) View() (ghost res seq[any]) {
-	return unfolding acc(s.Mem(), _) in s.viewAux(0, seq[any]{})
-}
-@*/
+// @ ghost
+// @ requires acc(s.Mem(), _)
+// @ ensures len(res) == len(s)
+// @ ensures forall i int :: {res[i]} {s[i]} 0 <= i && i < len(res) ==> unfolding acc(s.Mem(), _) in  res[i] == s[i]
+// @ decreases
+// @ pure func (s IntSlice) View() (ghost res seq[any]) {
+// @ 	return unfolding acc(s.Mem(), _) in s.viewAux(0, seq[any]{})
+// @ }
 
-/*@
-ghost
-requires acc(s, _)
-requires 0 <= i && i <= len(s)
-requires len(prefix) == i
-ensures len(res) == len(s)
-requires forall i int :: {prefix[i]} {s[i]} 0 <= i && i < len(prefix) ==> prefix[i] == s[i]
-ensures forall i int :: {res[i]} 0 <= i && i < len(res) ==> res[i] == s[i]
-decreases len(s) - i
-pure
-func (s IntSlice) viewAux(i int, prefix seq[any]) (ghost res seq[any]) {
-    return i == len(s) ? prefix : s.viewAux(i + 1, prefix ++ seq[any]{s[i]})
-}
-@*/
+// @ ghost
+// @ requires acc(s, _)
+// @ requires 0 <= i && i <= len(s)
+// @ requires len(prefix) == i
+// @ ensures len(res) == len(s)
+// @ requires forall i int :: {prefix[i]} {s[i]} 0 <= i && i < len(prefix) ==> prefix[i] == s[i]
+// @ ensures forall i int :: {res[i]} 0 <= i && i < len(res) ==> res[i] == s[i]
+// @ decreases len(s) - i
+// @ pure
+// @ func (s IntSlice) viewAux(i int, prefix seq[any]) (ghost res seq[any]) {
+// @ 	return i == len(s) ? prefix : s.viewAux(i + 1, prefix ++ seq[any]{s[i]})
+// @ }
 // ANCHOR_END: IntSliceView
 
 // ANCHOR: IntSliceLen
@@ -232,16 +248,14 @@ func (s IntSlice) Len() (res int) {
 
 // ANCHOR_END: IntSliceLen
 // ANCHOR: IntSliceLess
-/*@
-ghost
-requires acc(s.Mem(), _)
-requires 0 <= i && i < len(s.View())
-requires 0 <= j && j < len(s.View())
-decreases len(s.View())
-pure func (s IntSlice) LessSpec(i, j int) (res bool) {
-	return unfolding acc(s.Mem(), _) in s[i] < s[j]
-}
-@*/
+// @ ghost
+// @ requires acc(s.Mem(), _)
+// @ requires 0 <= i && i < len(s.View())
+// @ requires 0 <= j && j < len(s.View())
+// @ decreases len(s.View())
+// @ pure func (s IntSlice) LessSpec(i, j int) (res bool) {
+// @ 	return unfolding acc(s.Mem(), _) in s[i] < s[j]
+// @ }
 
 // @ requires acc(s.Mem(), 1/1024)
 // @ requires 0 <= i && i < len(s.View())
@@ -253,32 +267,54 @@ func (s IntSlice) Less(i, j int) (res bool) {
 	// @ unfold acc(s.Mem(), 1/1024)
 	res = s[i] < s[j]
 	// @ fold acc(s.Mem(), 1/1024)
+	return
 }
 
-/*@
-ghost
-requires acc(s.Mem(), _)
-requires 0 <= i && i < len(s.View())
-requires 0 <= j && j < len(s.View())
-requires !s.LessSpec(i, j) && !s.LessSpec(j, i)
-ensures acc(s.Mem(), _)
-ensures let view := s.View() in view[i] === view[j]
-decreases
-func (s IntSlice) LessIsConnected(i, j int) {}
-@*/
+// @ ghost
+// @ requires acc(s.Mem(), _)
+// @ requires 0 <= i && i < len(s.View())
+// @ requires 0 <= j && j < len(s.View())
+// @ requires 0 <= k && k < len(s.View())
+// @ requires s.LessSpec(i, j) && s.LessSpec(j, k)
+// @ ensures acc(s.Mem(), _)
+// @ ensures s.LessSpec(i, k)
+// @ decreases
+// @ func (s IntSlice) LessIsTransitive(i, j, k int) {}
 
-/*@
-ghost
-requires acc(s.Mem(), _)
-requires 0 <= i && i < len(s.View())
-requires 0 <= j && j < len(s.View())
-requires 0 <= k && k < len(s.View())
-requires s.LessSpec(i, j) && s.LessSpec(j, k)
-ensures acc(s.Mem(), _)
-ensures s.LessSpec(i, k)
-decreases
-func (s IntSlice) LessIsTransitive(i, j, k int) {}
-@*/
+// ANCHOR: IntSliceLessIsCoTransitive
+// @ ghost
+// @ requires acc(s.Mem(), _)
+// @ requires 0 <= i && i < len(s.View())
+// @ requires 0 <= j && j < len(s.View())
+// @ requires 0 <= k && k < len(s.View())
+// @ requires !s.LessSpec(i, j) && !s.LessSpec(j, k)
+// @ ensures acc(s.Mem(), _)
+// @ ensures old(!s.LessSpec(i, k))
+// @ decreases
+// @ func (s IntSlice) LessIsCoTransitive(i, j, k int) {}
+// ANCHOR_END: IntSliceLessIsCoTransitive
+
+// ANCHOR: IntSliceLessIsIrreflexive
+// @ ghost
+// @ requires acc(s.Mem(), _)
+// @ requires 0 <= i && i < len(s.View())
+// @ ensures acc(s.Mem(), _)
+// @ ensures old(!s.LessSpec(i, i))
+// @ decreases
+// @ func (s IntSlice) LessIsIrreflexive(i int) {}
+// ANCHOR_END: IntSliceLessIsIrreflexive
+
+// ANCHOR: IntSliceLessIsAsymmetric
+// @ ghost
+// @ requires acc(s.Mem(), _)
+// @ requires 0 <= i && i < len(s.View())
+// @ requires 0 <= j && j < len(s.View())
+// @ requires s.LessSpec(i, j)
+// @ ensures acc(s.Mem(), _)
+// @ ensures old(!s.LessSpec(j, i))
+// @ decreases
+// @ func (s IntSlice) LessIsAsymmetric(i, j int) {}
+// ANCHOR_END: IntSliceLessIsAsymmetric
 // ANCHOR_END: IntSliceLess
 
 // ANCHOR: IntSliceSwap
