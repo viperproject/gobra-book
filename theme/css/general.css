@@ -68,7 +68,13 @@ h6 code {
 .errorHighlight {
     position: absolute;
     z-index: 20;
-    background-color: red;
+    text-decoration: none;
+    background-image: url("data:image/svg+xml,\
+    <svg xmlns='http://www.w3.org/2000/svg' width='6' height='3'>\
+      <path d='M 0 3 Q 1.5 0 3 3 T 6 3' stroke='red' fill='transparent' stroke-width='1'/>\
+    </svg>");
+    background-repeat: repeat-x;
+    background-position: bottom;
 }
 
 .ace_hide_line {

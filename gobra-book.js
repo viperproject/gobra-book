@@ -9,8 +9,6 @@ const GO_PLAYGROUND = new URL("https://gobra.void.gschall.ch/run");
 // extracted and refactored elements
 // Added functionality to support Go and Gobra
 const DEFAULT_LANGUAGE = "text";
-const GOBRA_INLINE = /\/\*@.*@\*\//g;
-const GOBRA_COMMENT = /\/\/\s*?@/;
 
 function fetch_with_timeout(url, options, timeout = 20000) {
   return Promise.race([
@@ -174,7 +172,8 @@ const verifyButton = (id) =>
     "fa-check-circle-o",
     "Verify with Gobra",
     (ctxt) => {
-      const code = ctxt.editor.getSession().getValue();
+      const session = ctxt.editor.getSession();
+      const code = session.getValue();
       const container = ctxt.editor.container.parentNode;
       let result_block = container.querySelector(".result");
       if (!result_block) {
@@ -198,8 +197,20 @@ const verifyButton = (id) =>
             result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`;
             result_block.innerHTML += errors
               .map((err) => {
-                // let position = `(${err.Position.line}, ${err.Position.char})`
-                // TODO highlight in editor
+                const line = err.Position.line - 1;
+                const char = err.Position.char - 1;
+                const codeLines = code.split("\n");
+                if (0 <= line && line < codeLines.length) {
+                  const lineLen = codeLines[line].length + 1;
+                  // also clear it again...
+                  session.addMarker(
+                    new AceRange(line, char, line, lineLen),
+                    "errorHighlight",
+                    "singleLine",
+                  );
+                  let position = `${err.Position.line},${err.Position.char}`;
+                  return `<p>ERROR (${position}): ${err.message}</p>`;
+                }
                 return `<p>ERROR: ${err.message}</p>`;
               })
               .join("");
@@ -226,6 +237,13 @@ function initBlock(code_block) {
   }
   let editor = ace.edit(code_block);
   let session = editor.getSession();
+  session.on("change", function () {
+    // clear error highlights
+    session.clearAnnotations();
+    Object.keys(session.getMarkers()).forEach((markerId) =>
+      session.removeMarker(markerId),
+    );
+  });
   const showLines = window.playground_line_numbers || !noEdit;
   // Configure the editor
   editor.setOptions({
@@ -246,13 +264,7 @@ function initBlock(code_block) {
   if (noEdit) {
     session.setValue(hiddenCode);
   }
-  // TODO extract error information
   // Bind Commands to keybindings
-  editor.commands.addCommand({
-    name: "highlightSpecs",
-    bindKey: { win: "Ctrl-L", mac: "Cmd-L" },
-    exec: specsToggler(),
-  });
   editor.commands.addCommand({
     name: "runGo",
     bindKey: {
@@ -322,64 +334,4 @@ function initializeCodeBlocks() {
 addEventListener("DOMContentLoaded", () => {
   initializeCodeBlocks();
 });
-// Showcases the use of Marker and Range,
-// in the following form this wont be a useful functionality
-// Toggle the display of Gobra annotations within Go files
-// Handle line comments starting with //@
-// and inline comments of the form /*@ ... @*/
-function specsToggler() {
-  var hidden = false;
-  var markers = [];
-  return (editor) => {
-    console.debug("Toggling specs display");
-    var session = editor.getSession();
-    hidden = !hidden;
-    markers.forEach((marker) => editor.getSession().removeMarker(marker));
-    markers = [];
-    if (!hidden) {
-      return;
-    }
-    var doc = session.getDocument();
-    var lines = doc.getAllLines();
-    lines.forEach((line, line_number) => {
-      let match = line.match(GOBRA_COMMENT);
-      if (match) {
-        console.debug("Found gobra line: ", line);
-        markers.push(
-          session.addMarker(
-            new AceRange(
-              line_number,
-              match.index,
-              line_number,
-              line.length + 1,
-            ),
-            "errorHighlight",
-            "fullLine",
-          ),
-        );
-      }
-      let matches = line.match(GOBRA_INLINE);
-      if (matches) {
-        matches.forEach((match) => {
-          let start = line.indexOf(match);
-          let end = start + match.length;
-          console.debug(
-            "Found gobra annotation: ",
-            match,
-            line_number,
-            start,
-            end,
-          );
-          markers.push(
-            session.addMarker(
-              new AceRange(line_number, start, line_number, end),
-              "errorHighlight",
-              "text",
-            ),
-          );
-        });
-      }
-    });
-  };
-}
 export {};
