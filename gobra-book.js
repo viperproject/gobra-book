@@ -197,18 +197,21 @@ const verifyButton = (id) =>
             result_block.innerHTML += `<span> Verification failed, taking ${duration}</span>`;
             result_block.innerHTML += errors
               .map((err) => {
-                let position = `${err.Position.line},${err.Position.char}`;
-                // TODO highlight in editor
                 const line = err.Position.line - 1;
                 const char = err.Position.char - 1;
-                const lineLen = code.split("\n")[line].length + 1;
-                // also clear it again...
-                session.addMarker(
-                  new AceRange(line, char, line, lineLen),
-                  "errorHighlight",
-                  "singleLine",
-                );
-                return `<p>ERROR (${position}): ${err.message}</p>`;
+                const codeLines = code.split("\n");
+                if (0 <= line && line < codeLines.length) {
+                  const lineLen = codeLines[line].length + 1;
+                  // also clear it again...
+                  session.addMarker(
+                    new AceRange(line, char, line, lineLen),
+                    "errorHighlight",
+                    "singleLine",
+                  );
+                  let position = `${err.Position.line},${err.Position.char}`;
+                  return `<p>ERROR (${position}): ${err.message}</p>`;
+                }
+                return `<p>ERROR: ${err.message}</p>`;
               })
               .join("");
           }
