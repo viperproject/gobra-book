@@ -47,7 +47,7 @@ This contract does not yet capture that `idx` must be the first index where `tar
 Here is the first implementation of `BinarySearchArr`.
 The elements with an index between `low` and `high` denote the parts of the array that remain to be searched for `target`.
 We must add several loop invariants until this function satisfies its contract.
-``` go
+``` go does_not_verify
 ~const N = 1000
 ~
 // @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < N ==> arr[i] <= arr[j]
@@ -191,7 +191,7 @@ The full example can be found below.
 
 ## Full Example
 
-``` go
+``` go verifies
 package binarysearcharr
 
 const N = 7

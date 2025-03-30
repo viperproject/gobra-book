@@ -87,7 +87,7 @@ Therefore `i == len(arr)` and `forall i int :: 0 <= i && i < len(arr) ==> arr[i]
 
 ## Failing to establish an invariant
 When we change the first invariant to use `1 <= i` instead of `0 <= i`, this invariant does not hold before the first iteration:
-``` go
+``` go does_not_verify
 func NotEstablished(arr [N]int, target int) (idx int, found bool) {
 	// @ invariant 1 <= i && i <= len(arr)
 	for i := 0; i < len(arr); i += 1 {
@@ -106,7 +106,7 @@ Assertion 1 <= i might not hold.
 ## Failing to preserve an invariant
 When we change the first invariant to use `i < len(arr)` instead of `i <= len(arr)`, this invariant does not hold after every iteration.
 After the last iteration `i==len(arr)` holds and this invariant is not preserved.
-``` go
+``` go does_not_verify
 func NotPreserved(arr [N]int, target int) (idx int, found bool) {
 	// @ invariant 0 <= i && i < len(arr)
 	for i := 0; i < len(arr); i += 1 {

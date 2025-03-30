@@ -70,7 +70,7 @@ ace.define(
       require("./text_highlight_rules").TextHighlightRules;
     var GolangHighlightRules = function () {
       var gobra_keywords =
-        "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|assume|apply|inhale|exhale|assert|ghost|implements|unfolding|let|fold|unfold|decreases";
+        "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|assume|apply|inhale|exhale|assert|ghost|implements|unfolding|let|fold|unfold|decreases|with";
       var gobra_operators = "=>|<==>|<==|::|in|===|!==";
       var keywords =
         "else|break|case|return|goto|if|const|select|" +

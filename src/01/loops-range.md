@@ -8,7 +8,7 @@ Gobra does not support range clauses for integers, strings, and functions.
 
 Here we refactor the `LinearSearch` example from the section on [loop invariants](./loops-invariant.md) to use a for-range loop.
 The contract is left unchanged, but Gobra reports an error:
-``` go
+``` go does_not_verify
 const N = 10
 
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
@@ -40,7 +40,7 @@ Additionally, `i0` will be equal to `len(arr)` at the end of the loop.
 Thus, if we replace `i` with `i0` in the second invariant, Gobra can verify the postcondition.
 The invariant `0 <= i && i < len(arr)` can be removed, as it is implicitly understood by Gobra.
 Our final verifying version is:
-``` go
+``` go verifies
 package main
 
 const N = 10

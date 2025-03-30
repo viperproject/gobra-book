@@ -25,3 +25,5 @@ We are grateful to the following open source projects:
 - <https://github.com/rust-lang/book> ([Apache License](./licenses/LICENSE-APACHE), [MIT License](./licenses/LICENSE-MIT)) which was used as the base for the CI/CD actions and the script `ci/spellcheck.sh`
 
 - <https://github.com/ajaxorg/ace>  ([License](./licenses/LICENSE-ACE)) which provides a code editor and golang support via `mode-golang.js`
+
+- The [Go Gopher](https://go.dev/wiki/Gopher) is licensed under the Creative Commons 4.0 Attributions license.

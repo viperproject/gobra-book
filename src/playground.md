@@ -1,7 +1,7 @@
 # Playground
 You can edit the code below.
 Use the buttons to verify it with Gobra or run it as a Go program.
-```go, editable
+```go editable
 package main
 
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target

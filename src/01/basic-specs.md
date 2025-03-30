@@ -68,7 +68,7 @@ Preconditions are added with the keyword `requires` before a function declaratio
 For any reachable call, Gobra checks whether the function's precondition is guaranteed to hold.
 Since this is enforced, the precondition can be assumed to hold at the beginning of a function.
 Let us exemplify this with the absolute value example:
-```go
+```go does_not_verify
 const MinInt32 = -2147483648
 
 // @ requires x != MinInt32
@@ -131,7 +131,7 @@ Once again, notice that Gobra verifies programs before they are even compiled.
 These checks do not introduce any assertions at runtime, so there is no performance cost to adding these annotations.
 
 The first assertion passes in the following program since it can be inferred from the precondition.
-```go
+```go does_not_verify
 // @ requires a > 0 && b < 0
 func client3(a, b int32) {
     // @ assert a > b
@@ -153,7 +153,7 @@ In the contract of the function `Abs`, we have already seen the postcondition `r
 
 When a function is called, Gobra checks that its preconditions hold at the call site, and if so, the postcondition is assumed.
 We illustrate this by adding `assert` statements in the code for `client4` that show that the postcondition of `Abs` holds.
-```go
+```go verifies
 const MinInt32 = -2147483648
 
 // @ requires x != MinInt32
@@ -189,7 +189,7 @@ This is crucial for scaling verification to large projects.
 
 
 If we exchange the bodies of the `if` statement, the function `WrongAbs` does not satisfy its contract:
-``` go
+``` go does_not_verify
 const MinInt32 = -2147483648
 
 // @ requires x != MinInt32

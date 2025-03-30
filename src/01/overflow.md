@@ -17,7 +17,7 @@ In a file, we can enable overflow checking by adding the following line:
 
 ## Overflow in binary search
 If we check our [binary search](./loops-binarysearch.md) program for large arrays with overflow checking enabled, Gobra detects a potential overflow.
-``` go
+``` go does_not_verify
 package binarysearch
 
 // ##(--overflow)
