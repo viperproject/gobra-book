@@ -13,7 +13,7 @@
     tomorrowNight: document.querySelector("[href$='tomorrow-night.css']"),
     highlight: document.querySelector("[href$='highlight.css']"),
   };
-  var default_theme = "ace/theme/tomorrow_night";
+  var default_theme = "light";
 
   function showThemes() {
     themePopup.style.display = "block";
