@@ -441,7 +441,10 @@ function createFerris(type, size) {
   a.setAttribute("target", "_blank");
 
   let img = document.createElement("img");
-  img.setAttribute("src", "/assets/ferris/" + type.attr + ".svg");
+  img.setAttribute(
+    "src",
+    window.path_to_root + "assets/ferris/" + type.attr + ".svg",
+  );
   img.setAttribute("title", type.title);
   img.classList.add("ferris");
   img.classList.add("ferris-" + size);
