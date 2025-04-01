@@ -11,7 +11,7 @@ Gobra checks that assertions are self-framing, and reports an error otherwise.
 This also applies to contracts.
 In the following example, there is an error since `*x` and `*y` are accessed in the postcondition of `swap`,
 without holding permissions for `x` and `y`:
-``` go
+``` go does_not_verify
 // @ requires acc(x) && acc(y)
 // @ ensures *x == old(*y) && *y == old(*x)
 func swap(x *int, y *int) {
@@ -26,7 +26,7 @@ Permission to *x might not suffice.
 ```
 
 We can make it _self-framing_ by returning the permissions `acc(x)` and `acc(y)`:
-``` go
+``` go verifies
 // @ requires acc(x) && acc(y)
 // @ ensures acc(x) && acc(y)   // <------ added
 // @ ensures *x == old(*y) && *y == old(*x)
@@ -41,7 +41,7 @@ func swap(x *int, y *int) {
 Note that the order of the pre- and postconditions matters.
 The contract is checked from top to bottom and permission must be held before accessing.
 For example, if we exchange the postconditions of `swap`, we get the same error again:
-``` go
+``` go does_not_verify
 // @ requires acc(x) && acc(y)
 // @ ensures *x == old(*y) && *y == old(*x)
 // @ ensures acc(x) && acc(y)
@@ -69,7 +69,7 @@ ensures *x == old(*y) && acc(x) && acc(y)
 As an exception, the assertion from an `assert` statement must not be self-framing.
 For example, we can write `*x == 1` instead of `acc(x) && *x == 1`.
 However, Gobra reports an error if `acc(x)` is not held in the state.
-``` go
+``` go verifies
 func client() {
 	x := new(int)
 	*x = 1

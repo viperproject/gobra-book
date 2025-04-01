@@ -9,7 +9,7 @@ It is idiomatic to use [wildcard permissions](wildcard-permission.md) since all 
 The `pure` and `ghost` function `allZero` returns whether all elements of an array behind a pointer are zero.
 After allocation with `new`, the array is filled with zero values, and this can be asserted.
 
-``` go
+``` go verifies
 {{#include allZero.go}}
 ```
 

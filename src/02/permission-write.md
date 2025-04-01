@@ -29,7 +29,7 @@ Permission to *p might not suffice.
 ```
 In order to read and write the value stored at the memory address `x`, we must hold full access to this location.
 This is denoted by the accessibility predicate `acc(x)`.
-``` go
+``` go verifies
 {{#include frame.go:inc_full}}
 {{#include frame.go:client_full}}
 ```
@@ -49,7 +49,7 @@ Permissions are held for _resources_.
 For now, we only consider pointers.
 Having access `acc(x)` to a pointer `x` implies `x != nil`, so reading (e.g. `tmp := *x`) and writing (e.g. `*x = 1`) do not panic.
 Let us illustrate this with a function that swaps the values of two integer pointers:
-``` go
+``` go panics
 func swap(x *int, y *int) {
 	tmp := *x
 	*x = *y
@@ -77,7 +77,7 @@ Permission to *x might not suffice.
 ```
 The permissions a function requires must be specified in the precondition.
 Since `swap` modifies both `x` and `y`, we write:
-``` go
+``` go does_not_verify
 // @ requires acc(x) && acc(y)
 func swap(x *int, y *int) {
 	tmp := *x
@@ -93,7 +93,7 @@ func client() {
 	*x = 1
 	*y = 2
 	swap(x, y)
-	// @ assert *x == 2 // fail
+	// @ assert *x == 2 // error
 	// @ assert *y == 1
 }
 ```
@@ -111,7 +111,7 @@ Otherwise the permissions are leaked (lost).
 ## `old` state
 To specify the behavior of `swap`, we have to refer to the values `*x` and `*y` before any modifications.
 With `old(*y)`, we can use the value of `*y` from the state at the beginning of the function call.
-``` go
+``` go verifies
 // @ requires acc(x) && acc(y)
 // @ ensures acc(x) && acc(y)
 // @ ensures *x == old(*y) && *y == old(*x)
@@ -125,7 +125,7 @@ func swap(x *int, y *int) {
 ## Exclusivity and aliasing
 Clients may want to call `swap` with the same argument, e.g. `swap(x, x)`.
 So far, our specification forbids this and we get the error:
-``` go
+``` go does_not_verify
 // @ requires acc(x) && acc(y)
 // @ ensures acc(x) && acc(y)
 // @ ensures *x == old(*y) && *y == old(*x)
@@ -153,7 +153,7 @@ As a result, the precondition prevents us from calling `swap(x, x)`.
 
 One possibility is to perform a case distinction in the specification on `x == y`.
 While this works, the resulting specs are verbose, and we better refactor them to a reduced form.
-``` go ,bad
+``` go
 // @ requires x == y ==> acc(x)
 // @ requires x != y ==> acc(x) && acc(y)
 // @ ensures x == y ==> acc(x)
@@ -211,7 +211,7 @@ We can simplify this using the keyword `preserves`, which is syntactical sugar f
 
 
 ## Final version of `swap`
-``` go
+``` go verifies
 // @ preserves acc(x)
 // @ preserves x != y ==> acc(y)
 // @ ensures *x == old(*y) && *y == old(*x)

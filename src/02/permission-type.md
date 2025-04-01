@@ -2,7 +2,7 @@
 
 Having a fixed permission amount in the contract is restrictive.
 For example, clients with only `acc(r, 1/4)` cannot call `p.sum()`:
-``` go
+``` go does_not_verify
 type pair struct {
 	left, right int
 }
@@ -28,7 +28,7 @@ Permission to p might not suffice.
 
 One option is to use the [wildcard permission](./wildcard-permission.md) amount, as previously studied, which comes with its own drawbacks.
 In this section, we show how to abstract the exact permission amount by introducing a ghost parameter of type `perm`, i.e., Gobra's type for permission amounts:
-``` go
+``` go verifies
 type pair struct {
 	left, right int
 }
@@ -59,7 +59,7 @@ Expression a might be negative.
 
 ## Permission arithmetic
 We may convert a fraction to a permission amount and perform calculations with it: 
-``` gobra
+``` gobra verifies
 func main() {
 	assert perm(1/2) + perm(1/2) == writePerm
 	assert perm(1) - 1/2 == perm(1/2)

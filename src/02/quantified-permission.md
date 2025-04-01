@@ -27,7 +27,7 @@ Each element of an array is addressable, and with quantified permissions we can 
 forall i int :: 0 <= i && i < N ==> acc(&p[i])
 ```
 Note that the pointer to the array is dereferenced automatically and that we have access to the location `&p[i]`, not the value `p[i]`.
-``` go
+``` go verifies
 {{#include shared_array.go:reverseInplace}}
 
 {{#include shared_array.go:client1}}
@@ -35,7 +35,7 @@ Note that the pointer to the array is dereferenced automatically and that we hav
 
 We can be more specific and have access to single elements.
 For example, to increment the first element, only `acc(&a[0])` is required.
-``` go
+``` go verifies
 {{#include shared_array.go:client2}}
 ```
 
@@ -49,7 +49,7 @@ The fact that a variable is shared is local; in this case, only within the scope
 It requires no permissions as the array is copied.
 But in `client3`, at least read permission must be held to call `reverse(a)`.
 If we [exhale](./inhale-exhale.md) access to the shared array, we can no longer pass `a` as an argument.
-``` go
+``` go does_not_verify
 {{#include shared_array.go:reverse}}
 {{#include shared_array.go:client3}}
 ```
@@ -66,7 +66,7 @@ In the example `addToSlice`, this injective mapping is from `i` to `&s[i]`.
 
 In the following example, the postcondition of `getPointers` does not specify that the returned pointers are all distinct.
 Gobra cannot prove that the mapping is injective and reports an error.
-``` go
+``` go does_not_verify
 // @ ensures acc(ps[0],1/2) && acc(ps[1],1/2) && acc(ps[2],1/2)
 func getPointers() (ps [3]*int) {
 	a /*@@@*/, b /*@@@*/, c /*@@@*/ := 0, 1, 2
