@@ -24,9 +24,9 @@ Note that the loop invariant must also capture which part of the array is still 
 This allows the array to be reversed in place, as long as permissions are held to modify its elements.
 Each element of an array is addressable, and with quantified permissions we can specify access to each with the following assertion, as seen in the contract of `reverseInplace`:
 ``` gobra
-forall i int :: 0 <= i && i < N ==> acc(&((*p)[i]))
+forall i int :: 0 <= i && i < N ==> acc(&p[i])
 ```
-Note that we must dereference the pointer first and that we have access to the location `&((*p)[i])`, not the value `(*p)[i]`.
+Note that the pointer to the array is dereferenced automatically and that we have access to the location `&p[i]`, not the value `p[i]`.
 ``` go
 {{#include shared_array.go:reverseInplace}}
 
@@ -40,7 +40,7 @@ For example, to increment the first element, only `acc(&a[0])` is required.
 ```
 
 For a pointer to an array, we can use the syntactic sugar `acc(p)` which is short for access to each element
-(`forall i int :: 0 <= i && i < N ==> acc(&((*p)[i]))`).
+`forall i int :: 0 <= i && i < N ==> acc(&p[i])`.
 
 
 Note that we can still call the function `reverse` with a shared array.
@@ -72,6 +72,7 @@ func getPointers() (ps [3]*int) {
 	a /*@@@*/, b /*@@@*/, c /*@@@*/ := 0, 1, 2
 	return [...]*int{&a, &b, &c}
 }
+
 // @ requires forall i int :: {ps[i]} 0 <= i && i < len(ps) ==> acc(ps[i], 1/2)
 func consumer(ps [3]*int) { /* ... */ }
 
