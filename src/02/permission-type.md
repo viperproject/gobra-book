@@ -53,7 +53,7 @@ When calling `sum`, we must pass the permission amount: `p.sum( /*@ 1/4 @*/ )`.
 The precondition `p > 0` is important to get read permission, otherwise we get:
 ``` text
 ERROR Method contract is not well-formed.
-Expression p might be negative.
+Expression a might be negative.
 ```
 
 
