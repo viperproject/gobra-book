@@ -15,7 +15,7 @@ We will not fully introduce sequences at this point, but refer the reader to the
 A sequence of integers `seq[int]` is constructed recursively from the list, concatenating (`++`) the sequences.
 By convention, the abstraction function is called `View`.
 Note that the function must be `pure`, as we want to use it in specifications.
-``` gobra
+``` go verifies
 {{#include list.go:view}}
 ```
 

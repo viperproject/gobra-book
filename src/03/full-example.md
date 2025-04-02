@@ -1,5 +1,5 @@
 # Full linked list example
 
-``` go
+``` go verifies
 {{#include list.go:all}}
 ```

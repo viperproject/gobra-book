@@ -70,7 +70,7 @@ The `fold` statement exchanges the body of a predicate for a predicate instance.
 In the following example we allocate a new list and highlight with `assert`s that the assertion from the body of `elements` holds for `l`.
 With the statement `fold elements(l)` we exchange these for the predicate instance `elements(l)` as a token representing access to the list.
 However, `acc(&l.Value)` has been exhaled and we may no longer access `l.Value`:
-``` go
+``` go does_not_verify
 {{#include list.go:fold}}
 ```
 ``` text
@@ -79,7 +79,7 @@ Permission to l.Value might not suffice.
 ```
 
 Folding fails if the assertion from the body does not hold:
-``` go
+``` go does_not_verify
 {{#include list.go:foldfail}}
 ```
 ``` text
@@ -88,13 +88,13 @@ Permission to elements(l.next) might not suffice.
 ```
 
 We can fix this by requiring `elements(tail)` if `tail != nil`.
-``` go
+``` go verifies
 {{#include list.go:foldsucceed}}
 ```
 
 ## Unwrapping predicate instances with `unfold`
 The `unfold` statement exchanges a predicate instance with its body.
-``` go
+``` go verifies
 {{#include list.go:unfold}}
 ```
 
@@ -103,7 +103,7 @@ If we try to `unfold elements(l)` twice, the second statement causes an error:
 ``` go
 {{#include list.go:unfoldfail}}
 ```
-``` text
+``` text does_not_verify
 ERROR Unfold might fail. 
 Permission to elements(l) might not suffice.
 ```
@@ -114,7 +114,7 @@ In the following example, we build a list with 3 elements, always folding the pe
 `elements(l3)` abstracts access to the full list and has the predicate instances `elements(l2)` and `elements(l1)` folded within it.
 We could continue this process, and handle a list of possibly unbounded size.
 To recover the concrete permissions, we `unfold` the predicates in the reverse order.
-``` go
+``` go verifies
 {{#include list.go:fold3}}
 ```
 Please note that we lose access when traversing the list to sum the elements, which is undesirable.

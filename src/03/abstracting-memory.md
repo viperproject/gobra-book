@@ -25,7 +25,7 @@ Note the slight difference: for `l.Mem()`, `l` could be `nil` whereas `elements(
 A predicate instance `l.Mem()` can be obtained, for example, by allocating a new list.
 The postconditions of `Empty` and `New` ensure this.
 For `New`, the contract in turn requires holding `tail.Mem()`.
-``` go
+``` go verifies
 {{#include listMem.go:empty}}
 {{#include listMem.go:new}}
 ```
@@ -46,7 +46,7 @@ While this is an idiomatic choice in Go, we still exemplify how this can be hidd
 Some functions like `Head` cannot be called with an empty list.
 The precondition `l != nil` would leak this to clients.
 Instead, we provide a `pure` method `IsEmpty` to be used in contracts.
-``` go
+``` go verifies
 {{#include listMem.go:empty}}
 {{#include listMem.go:isempty}}
 {{#include listMem.go:head}}

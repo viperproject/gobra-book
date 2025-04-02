@@ -14,7 +14,7 @@ In this case, any permission amount in the body of the predicate is multiplied b
 For example, the body of `l.Mem()` contains `acc(l)` and `l.next.Mem()`.
 After `unfold acc(l.Mem())`, only `acc(l, 1/2)` and `acc(l.next.Mem(), 1/2)` are held.
 
-``` go
+``` go verifies
 {{#include list.go:fractional}}
 ```
 
@@ -22,7 +22,7 @@ After `unfold acc(l.Mem())`, only `acc(l, 1/2)` and `acc(l.next.Mem(), 1/2)` are
 Hence, we change their contracts to only require `acc(l.Mem(), 1/2)`, and update any fold operations to use the correct permission amount.
 For methods like `Remove` that modify the `List`, we still require write access.
 For now, disregard `l.View()` in the contracts.
-``` go
+``` go verifies
 {{#include list.go:head}}
 {{#include list.go:get}}
 {{#include list.go:remove}}
@@ -35,6 +35,6 @@ If write permissions were required, the contract would need to explicitly state 
 For pointers, `acc(x, 2)` implies `false`.
 For predicates, we may have permission amounts larger than 1.
 For example, we can have `acc(p2(l), 2)`, which denotes access to two predicate instances `p2(l)`.
-``` go
+``` go verifies
 {{#include list.go:pred2}}
 ```

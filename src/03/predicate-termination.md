@@ -3,7 +3,7 @@
 Predicate instances can be used as [termination measures](../01/termination.md).
 The measure decreases if an instance is nested within another predicate instance.
 For example, `l1.Mem()` is nested within `l2.Mem()` and `l2.Mem()` is nested within `l3.Mem()`.
-``` go
+``` go verifies
 l1 := New(1, Empty())
 // @ fold l1.Mem()
 l2 := New(2, l1)
@@ -21,7 +21,7 @@ For example, `l3.Mem()` has two predicate instances nested within, whereas `l1.M
 To prove termination of the `List` method `Length`, we add the termination measure `l.Mem()`.
 As is common for recursive functions, we unfold the predicate instance before the recursive call.
 It is decreasing since `l.next.Mem()` is nested within `l.Mem()`.
-``` go
+``` go verifies
 {{#include list.go:length}}
 ```
 Please note that we write `decreases l.Mem()` instead of `decreases acc(l.Mem(), 1/2)`, even if we only require `acc(l.Mem(), 1/2)`.
