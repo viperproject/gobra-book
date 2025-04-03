@@ -2,7 +2,7 @@
 
 A `nil` interface value holds neither a value nor a concrete type [[1]](https://go.dev/tour/methods/13).
 For example, the variable `c` of type `Color` is not assigned a concrete value.
-``` go
+``` go panics
 {{#include ./nil.go:fail1}}
 ```
 Go panics with a run-time error if a method is called on a `nil` interface value.
@@ -22,7 +22,7 @@ In the following example, `*SomeColor` implements the interface `Color`.
 The first two assertions pass since `c` has the dynamic type `*SomeColor`.
 Hence, calling the method `RGBA` is legal.
 Since the receiver `(s *SomeColor)` might be `nil`, the last assertion fails:
-``` go
+``` go does_not_verify
 {{#include ./nil.go:fail2}}
 ```
 ``` text
@@ -33,6 +33,6 @@ Assertion s != nil might not hold.
 
 ## Full section example
 Gobra is expected to find 2 errors.
-``` go
+``` go does_not_verify
 {{#include ./nil.go:all}}
 ```

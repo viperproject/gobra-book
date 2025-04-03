@@ -85,6 +85,6 @@ func main() {
 // @ decreases
 // @ requires 0 <= i && i < len(s)
 // @ requires 0 <= j && j < len(s)
-// @ requires s[i] == s[j]
+// @ requires s[i] === s[j]
 // @ func GhostEq(s seq[any], i, j int) {}
 // ANCHOR_END: GhostEq

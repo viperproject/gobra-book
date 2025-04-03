@@ -91,12 +91,11 @@ Having implemented `Interface`, we may now call `IsSorted(x)` with `IntSlice` va
 {{#include ./sort.go:client}}
 ```
 
-## Quiz
 {{#quiz ../../quizzes/sort-interface.toml}}
 
 ## Full example
 
-``` go
+``` go verifies
 {{#include ./sort.go:all}}
 ```
 

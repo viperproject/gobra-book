@@ -2,7 +2,7 @@
 
 Comparing two interfaces may cause a runtime error if both dynamic values are incomparable.
 For example, slices are not comparable in Go:
-``` go
+``` go panics
 {{#include comparable.go:main}}
 ```
 ``` text
@@ -18,7 +18,7 @@ Gobra provides the function `isComparable`, which takes as input an interface va
 When the value of an implementation is stored in an interface value, Gobra records whether the resulting interface value is comparable.
 In the following example, we assign the numeric constant `5` to `x`, which makes it comparable.
 
-``` go
+``` go verifies
 {{#include comparable.go:isComparable}}
 ```
 
@@ -29,7 +29,7 @@ As an example, we change the linked [`List`](../03/full-example.md) type to stor
 Note that we can store arbitrary values in the list, as the empty interface is trivially implemented by every type.
 
 The recursive function `Contains` that searches the list for a `value` might panic because of the comparison `l.Value == value` between possibly incomparable values, which Gobra detects:
-``` go
+``` go does_not_verify
 // @ requires acc(l.Mem(), 1/2)
 // @ pure
 // @ decreases l.Mem()
@@ -44,11 +44,12 @@ To require that the `List` contains only comparable elements, we define the func
 With `isComparable`, we state recursively that each element must be comparable.
 ``` go
 {{#include comparable.go:Comparable}}
+
 {{#include comparable.go:Contains}}
 ```
 
 The following client code verifies.
-``` go
+``` go verifies
 {{#include comparable.go:client}}
 ```
 
@@ -58,17 +59,17 @@ The following client code verifies.
 
 ## Ghost equality `===`, `!==`
 The ghost comparison `===` compares values of arbitrary types by identity and does not panic.
-If we used the normal equality `==` instead in the following example, Gobra reports an error since the sequence contains elements of type `any` which might not be directly comparable.
-``` go
+``` go verifies
 {{#include comparable.go:GhostEq}}
 ```
+If we used the normal equality `==` instead in the preceding example, Gobra reports an error since the sequence contains elements of type `any` which might not be directly comparable.
 ``` text
 ERROR Comparison might panic. 
 Both operands of view[i] == view[j] might not have comparable values.
 ```
 
 ## Full example
-``` go
+``` go verifies
 {{#include comparable.go:all}}
 ```
 
