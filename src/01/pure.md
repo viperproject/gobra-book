@@ -5,8 +5,6 @@ A function that is deterministic and has no side effects can be marked as `pure`
 <!-- We are not allowed to call arbitrary functions in specifications. -->
 If we try to call a normal Go function `Cube` in an assert statement, Gobra reports errors:
 ``` go does_not_verify
-package main
-
 func Cube(x int) int {
     return x * x * x
 }
@@ -26,19 +24,7 @@ ERROR ghost error: Found call to non-ghost impure function in ghost code
 Let us mark the function `Cube` as `pure`, and also with `decreases`, since a termination measure is a requirement for a pure function.
 Gobra enforces the syntactic requirement that the body of `pure` functions must be a single return with a pure expression, which is satisfied in this case.
 ``` go verifies
-// @ pure
-// @ decreases
-func Cube(x int) int {
-    return x * x * x
-}
-
-// @ requires n >= 0
-func client(n int) {
-    // @ assert 8 == Cube(2)
-    // @ assert Cube(2) >= 8 && Cube(2) <= 8
-    r := Cube(2)
-// @ assert Cube(n) >= 0
-}
+{{#include pure.go:cube}}
 ```
 Note that we may call pure functions in normal (non-ghost) code, unlike ghost functions.
 The assertion passes, even without a postcondition.
@@ -66,17 +52,18 @@ Still, if only ghost state is affected, keeping track of the side effects would 
 We define a `pure` function `fibonacci` as a mathematical reference implementation, following the recursive definition of the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence).
 While recursion is not idiomatic in Go, recursion is often used for specifications.
 In the end, our goal is to verify the functional correctness of an iterative implementation that can be defined in terms of the pure function.
-``` go
+``` go does_not_verify
 // @ requires n >= 0
 // @ ensures res == fibonacci(n)
 func fibIterative(n int) (res int) {
 	a, b := 0, 1
 	for i := 0; i < n; i++ {
-		a, b = b, a + b
+		a, b = b, a+b
 	}
 	return a
 }
 ```
+We leave it as an exercise in the quiz to provide invariants for the iterative implementation satisfying the specification.
 
 ## Syntactic restriction
 Gobra enforces the syntactic restriction that the body of `pure` functions must be a single return with a pure expression.
@@ -121,15 +108,7 @@ func fibonacci(n int) (res int) {
 An error is reported since the conditional expression is a ghost operation.
 The error can be avoided by declaring the out parameter as `(ghost res int)`, but we prefer to mark the entire function `ghost`, as this function is not valid Go code.
 ``` go
-/*@
-ghost
-requires n >= 0
-decreases n
-pure
-func fibonacci(n int) (res int) {
-    return n <= 1 ? n : fibonacci(n-1) + fibonacci(n-2)
-}
-@*/
+{{#include pure.go:fibonacci}}
 ```
 
 ## Pure functions are transparent
@@ -137,23 +116,13 @@ Unlike normal functions, where we cannot peek inside their body,
 Gobra learns the body of `pure` functions when calling them.
 The following assertions pass, without having specified a postcondition.
 ``` go verifies
-func client1(n int) {
-    if n > 1 {
-        // @ assert fibonacci(n) == fibonacci(n-1) + fibonacci(n-2)
-    } else if n == 0 {
-        // @ assert fibonacci(n) == 0
-    }
-}
+{{#include pure.go:client1}}
 ```
-<!-- We may still specify postconditions -->
 
 Note that this does not automatically happen for the recursive calls in the body.
 For example, we can assert `fibonacci(3) == fibonacci(2) + fibonacci(1)`, but not `fibonacci(3) == 2`.
 ``` go does_not_verify
-func client2() {
-    // @ assert fibonacci(3) == fibonacci(2) + fibonacci(1)
-    // @ assert fibonacci(3) == 2
-}
+{{#include pure.go:client2}}
 ```
 ``` text
 ERROR Assert might fail. 
@@ -162,12 +131,7 @@ Assertion fibonacci(3) == 2 might not hold.
 By providing additional proof goals, we can to assert `fibonacci(3) == 2`.
 Having previously asserted `fibonacci(1) == 1` and `fibonacci(2) == 1`, these can be substituted in `fibonacci(3) == fibonacci(2) + fibonacci(1)`.
 ``` go verifies
-func client3() {
-    // @ assert fibonacci(0) == 0
-    // @ assert fibonacci(1) == 1
-    // @ assert fibonacci(2) == 1
-    // @ assert fibonacci(3) == 2
-}
+{{#include pure.go:client3}}
 ```
 
 <!-- ``` go -->
