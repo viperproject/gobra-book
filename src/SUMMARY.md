@@ -2,7 +2,7 @@
 
 [Overview](./overview.md)
 
-# The basics
+# Getting Started with Specifications and Verification
 - [Introduction]()
 - [Installation]()
 <!-- - [Getting started]() -->
