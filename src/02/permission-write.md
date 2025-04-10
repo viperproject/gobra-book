@@ -144,7 +144,7 @@ func client2() {
 	// @ assert *x == 1
 }
 ```
-``` go
+``` text
 Precondition of call swap(x, x) might not hold. 
 Permission to y might not suffice.
 ```

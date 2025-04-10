@@ -75,7 +75,6 @@ Additional buttons are displayed for
 The following attributes add a Gobra snake / Go gopher to the code blocks:
 - `does_not_compile`
 - `does_not_verify`
-- `not_efficient`
 - `panics`
 - `verifies`
 
