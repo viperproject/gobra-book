@@ -10,7 +10,7 @@ The statement `exhale ASSERTION`
 3. removes all permissions mentioned by `ASSERTION`
 
 Exhale is similar to `assert`, with the difference that `assert` does not remove any permissions:
-``` gobra
+``` gobra does_not_verify
 requires acc(x, 1)
 func breatheOut(x *int) {
 	assert acc(x, 1)
@@ -36,7 +36,7 @@ Inhaling can result in an inconsistent state.
 Do not use it without a good reason, except for debugging and learning.
 </div>
 
-``` gobra
+``` gobra verifies
 requires acc(x, 1/2)
 func breatheIn(x *int) {
 	assert acc(x, 1/2)
@@ -46,7 +46,7 @@ func breatheIn(x *int) {
 ```
 
 By inhaling a permission amount of 1 for the pointer `x` while already holding `acc(x, 1/2)`, we reach an inconsistent state, and `false` can be asserted:
-``` gobra
+``` gobra verifies
 requires acc(x, 1/2)
 func breatheMore(x *int) {
 	inhale acc(x, 1)

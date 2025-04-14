@@ -2,7 +2,7 @@
 
 [Overview](./overview.md)
 
-# The basics
+# Getting Started with Specifications and Verification
 - [Introduction]()
 - [Installation]()
 <!-- - [Getting started]() -->
@@ -52,8 +52,8 @@
 - [Case study: `sort.Interface`](./04/sort.md)
 - [Interfaces and termination](./04/interface-termination.md)
 - [Comparable interfaces, `isComparable`](./04/comparable.md)
-- [The `error` interface]()
 - [Full example: `image`](./04/image.md)
+- [The `error` interface]()
 
 # Concurrency
 - [Goroutines and data races](./05/goroutine.md)

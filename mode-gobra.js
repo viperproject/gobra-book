@@ -69,22 +69,25 @@ ace.define(
     var TextHighlightRules =
       require("./text_highlight_rules").TextHighlightRules;
     var GobraHighlightRules = function () {
-      // TODO: incomplete list of keywords (look at the Antlr4 grammar or the treesitter-gobra project)
       var gobra_keywords =
-        "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|assume|apply|inhale|exhale|assert|ghost|implements|unfolding|let|fold|unfold|decreases";
-      var gobra_operators = "=>|<==>|<==|::|in|===|!==";
+        "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|forall|assume|apply|inhale|exhale|assert|refute|ghost|implements|unfolding|let|fold|unfold|decreases|as|domain|axiom|adt|match|shared|exclusive|predicate|writePerm|noPerm|initEnsures|importRequires|proof|with|backend";
+      var gobra_operators = "==>|::|in|===|!==|@|--*|#|<!|!>"; // .. ?
+      var gobra_types = "seq|set|mset|dict|option|gpointer";
+      var gobra_functions = "acc|old|before|some|get|none|typeOf|isComparable";
+
       var keywords =
         "else|break|case|return|goto|if|const|select|" +
         "continue|struct|default|switch|for|range|" +
         "func|import|package|chan|defer|fallthrough|go|interface|map|range|" +
         "select|type|var|" +
         gobra_keywords;
-
       var builtinTypes =
         "string|uint8|uint16|uint32|uint64|int8|int16|int32|int64|float32|" +
-        "float64|complex64|complex128|byte|rune|uint|int|uintptr|bool|error";
+        "float64|complex64|complex128|byte|rune|uint|int|uintptr|bool|error|" +
+        gobra_types;
       var builtinFunctions =
-        "new|close|cap|copy|panic|panicln|print|println|len|make|delete|real|recover|imag|append|acc";
+        "new|close|cap|copy|panic|panicln|print|println|len|make|delete|real|recover|imag|append|" +
+        gobra_functions;
       var builtinConstants = "nil|true|false|iota";
       var keywordMapper = this.createKeywordMapper(
         {

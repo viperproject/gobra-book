@@ -24,10 +24,10 @@ Note that the loop invariant must also capture which part of the array is still 
 This allows the array to be reversed in place, as long as permissions are held to modify its elements.
 Each element of an array is addressable, and with quantified permissions we can specify access to each with the following assertion, as seen in the contract of `reverseInplace`:
 ``` gobra
-forall i int :: 0 <= i && i < N ==> acc(&((*p)[i]))
+forall i int :: 0 <= i && i < N ==> acc(&p[i])
 ```
-Note that we must dereference the pointer first and that we have access to the location `&((*p)[i])`, not the value `(*p)[i]`.
-``` go
+Note that the pointer to the array is dereferenced automatically and that we have access to the location `&p[i]`, not the value `p[i]`.
+``` go verifies
 {{#include shared_array.go:reverseInplace}}
 
 {{#include shared_array.go:client1}}
@@ -35,12 +35,12 @@ Note that we must dereference the pointer first and that we have access to the l
 
 We can be more specific and have access to single elements.
 For example, to increment the first element, only `acc(&a[0])` is required.
-``` go
+``` go verifies
 {{#include shared_array.go:client2}}
 ```
 
 For a pointer to an array, we can use the syntactic sugar `acc(p)` which is short for access to each element
-(`forall i int :: 0 <= i && i < N ==> acc(&((*p)[i]))`).
+`forall i int :: 0 <= i && i < N ==> acc(&p[i])`.
 
 
 Note that we can still call the function `reverse` with a shared array.
@@ -49,7 +49,7 @@ The fact that a variable is shared is local; in this case, only within the scope
 It requires no permissions as the array is copied.
 But in `client3`, at least read permission must be held to call `reverse(a)`.
 If we [exhale](./inhale-exhale.md) access to the shared array, we can no longer pass `a` as an argument.
-``` go
+``` go does_not_verify
 {{#include shared_array.go:reverse}}
 {{#include shared_array.go:client3}}
 ```
@@ -66,12 +66,13 @@ In the example `addToSlice`, this injective mapping is from `i` to `&s[i]`.
 
 In the following example, the postcondition of `getPointers` does not specify that the returned pointers are all distinct.
 Gobra cannot prove that the mapping is injective and reports an error.
-``` go
+``` go does_not_verify
 // @ ensures acc(ps[0],1/2) && acc(ps[1],1/2) && acc(ps[2],1/2)
 func getPointers() (ps [3]*int) {
 	a /*@@@*/, b /*@@@*/, c /*@@@*/ := 0, 1, 2
 	return [...]*int{&a, &b, &c}
 }
+
 // @ requires forall i int :: {ps[i]} 0 <= i && i < len(ps) ==> acc(ps[i], 1/2)
 func consumer(ps [3]*int) { /* ... */ }
 

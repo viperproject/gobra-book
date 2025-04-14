@@ -1,7 +1,7 @@
 # Addressability, `@` and sharing
 
 If we try to take the address of a local variable, Gobra reports an error:
-``` go
+``` go does_not_verify
 func main() {
 	b := 1
 	x := &b
@@ -16,7 +16,7 @@ To reference local variables, they must be marked as _shared_ by appending the a
 Then, Gobra uses permissions to track access to this location.
 For a variable `b`, we either write `b /*@@@*/` using an inline annotation, or equivalently as `b@` in `.gobra` files.
 
-``` go
+``` go verifies
 func main() {
 	b /*@@@*/ := 1
 	// b@ := 1 // .gobra version
@@ -44,7 +44,7 @@ The fields of structs can be addressed individually.
 For example, access can be specified to the field `x` of a shared struct `c` with `acc(&c.x)`.
 
 In the following example, we use structs representing 2D coordinates and implement a method `Scale` to multiply them by a scalar factor.
-``` go
+``` go does_not_verify
 {{#include shared_struct.go:Scale}}
 
 func client1() {
@@ -59,20 +59,20 @@ ERROR Scale requires a shared receiver ('share' or '@' annotations might be miss
 Gobra reports an error if we try to call `Scale` on a non-shared struct.
 `Scale` is defined for a pointer receiver, and here, the address of the struct is taken implicitly.
 The error message is instructive, and we can fix this by marking `c` as shared:
-``` go
+``` go verifies
 {{#include shared_struct.go:client1}}
 ```
 
 Composite literals are addressable.
 We may reference them directly without errors:
-``` go
+``` go verifies
 {{#include shared_struct.go:client2}}
 ```
 
 ## Shared parameters (`share`)
 It is not possible to mark parameters with `@`, as whether a parameter is shared is local to the function and should not be exposed in its signature.
 Gobra reports errors as we cannot reference the non-shared `c1` and `c2` to call `Scale` on a pointer receiver.
-``` go
+``` go does_not_verify
 func client3(c1, c2 Coord) {
 	c1.Scale(5) // error
 	c2.Scale(-1) // error
@@ -87,7 +87,7 @@ ERROR Scale requires a shared receiver ('share' or '@' annotations might be miss
     ^
 ```
 Parameters of a function or method can be shared with the `share` statement at the beginning of the body.
-``` go
+``` go verifies
 {{#include shared_struct.go:client3}}
 ```
 This resolves the errors above.

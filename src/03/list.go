@@ -134,8 +134,8 @@ func (l *List) Length() (length int) {
 
 // ANCHOR_END: length
 
-/*@
 // ANCHOR: view
+/*@
 ghost
 pure
 requires acc(l.Mem(), 1/2)
@@ -143,8 +143,8 @@ decreases l.Mem()
 func (l *List) View() seq[int] {
 	return l == nil ? seq[int]{} : unfolding acc(l.Mem(), 1/2) in seq[int]{l.Value} ++ l.next.View()
 }
-// ANCHOR_END: view
 @*/
+// ANCHOR_END: view
 
 // ANCHOR: client
 func client() {

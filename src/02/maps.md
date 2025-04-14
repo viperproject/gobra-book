@@ -1,7 +1,7 @@
 # Maps
 
 Go provides the built-in map data structure implementing a hash table.
-``` go
+``` go verifies
 watched := make(map[string]bool, 10) // optional capacity
 // @ assert acc(watched) && len(watched) == 0
 ```
@@ -11,7 +11,7 @@ Individual elements, as in slices, are not addressable.
 
 Holding write permissions, we can add entries.
 In specifications, we can check with `in` if a key is contained in the map.
-``` go
+``` go verifies
 watched["Blade Runner"] = true
 // @ assert "Blade Runner" in watched && len(watched) == 1
 ```
@@ -19,7 +19,7 @@ watched["Blade Runner"] = true
 The values can be retrieved with their keys.
 Note that key elements must be comparable.
 For example, one cannot use other maps, slices, and functions as keys.
-``` go
+``` go verifies
 elem, ok := watched["Blade Runner"]
 // @ assert ok && elem
 // non-existing key
@@ -31,7 +31,7 @@ elem, ok := watched["Dune"]
 A `nil` map is obtained with `new` or by not initializing a map variable.
 No permission is held for the `nil` map and no elements can be added.
 Otherwise, it behaves like an empty map.
-``` go
+``` go verifies
 var rating map[string]int
 // @ assert acc(rating, noPerm)
 // @ assert len(rating) == 0
@@ -69,7 +69,7 @@ We focus on the loop and omit the full functional specification for simplicity.
 
 <!-- TODO change after https://github.com/viperproject/gobra/issues/808 -->
 
-``` go
+``` go verifies
 package movies
 
 type Movie struct {
@@ -104,7 +104,7 @@ Go does not specify the iteration order over maps (see [^1]).
 An entry added during iteration may either be produced or skipped.
 Gobra prohibits the mutation of maps while iterating.
 <!-- TODO connect/motivate -->
-``` go
+``` go does_not_verify
 package main
 
 type Movie struct {
@@ -143,7 +143,7 @@ map[2:{Jaws 6} 3:{Cars 5} 4:{Jaws2 4} 6:{Cars2 3} 12:{Cars22 1} 24:{Cars222 -1} 
 
 Mutation is prevented by exhaling a small constant permission amount to the map before the loop.
 As a consequence, the wildcard permission amount is insufficient:
-``` go
+``` go does_not_verify
 // @ requires acc(m, _)
 // @ requires len(m) > 0
 func wildRating(m map[int]Movie) int {

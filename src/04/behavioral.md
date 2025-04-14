@@ -17,7 +17,7 @@ Furthermore, we add a ghost and pure method `Valid` to the interface.
 With `Valid`, implementations provide an assertion that must hold for the data structure such that a valid color can be returned.
 <!-- We must add `0 <= r` since Gobra currently does not infer this automatically for the unsigned integer type `uint32`. -->
 
-The type `Alpha16`, which represents a 16-bit alpha color:
+The type `Alpha16` represents a 16-bit alpha color:
 ``` go
 {{#include ./behavioral.go:Alpha16}}
 ```
@@ -31,14 +31,14 @@ Gobra checks that `Alpha16` is a behavioral subtype of `Color` only when needed,
 For example, this occurs when we assign a value to a variable of interface type or pass an argument to a function with an in-parameter of interface type.
 
 The following client verifies since the postcondition of `Alpha16`'s `RGBA` is equivalent to the postcondition of the interface method.
-``` go
+``` go verifies
 {{#include ./behavioral.go:client1}}
 ```
 
 The implementation's postcondition may be stronger.
 For example, the `Constant` color guarantees that it always returns the same color components.
 From this, the postcondition of the interface immediately follows.
-``` go
+``` go verifies
 {{#include ./behavioral.go:Constant}}
 ```
 
@@ -52,7 +52,7 @@ The function `client` has a parameter of interface type, whose concrete type is 
 When `c.RGBA()` is called, the precondition of the interface method must hold.
 However, this does not imply the precondition of `Fail1`'s `RGBA`.
 Hence, it would be unsound to allow `Fail1` to be used as a value of type `Color`.
-``` go
+``` go does_not_verify
 {{#include ./behavioral.go:fail1}}
 ```
 ``` text
@@ -66,7 +66,7 @@ Assertion Valid() might not hold.
 ## Implementation postcondition too weak
 An error is reported if the postcondition of an implementation method might not imply the postcondition of the corresponding interface method.
 <!-- unsound (well here it would actually hold, just not specified...) -->
-``` go
+``` go does_not_verify
 {{#include ./behavioral.go:fail2}}
 ```
 ``` text

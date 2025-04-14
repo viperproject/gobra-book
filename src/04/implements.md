@@ -18,7 +18,7 @@ With the implementation of `Bounds` and the predicate `Mem`,
 <!-- TODO: rename Alpha16Image to not confuse? maybe simplify struct and Mem pred -->
 
 The statement `T implements I` checks whether the type `T` is a behavioral subtype of the interface type `I`. Gobra tries an auto-generated proof, which may fail as seen in the following snippet:
-``` go
+``` go does_not_verify
 // @ (*Alpha16Image) implements Bounded
 ```
 ``` text
@@ -34,7 +34,7 @@ Gobra currently does not attempt to show this.
 We give an implementation proof following the `implements` keyword, 
 where we must show that the implementation's precondition holds, given that the interface's precondition holds.
 After calling the implementation method and establishing its postcondition, we must prove the postcondition of the interface method.
-``` go
+``` go verifies
 {{#include ./implements.go:BoundsProof}}
 ```
 
@@ -110,6 +110,6 @@ func (p *Alpha16Image) Bounds() (r Rectangle) {
 <!-- > TODO : concise description for implementation proof -->
 
 ## Full example
-``` go
+``` go verifies
 {{#include ./implements.go:all}}
 ```

@@ -120,7 +120,7 @@ For points within the rectangle, `Opaque` color is returned and `Transparent` co
 No memory access is required in this case, and no invariant must be preserved.
 The predicate `Mem` and the function `Inv` still have to be defined to implement `Image`.
 We simply have `true` as the body and the return value respectively.
-``` go
+``` go verifies
 {{#include ./image.go:RectImpl}}
 ```
 

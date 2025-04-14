@@ -1,6 +1,6 @@
 # Full example: `image`
 
-``` go
+``` go verifies
 {{#include ./image.go:all}}
 ```
 

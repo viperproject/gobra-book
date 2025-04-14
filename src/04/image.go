@@ -185,7 +185,8 @@ type Image interface {
 	// @ Inv() bool
 
 	// ColorModel returns the Image's color model.
-	ColorModel() Model
+	// @ ensures m != nil
+	ColorModel() (m Model)
 
 	// ANCHOR: ImageBounds
 	// Bounds returns the domain for which At can return non-zero color.
@@ -224,7 +225,8 @@ pure func (r Rectangle) Inv() bool {
 @*/
 
 // ColorModel implements the [Image] interface.
-func (r Rectangle) ColorModel() Model {
+// @ ensures m != nil
+func (r Rectangle) ColorModel() (m Model) {
 	return Alpha16Model
 }
 
@@ -296,7 +298,8 @@ func (p *Alpha16Image) Inv() bool {
 
 // ANCHOR: Alpha16ImageMethods
 
-func (p *Alpha16Image) ColorModel() Model { return Alpha16Model }
+// @ ensures m != nil
+func (p *Alpha16Image) ColorModel() (m Model) { return Alpha16Model }
 
 // @ requires acc(p.Mem(), _)
 // @ pure

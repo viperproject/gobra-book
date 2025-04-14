@@ -18,7 +18,7 @@ In the remainder of this section, we study how to use fractional permissions wit
 Previously we saw the function `swap` that needs `write` access to both variables.
 In the following example, we sum the fields `left` and `right` of a struct `pair`.
 Since we only read the fields, we specify a permission amount of `1/2`.
-``` go
+``` go verifies
 type pair struct {
 	left, right int
 }
@@ -62,7 +62,7 @@ with
 
 Since `sum` requires only `acc(p, 1/2)`, and client acquires full access on allocation,
 we can _frame_ the property `p.left == 3 && p.right == 5` across the call `p.sum()`, without specifying that the shared struct is not modified.
-``` go
+``` go verifies
 // @ preserves acc(p, 1/2)
 // @ ensures s == p.left + p.right
 func (p *pair) sum() (s int) {
@@ -77,7 +77,7 @@ func client() {
 }
 ```
 But if we change `client` to get only permission amount `1/2` for `p`, Gobra reports an error.
-``` go
+``` go does_not_verify
 // @ requires acc(p, 1/2)
 // @ requires p.left == 0
 func client2(p *pair) {
@@ -104,7 +104,7 @@ func client3(p *pair) {
 ```
 
 Now let us consider `sum` with a different contract, where write access is required:
-``` go
+``` go verifies
 type pair struct {
 	left, right int
 }
@@ -131,7 +131,7 @@ For a pointer `x`, for any positive permission amount `p`, `acc(x, p)` implies `
 But `acc(x1, 1/2) && acc(x2, 1/2)` does no longer imply `x1 != x2`.
 If we have `2/3` fractional permission to `x1` instead, we can now infer `x1 != x2` 
 since permission amounts to the same location are added together:
-``` gobra
+``` gobra verifies
 requires acc(x1, 2/3) && acc(x2, 1/2)
 ensures x1 != x2
 func lemma(x1, x2 *int) {}
