@@ -1,12 +1,12 @@
 # Inhaling and exhaling
 
-Permissions can be added to the verification state by inhaling, and removed by exhaling.
+Permissions can be added to the verification state by inhaling and removed by exhaling.
 This can be useful for debugging but should not be needed for normal verification purposes.
 
 ## Removing permissions with `exhale`
 The statement `exhale ASSERTION`
-1. checks that all value constraints in `ASSERTION` hold, otherwise an error is reported.
-2. checks that all permissions mentioned by `ASSERTION` are held, otherwise an error is reported.
+1. checks that all value constraints in `ASSERTION` hold; otherwise, an error is reported.
+2. checks that all permissions mentioned by `ASSERTION` are held; otherwise, an error is reported.
 3. removes all permissions mentioned by `ASSERTION`
 
 Exhale is similar to `assert`, with the difference that `assert` does not remove any permissions:
@@ -24,7 +24,7 @@ func breatheOut(x *int) {
 ERROR Exhale might fail. 
 Permission to x might not suffice.
 ```
-The last `exhale` failed since at this point only a permission amount of `3/4` is held.
+The last `exhale` failed because, at this point, only a permission amount of `3/4` is held.
 
 ## Adding permissions with `inhale`
 The statement `inhale ASSERTION`
