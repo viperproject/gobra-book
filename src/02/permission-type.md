@@ -48,9 +48,10 @@ func client(p *pair) {
 	// @ assert res == 5
 }
 ```
-Conventionally the permission amount is called `p`, which clashes here with our `pair` pointer.
+Conventionally, the permission amount is called `p`, which clashes with our `pair` pointer.
 When calling `sum`, we must pass the permission amount: `p.sum( /*@ 1/4 @*/ )`.
-The precondition `p > 0` is important to get read permission, otherwise we get:
+The precondition `p > 0` is important to get read permission.
+Otherwise, we get:
 ``` text
 ERROR Method contract is not well-formed.
 Expression a might be negative.
@@ -69,4 +70,4 @@ func main() {
 	assert perm(perm(1/3)) == perm(1/3)
 }
 ```
-Note that for access predicates, we can, and have been using the shorthand `acc(p, 1/2)` instead of `acc(p, perm(1/2))`.
+Note that for access predicates, we can and have been using the shorthand `acc(p, 1/2)` instead of `acc(p, perm(1/2))`.
