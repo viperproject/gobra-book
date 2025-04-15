@@ -1,6 +1,6 @@
 # Pure functions
 
-A function that is deterministic and has no side effects can be marked as `pure` and may be used in specifications and proof annotations.
+A deterministic function with no side effects can be marked as `pure` and may be used in specifications and proof annotations.
 
 <!-- We are not allowed to call arbitrary functions in specifications. -->
 If we try to call a normal Go function `Cube` in an assert statement, Gobra reports errors:
@@ -26,7 +26,7 @@ Gobra enforces the syntactic requirement that the body of `pure` functions must 
 ``` go verifies
 {{#include pure.go:cube}}
 ```
-Note that we may call pure functions in normal (non-ghost) code, unlike ghost functions.
+Unlike ghost functions, we may call pure functions in normal (non-ghost) code.
 The assertion passes, even without a postcondition.
 Unlike normal functions, Gobra may peek inside the body of a function.
 For example, `Cube(n)` can be treated as `n * n * n`
@@ -50,8 +50,8 @@ Still, if only ghost state is affected, keeping track of the side effects would 
 
 ## Specifying functional correctness with pure functions
 We define a `pure` function `fibonacci` as a mathematical reference implementation, following the recursive definition of the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence).
-While recursion is not idiomatic in Go, recursion is often used for specifications.
-In the end, our goal is to verify the functional correctness of an iterative implementation that can be defined in terms of the pure function.
+While recursion is not idiomatic in Go, it is often used for specifications.
+Ultimately, our goal is to verify the functional correctness of an iterative implementation that can be defined in terms of the pure function.
 ``` go does_not_verify
 // @ requires n >= 0
 // @ ensures res == fibonacci(n)
@@ -114,7 +114,7 @@ The error can be avoided by declaring the out parameter as `(ghost res int)`, bu
 ## Pure functions are transparent
 Unlike normal functions, where we cannot peek inside their body, 
 Gobra learns the body of `pure` functions when calling them.
-The following assertions pass, without having specified a postcondition.
+The following assertions pass without having specified a postcondition.
 ``` go verifies
 {{#include pure.go:client1}}
 ```
@@ -128,7 +128,7 @@ For example, we can assert `fibonacci(3) == fibonacci(2) + fibonacci(1)`, but no
 ERROR Assert might fail. 
 Assertion fibonacci(3) == 2 might not hold.
 ```
-By providing additional proof goals, we can to assert `fibonacci(3) == 2`.
+We can assert `fibonacci(3) == 2` by providing additional proof goals.
 Having previously asserted `fibonacci(1) == 1` and `fibonacci(2) == 1`, these can be substituted in `fibonacci(3) == fibonacci(2) + fibonacci(1)`.
 ``` go verifies
 {{#include pure.go:client3}}
@@ -149,14 +149,13 @@ We leave it as an exercise to provide invariants for an iterative implementation
 {{#quiz ../../quizzes/basic-ghost-pure.toml}}
 
 ## Ghost and pure functions
-Often, we will mark a function both `ghost` and `pure`.
-Although the concept of pure and ghost functions is orthogonal:
-a function may be ghost, pure, ghost and pure, or neither.
-Note that a ghost function may have side effects, e.g. modifying a ghost variable.
+We will often mark a function as `ghost` and `pure`.
+Although the concept of pure and ghost functions is orthogonal, a function may be ghost, pure, ghost and pure, or neither.
+Note that a ghost function may have side effects, e.g., modifying a ghost variable.
 
 ## Termination of `pure` functions
-By now we know that `pure` functions can be used in specifications,
-and since they do not have side effects nor non-determinism, they can be thought of as mathematical functions.
+By now, we know that `pure` functions can be used in specifications.
+Since they do not have side effects or non-determinism, they can be thought of as mathematical functions.
 To prevent inconsistencies, termination measures must be provided for `pure` functions:
 
 ``` gobra does_not_verify
@@ -170,8 +169,8 @@ func incons(x int) (res int) {
 All pure or ghost functions and methods must have termination measures, but none was found for this member.
 pure
 ```
-Next, we show why it is a bad idea to have non-terminating specification functions and derive `assert false`.
-For this we assume that `incons` terminates by giving it the wildcard termination measure `decreases _`.
+Next, we show why having non-terminating specification functions is a bad idea and derive `assert false`.
+For this, we assume that `incons` terminates by giving it the wildcard termination measure `decreases _`.
 
 ``` gobra verifies
 pure
