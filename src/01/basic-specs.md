@@ -21,20 +21,20 @@ func Abs(x int32) (res int32) {
     }
 }
 ```
-This function is annotated with a contract. Contracts may be added to functions via comments that start with the marker `// @` or that are in between markers `/*@` and `@*/` for multi-line annotations, and they must be placed immediately before the function signature.
+This function is annotated with a contract. Contracts may be added to functions via comments starting with the marker `// @` or between markers `/*@` and `@*/` for multi-line annotations, and they must be placed immediately before the function signature.
 The contract for `Abs` contains a single postcondition, marked with the `ensures` keyword, but it may contain more than one.
 Contracts may also be annotated with multiple preconditions, marked with the `requires` keyword, as we shall exemplify later.
 The postcondition `res >= 0 && (res == x || res == -x)` states
-that if `x` is negative, it must be negated, and otherwise the same value must be returned.
+If `x` is negative, it must be negated; otherwise, the same value must be returned.
 
-To make sure this function is correct, one could test it by writing unit tests, for various inputs. Unfortunately, it is very easy to ignore corner cases when writing tests.
+To make sure this function is correct, one could test it by writing unit tests for various inputs. Unfortunately, it is very easy to ignore corner cases when writing tests.
 There is a subtle bug, which Gobra detects with [overflow checking](./overflow.md) enabled:
 ``` text
 ERROR Expression -x might cause integer overflow.
 ```
 <div class="warning">
 Overflow checking is still experimental and under implementation, and because of that, it is disabled by default.
-It can be enabled with the option <code>--overflow</code> in the CLI, or with the annotation <code>// ##(--overflow)</code> in the beginning of a file.
+It can be enabled with the option <code>--overflow</code> in the CLI or with the annotation <code>// ##(--overflow)</code> at the beginning of a file.
 </div>
 
 Without this option, Gobra would accept the function `Abs`.
@@ -53,11 +53,11 @@ const MinInt32 = -2147483648  // -1<<32
 func Abs(x int32) (res int32)
 ```
 Gobra only considers function calls that satisfy the precondition.
-That is why we are able to prove that the postcondition holds by adding this precondition.
+That is why we can prove that the postcondition holds by adding this precondition.
 
-It is the programmer's job to specify the functions they write and to provide any annotations that may guide the proof (more on this later).
+The programmer's job is to specify the functions they write and provide any annotations that may guide the proof (more on this later).
 In turn, Gobra checks that all function contracts hold and that the function will never panic (for example, due to a division by zero).
-If the program fails to verify, Gobra produces helpful error messages that can help to identify the error.
+If the program fails to verify, Gobra produces helpful error messages to help identify the error.
 These checks happen statically before the program is even compiled.
 **These annotations do not impose any runtime checks, and thus, they do not introduce any changes in the program's behavior or performance**.
 In the next sections, we explain how to prove that a function satisfies its contract and how callers of this function may rely on its contract.
@@ -65,7 +65,7 @@ In the next sections, we explain how to prove that a function satisfies its cont
 
 ## Specifying preconditions with `requires` clauses
 Preconditions are added with the keyword `requires` before a function declaration.
-For any reachable call, Gobra checks whether the function's precondition is guaranteed to hold.
+Gobra checks whether the function's precondition is guaranteed to hold for any reachable call.
 Since this is enforced, the precondition can be assumed to hold at the beginning of a function.
 Let us exemplify this with the absolute value example:
 ```go does_not_verify
@@ -103,16 +103,16 @@ Assertion x != MinInt32 might not hold.
 The function `client1` calls `Abs` with constant values.
 For the calls `Abs(3)` and `Abs(-2)` the preconditions hold, since clearly `3 != MinInt32` and `-2 != MinInt32`.
 This check fails for `Abs(MinInt32)`.
-The function `client2` calls `Abs` with its arguments constrained by another precondition `a > 0 && b < 0`.
-Here the precondition holds for the call `Abs(a)`, since `a > 0` implies `a != MinInt32`.
+The function `client2` calls `Abs` with arguments constrained by another precondition `a > 0 && b < 0`.
+Here, the precondition holds for the call `Abs(a)` since `a> 0` implies `a!= MinInt32`.
 We get another error for `Abs(b)`, as the only information Gobra has about `b` at this point is `b < 0` which does not exclude `b != MinInt32`.
 
-Please note that the errors are reported at the location of the call since the caller is violating the contract of the function.
+Please note that the errors are reported at the caller's location since the caller is violating the function's contract.
 
 <!-- actually, it is a "separating conjunction" -->
 Preconditions `a > 0 && b < 0` joined by the logical AND can be split into multiple lines.
 We can write the contract for `client2` equivalently as:
-```go
+``` go
 // @ requires a > 0
 // @ requires b < 0
 func client2(a, b int32)
@@ -127,8 +127,8 @@ Before we look at postconditions, we introduce our first kind of proof annotatio
 These statements check whether some condition is guaranteed to hold on all program paths that reach it.
 Because of this, it may be very useful when constructing and debugging proofs, as we shall see throughout this book.
 As with any other annotations introduced by Gobra, they must occur in comments marked with `// @`.
-Once again, notice that Gobra verifies programs before they are even compiled.
-These checks do not introduce any assertions at runtime, so there is no performance cost to adding these annotations.
+Once again, please remember that Gobra verifies programs before they are compiled.
+These checks do not introduce assertions at runtime, so adding these annotations does not incur a performance cost.
 
 The first assertion passes in the following program since it can be inferred from the precondition.
 ```go does_not_verify
@@ -151,9 +151,10 @@ Postconditions are added with the keyword `ensures` before a function declaratio
 By convention, they are written after any preconditions.
 In the contract of the function `Abs`, we have already seen the postcondition `res >= 0 && (res == x || res == -x)`.
 
-When a function is called, Gobra checks that its preconditions hold at the call site, and if so, the postcondition is assumed.
+When a function is called, Gobra checks that its preconditions hold at the call site.
+If so, the postcondition is assumed.
 We illustrate this by adding `assert` statements in the code for `client4` that show that the postcondition of `Abs` holds.
-```go verifies
+``` go verifies
 const MinInt32 = -2147483648
 
 // @ requires x != MinInt32
@@ -180,11 +181,11 @@ func client4() {
 ```
 
 At the beginning of the function `Abs`, the precondition holds.
-Then depending on the branch taken, different constraints hold for `x`.
+Then, depending on the branch taken, different constraints hold for `x`.
 After the call to `Abs`, we can `assert` the postcondition (with the arguments substituted, for example, `v2 >= 0 && (v2 == -2 || v2 == -(-2))` implies that `v2 == 2` which can also be asserted).
 
 Gobra uses a _modular_ verification approach.
-Each function is verified independently and all we know about a function at call sites is its contract.
+Each function is verified independently; all we know about a function at call sites is its contract.
 This is crucial for scaling verification to large projects.
 
 
@@ -210,7 +211,7 @@ Assertion res >= 0 might not hold.
 > Gobra checks that a function's postconditions hold whenever the function returns and reports an error if it cannot prove it.
 
 ## Default precondition and postcondition
-A `requires` or `ensures` clause may be omitted from a contract, or both clauses may be omitted. In such cases, the precondition and postcondition default to `true`.
+A `requires` or `ensures` clause may be omitted from a contract, or both may be omitted. In such cases, the precondition and postcondition default to `true`.
 ``` go
 func foo() {}
 ```
@@ -224,9 +225,9 @@ func foo() {}
 Since `true` always holds, the precondition `true` does not restrict when a function can be called.
 A postcondition `true` provides no information about the return values.
 
-> If no precondition is specified by the user, it defaults to `true`.
+> If the user specifies no precondition, it defaults to `true`.
 >
-> If no postcondition is specified by the user, it defaults to `true`.
+> If the user specifies no postcondition, it defaults to `true`.
 
 {{#quiz ../../quizzes/basic-specs.toml}}
 
