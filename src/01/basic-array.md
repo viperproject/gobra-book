@@ -1,11 +1,8 @@
 # Verifying programs with arrays
-<!--
-explain preconditions of an indexing operation, make it clear that accesses out of bounds are excluded statically -->
 
-In this section, we show how to verify programs that use arrays of fixed size
- (we will later see how to verify programs with slices, whose length may not be statically known).
-Programs that access arrays often suffer from subtle bugs such as off-by-one errors, or other kinds of out-of-bounds accesses, that may lead to runtime panics.
-Gobra prevents these by **statically** checking that every access to arrays is within bounds.
+In this section, we show how to verify programs that use arrays of fixed size (we will later see how to verify programs with slices, the length of which may not be statically known).
+Programs that access arrays often suffer from subtle bugs such as off-by-one errors or out-of-bounds accesses that may lead to runtime panics.
+Gobra prevents this by **statically** checking that every access to arrays is within bounds.
 
 Go can find out-of-bounds indices for constant values when compiling a program.
 ``` go does_not_compile
@@ -29,7 +26,7 @@ goroutine 1 [running]:
 main.readArr(...)
         /home/gobra/array.go:20
 ```
-Now if we check the program with Gobra we can find the error statically at _verification time_.
+If we check the program with Gobra, we can find the error statically at _verification time_.
 ``` text
 ERROR Assignment might fail. 
 Index i into a[i] might be negative.
