@@ -1,12 +1,12 @@
 # Termination
 
 Having discussed loops, the next thing to address is termination.
-Here we look at the termination of loops and recursive functions.
+Here, we look at the termination of loops and recursive functions.
 In general, proving termination is [undecidable](https://en.wikipedia.org/wiki/Halting_problem).
 However, for functions we write in practice, it is usually not hard to show termination.
 By default, Gobra checks for _partial correctness_, i.e., correctness with respect to specifications _if the function terminates_.
 For _total correctness_, both termination and correctness with respect to specifications must be proven.
-To prove termination, Gobra uses _termination measures_, i.e., expressions that are strictly decreasing and bounded from below.
+Gobra uses _termination measures_, i.e., expressions that are strictly decreasing and bounded from below to prove termination.
 
 
 ## Partial correctness
@@ -26,15 +26,15 @@ func main() {
     assert r == 1
 }
 ```
-When the function `main` is verified, it is unknown whether `infiniteZero` terminates.
+When the function `main` is verified, whether `infiniteZero` terminates is unknown.
 However, the contract guarantees that when `infiniteZero` returns, its postcondition holds.
 Assuming it terminates, we can assert an arbitrary property, such as `r == 1`.
-This is fine since, if we run the program, this statement will never be reached.
+This is fine since this statement will never be reached if we run the program.
 
 ## Specifying termination measures with `decreases`
 We can instruct Gobra to check for termination by adding the `decreases` keyword to the specification of a function or a loop.
 It must come right before the function/loop after any preconditions/postconditions/invariants.
-Sometimes, this suffices and a termination measure can be automatically inferred. 
+Sometimes, this suffices, and a termination measure can be automatically inferred. 
 For example, for simple functions like `Abs` that terminate immediately:
 ``` go verifies
 decreases
@@ -60,7 +60,7 @@ For example, integers `i, j int` are lower-bounded if `i >= 0` and decreasing if
 
 ## Termination of loops
 A common case is that we iterate over an array with an increasing loop variable `i`, as seen in the function `LinearSearch`.
-We can easily construct a termination measure that decreases instead by subtracting `i` from the array's length.
+We can construct a termination measure that decreases instead by subtracting `i` from the array's length.
 ``` go verifies
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
@@ -89,7 +89,7 @@ func client() {
     // @ assert arr[i4] == 4
 }
 ```
-We can also prove that `client` terminates since besides the calls to `LinearSearch`, which terminate, there is no diverging control flow.
+We can also prove that `client` terminates since, except for the calls to `LinearSearch`, which terminate, there is no diverging control flow.
 If we do not specify a termination measure `decreases len(arr) - i` for the loop, Gobra reports the error:
 ``` text
 ERROR Function might not terminate. 
@@ -111,7 +111,7 @@ func fibonacci(n int) int {
 }
 ```
 
-Verification fails, if we mistype `buggynacci(n-0)` instead of `buggynacci(n-1)`.
+Verification fails if we mistype `buggynacci(n-0)` instead of `buggynacci(n-1)`.
 ``` go does_not_verify
 // @ requires n >= 0
 // @ decreases n
@@ -131,9 +131,9 @@ Termination measure might not decrease or might not be bounded.
 ## Assuming termination with `decreaes _`
 If we annotate a function or method with `decreases _`, termination is assumed and not checked.
 
-This can be dangerous. With the termination measure `_` we can assume that `buggynacci` terminates.
-Then the following program verifies, where we want to prove that the `client` code terminates.
-In practice, `buggynacci` would never return and `doSomethingVeryImportant` would never be called.
+This can be dangerous. With the termination measure `_`, we can assume that `buggynacci` terminates.
+Then the following program verifies where we want to prove that the `client` code terminates.
+In practice, `buggynacci` would never return, and `doSomethingVeryImportant` would never be called.
 ``` go
 ~// @ decreases
 ~// @ func doSomethingVeryImportant()
@@ -155,23 +155,8 @@ func client() {
 }
 
 ```
-<!-- The wildcard termination measure `_` should be used carefully, especially in conjunction with `pure` functions. -->
-<!-- Contradictions can arise if we specify that a function terminates that does not terminate. -->
 
-<!-- ``` gobra -->
-<!-- decreases _ -->
-<!-- ensures false -->
-<!-- pure -->
-<!-- func infiniteRecursion() { -->
-<!-- 	infiniteRecursion() -->
-<!-- 	assert 0 != 1 -->
-<!-- } -->
-<!-- ``` -->
-<!-- Because of the wildcard measure the verifier assumes that `infiniteRecursion` terminates. -->
-<!-- Then assertion verifies since the postcondition of `infiniteRecursion` establishes `false` from which we can prove any assertion, including logical inconsistencies like `0 != 1`. -->
-
-
-The use of the wildcard measure can be justified when termination is proven by other means, for example leveraging a different tool.
+The use of the wildcard measure can be justified when termination is proven by other means, such as leveraging a different tool.
 Another use case is _gradual verification_ where it can be useful to assume termination of functions in a codebase, that have not yet been verified.
 
 <!-- Full Syntax `"decreases" [expressionList] ["if" expression]` -->
@@ -179,10 +164,10 @@ Another use case is _gradual verification_ where it can be useful to assume term
 
 ## Termination of binary search
 Let us look again at the [binary search](./loops-binarysearch.md) example.
-This time we introduce an implementation error:
+This time, we introduce an implementation error:
 `low` is updated to `low = mid` instead of `low = mid + 1`.
 `BinarySearchArr` could loop forever, for example, with `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 8)`.
-Without `decreases`, the function would still verify since only partial correctness is checked.
+The function would still verify without `decreases` since only partial correctness is checked.
 <!-- 
 For example for `N=3`, `BinarySearchArr([N]int{1, 2, 3}, 2)` does not terminate.
 	arr := [N]int{1, 2, 3}
@@ -225,7 +210,7 @@ Required termination condition might not hold.
 ```
 
 We might be tempted to try `decreases high` or `decreases len(arr)-low` as termination measures for the loop.
-However, this is not enough since the termination measure must decrease in every iteration.
+However, this is insufficient since the termination measure must decrease every iteration.
 In iterations where we update `low`, `high` does not decrease, and vice versa.
 The solution is to combine the two as `decreases high - low`.
 This measure coincides with the length of the subarray that has not been searched yet.
@@ -234,12 +219,11 @@ If we change back to `low=mid+1`, the program verifies again.
 
 ## Decreases tuple
 Sometimes, it might be hard to find a single expression that decreases.
-In general, one can specify a list of expressions with
-`decreases E1, E2, ..., EN`.
+Generally, one can specify a list of expressions with `decreases E1, E2, ..., EN`.
 
 A tuple termination measure decreases based on the [lexicographical order](https://en.wikipedia.org/wiki/Lexicographic_order) of the tuple elements.
 
-For `BinarySearchArr` we used `decreases high - low`.
+For `BinarySearchArr`, we used `decreases high - low`.
 Alternatively, we could use:
 ``` gobra 
 decreases high, len(arr) - low
@@ -247,11 +231,11 @@ decreases high, len(arr) - low
 
 ## TODO Conditional termination with `if` clauses
 <!--
-When we want to prove termination only under certain conditions we can add an `if` clause at the end.
+When we want to prove termination only under certain conditions, we can add an `if` clause at the end.
 
-One is allowed to add only a single clause per kind of termination measure (tuple or wildcard).
-But we can have a clause for a tuple termination measure while using the wildcard termination measure in other cases.
-But when the condition held for a tuple measure, this same measure must decrease for all further recursive invocations and cannot *downgrade* to a wildcard measure. -->
+One can only add a single clause per kind of termination measure (tuple or wildcard).
+However, we can have a clause for a tuple termination measure while using the wildcard termination measure in other cases.
+But when the condition held for a tuple measure, this measure must decrease for all further recursive invocations and cannot *downgrade* to a wildcard measure. -->
 <!-- TODO proper example -->
 
 ## TODO Mutual recursive functions
@@ -263,10 +247,10 @@ But when the condition held for a tuple measure, this same measure must decrease
 <!-- 
 > By default, Gobra checks for partial correctness.
 >
-> Termination is proven, when `decreases` is specified.
+> Termination is proven when `decreases` is specified.
 >
 > `decreases _` assumes termination
-> A *naked* `decreases` is equivalent to `decreases 0`, i.e. TODO -->
+> A *naked* `decreases` is equivalent to `decreases 0`, i.e., ... -->
 
 
 {{#quiz ../../quizzes/termination.toml}}
@@ -274,7 +258,7 @@ But when the condition held for a tuple measure, this same measure must decrease
 <!-- In the next section, we discuss why `pure` and `ghost` functions must have termination measures. -->
 
 <!--
-If you could find a termination measure for the function `Collatz` you would solve a
+If you could find a termination measure for the function `Collatz`, you would solve a
 [famous mathematical problem](https://en.wikipedia.org/wiki/Collatz_conjecture).
 ``` go
 // @ requires n >= 1
