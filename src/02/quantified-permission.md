@@ -14,15 +14,15 @@ func addToSlice(s []int, n int)
 
 ## Shared arrays
 For shared arrays, using quantified permissions is not compulsory.
-As an array has a fixed number of elements, we could simply list access to each element.
-In the following example, we look at how we can concisely specify access to the elements of a shared array.
+As an array has a fixed number of elements, we could list the access to each element.
+In the following example, we examine how to specify access to a shared array's elements concisely.
 
 We mark the array `a` as [shared with `/*@@@*/`](./addressable.md).
 Now, we may reference it and pass its address to the function `reverseInplace`.
-This function reverses the elements by swapping the first element with the last one, the second element with the second last element, and so on, until the entire array is reversed.
+This function reverses the elements by swapping the first element with the last one, the second element with the second-last element, and so on, until the entire array is reversed.
 Note that the loop invariant must also capture which part of the array is still unmodified.
 This allows the array to be reversed in place, as long as permissions are held to modify its elements.
-Each element of an array is addressable, and with quantified permissions we can specify access to each with the following assertion, as seen in the contract of `reverseInplace`:
+Each element of an array is addressable, and with quantified permissions, we can specify access to each with the following assertion, as seen in the contract of `reverseInplace`:
 ``` gobra
 forall i int :: 0 <= i && i < N ==> acc(&p[i])
 ```
@@ -34,13 +34,12 @@ Note that the pointer to the array is dereferenced automatically and that we hav
 ```
 
 We can be more specific and have access to single elements.
-For example, to increment the first element, only `acc(&a[0])` is required.
+For example, only `acc(&a[0])` is required to increment the first element.
 ``` go verifies
 {{#include shared_array.go:client2}}
 ```
 
-For a pointer to an array, we can use the syntactic sugar `acc(p)` which is short for access to each element
-`forall i int :: 0 <= i && i < N ==> acc(&p[i])`.
+For a pointer to an array, we can use the syntactic sugar `acc(p)`, which is short for access to each element `forall i int :: 0 <= i && i < N ==> acc(&p[i])`.
 
 
 Note that we can still call the function `reverse` with a shared array.
@@ -64,7 +63,7 @@ Permission to a might not suffice.
 As a requirement, the mapping between instances of the quantified variable and the receiver expression must be injective.
 In the example `addToSlice`, this injective mapping is from `i` to `&s[i]`.
 
-In the following example, the postcondition of `getPointers` does not specify that the returned pointers are all distinct.
+In the following example, the postcondition of `getPointers` does not specify that the returned pointers are distinct.
 Gobra cannot prove that the mapping is injective and reports an error.
 ``` go does_not_verify
 // @ ensures acc(ps[0],1/2) && acc(ps[1],1/2) && acc(ps[2],1/2)
@@ -104,4 +103,4 @@ The short answer is no.
 Consider the hypothetical precondition `requires exists i int :: acc(&s[i])`.
 This is not helpful because it would provide access to _some_ element of the slice `s`, but we cannot determine which element, as Gobra does not provide an instance of `i`.
 
-[^2]: Recursive data structures, such as a linked list, can also introduce an unbounded number of locations. In chapter 3 we explore how _recursive predicates_ can be used in this case.
+[^2]: Recursive data structures, such as a linked list, can also introduce an unbounded number of locations. In Chapter 3, we explore how _recursive predicates_ can be used in this case.

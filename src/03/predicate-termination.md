@@ -18,7 +18,7 @@ The termination measure is lower bounded for predicate instances with a finite u
 For example, `l3.Mem()` has two predicate instances nested within, whereas `l1.Mem()` has no other predicate instance nested within.
 
 
-To prove termination of the `List` method `Length`, we add the termination measure `l.Mem()`.
+To prove the termination of the `List` method `Length`, we add the termination measure `l.Mem()`.
 As is common for recursive functions, we unfold the predicate instance before the recursive call.
 It is decreasing since `l.next.Mem()` is nested within `l.Mem()`.
 ``` go verifies
@@ -27,16 +27,16 @@ It is decreasing since `l.next.Mem()` is nested within `l.Mem()`.
 Please note that we write `decreases l.Mem()` instead of `decreases acc(l.Mem(), 1/2)`, even if we only require `acc(l.Mem(), 1/2)`.
 <!-- Logic error: got unexpected type assertion -->
 
-For the `List` API, we can use the termination measure `l.Mem()` for the methods `Length` , `Get`, `View`.
+For the `List` API, we can use the termination measure `l.Mem()` for the methods `Length`, `Get`, and `View`.
 
-It might be tempting to use the length of a `List` or the length of the sequence from the abstraction function `View` as an integer termination measure.
+Using the length of a `List` or the sequence length from the abstraction function `View` might be tempting as an integer termination measure.
 For this, the function must be `pure`, which requires a termination measure in turn.
 
-We chose a recursive implementation for `Length`, in order to preserve access to `l.Mem()`.
+We chose a recursive implementation for `Length` to preserve access to `l.Mem()`.
 An idiomatic iterative implementation is more challenging to verify.
-When iteratively iterating over a list, we keep unfolding `current.Mem()` and lose access to the already visited elements.
-It is not directly clear how one could fold the predicate instances back such that `l.Mem()` is preserved by `LengthIterative`.
-A common approach is to define a predicate that denotes access to a segment of a list instead of the entire tail.
+When iteratively iterating over a list, we keep unfolding `current.Mem()` and lose access to the elements already visited.
+It is not immediately clear how to fold the predicate instances back such that `l.Mem()` is preserved by `LengthIterative`.
+A common approach is defining a predicate that denotes access to a list segment instead of the entire tail.
 Alternatively, [magic wands](../magic-wands.md) are applicable in this situation.
 ``` go
 {{#include list.go:LengthIterative}}

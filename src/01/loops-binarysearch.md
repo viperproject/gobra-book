@@ -2,7 +2,7 @@
 
 We will follow along with the example of the function `BinarySearchArr(arr [N]int, target int) (idx int, found bool)`,
 adapted from [Go's BinarySearch for slices](https://cs.opensource.google/go/go/+/refs/tags/go1.23.4:src/slices/sort.go;l=126).
-Here we use arrays of integers instead of generic slices:
+Here, we use arrays of integers instead of generic slices:
 The contract we write formalizes the docstring:
 ``` go
 // BinarySearch searches for target in a sorted slice and returns the earliest
@@ -12,7 +12,7 @@ The contract we write formalizes the docstring:
 func BinarySearch[S ~[]E, E cmp.Ordered](x S, target E) (int, bool)
 ```
 
-The following snippet shows the expected results for a test cases:
+The following snippet shows the expected results for test cases:
 ``` go
 ~func main() {
 	arr := [7]int{0, 1, 1, 2, 3, 5, 8}
@@ -23,7 +23,7 @@ The following snippet shows the expected results for a test cases:
 ~}
 ```
 
-Our approach is to gradually add specifications and fix errors along the way.
+Our approach is to add specifications and gradually fix errors along the way.
 To see the final code only, you can skip to the end of this section.
 
 Let us begin by writing a first contract.
@@ -42,7 +42,7 @@ For the case where `target` is found, `idx` gives its position:
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 ```
 
-This contract does not yet capture that `idx` must be the first index where `target` is found or otherwise the position where `target` would appear in the sort order.
+This contract does not yet capture that `idx` must be the first index where `target` is found or else the position where `target` would appear in the sort order.
 
 Here is the first implementation of `BinarySearchArr`.
 The elements with an index between `low` and `high` denote the parts of the array that remain to be searched for `target`.
@@ -75,15 +75,15 @@ Index mid into arr[mid] might be negative.
 
 The variable `mid` is computed as the average of `low` and `high`.
 After comparing `target` with the element `arr[mid]`, we can half the search range:
-If target is larger, we search in the upper half between `mid+1` and `high`.
-Otherwise, we search in the lower half between `low` and `mid`.
+If `target` is larger, we search between `mid+1` and `high` in the upper half.
+Otherwise, we search between `low` and `mid` in the lower half.
 For this, we need the invariant that `mid` remains a valid index for `arr`:
 ``` go
 	// @ invariant 0 <= mid && mid < len(arr)
 ```
 Let us check whether this invariant works:
-1. Before the first iteration `mid` is initialized to `0`. Therefore, `0 <= mid && mid < N` trivially holds.
-2. For an arbitrary iteration, assume that the invariant `0 <= mid && mid < N` held before this iteration. Now we need to show that after updating `mid = (low + high) / 2`, the invariant is still holds (since the rest of the body does not influence `mid`).
+1. Before the first iteration, `mid` is initialized to `0`. Therefore, `0 <= mid && mid < N` trivially holds.
+2. For an arbitrary iteration, assume that the invariant `0 <= mid && mid < N` held before this iteration. Now we must show that after updating `mid = (low + high) / 2`, the invariant still holds (since the rest of the body does not influence `mid`).
 However, this cannot be proven without establishing bounds for `low` and `high`.
 
 We know that `low` and `high` stay between `0` and `len(arr)`,
@@ -98,14 +98,14 @@ Assertion low < high might not hold.
 ```
 The condition `low < high` holds before the first iteration and for every iteration except the last.
 However, an invariant must hold after every iteration, including the last.
-To address this, we weaken the condition `low < high` to `low <= high`.
+We weaken the condition `low < high` to `low <= high` to address this.
 
 Note that after exiting the loop, the loop condition gives `!(low < high)`, while the invariant ensures `low <= high`.
 Together, these imply `low == high`.
 
-Our next challenge is to find invariants that describe which parts of the array have already been searched and are guaranteed to not contain `target`.
-By the final iteration, these invariants, combined with `low == high`, should be sufficient to prove the postcondition.
-Currently we get the error:
+Our next challenge is to find invariants that describe which parts of the array have already been searched and are guaranteed not to contain `target`.
+These invariants, combined with `low == high`, should be sufficient to prove the postcondition by the final iteration.
+Currently, we get the error:
 ``` text
 ERROR Postcondition might not hold. 
 Assertion !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target might not hold.
@@ -122,14 +122,14 @@ The following expressions are evaluated at the beginning of the loop and once af
 
 We observe a pattern: the slice `arr[low:high]` denotes the part of the array we still have to search for.
 All elements in the prefix `arr[:low]` are smaller than `target`, and all elements in the suffix `arr[high:]` are greater than or equal to `target`.
-Translating this into invariants gives, we have:
+Translating this into invariants gives:
 ``` go
 	// @ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < target
 	// @ invariant forall j int :: {arr[j]} high <= j && j < len(arr) ==>  target <= arr[j]
 ```
 
 Since the array is still known to be sorted, we can simplify this further by relating `target` to the elements
-`arr[low-1]` and `arr[high]`, while ensuring that the indices remain within bounds.
+`arr[low-1]` and `arr[high]`, while ensuring the indices remain within bounds.
 ``` go
 	// @ invariant low > 0 ==> arr[low-1] < target
 	// @ invariant high < len(arr) ==>  target <= arr[high]
@@ -153,16 +153,16 @@ func InitialClient() {
 	// @ assert !found4
 }
 ```
-While we know for certain that 4 is not contained, the current postcondition does not provide any information about the index in other cases.
+While we know for certain that `4` is not contained, the current postcondition does not provide any information about the index in other cases.
 For example, it does not guarantee that the position of the first occurrence of duplicate 1s will be returned.
-We need to include in the contract that `idx` is _the position where target would appear in the sort order_.
+We need to include in the contract that `idx` is _the position where `target` would appear in the sort order_.
 ``` go
 // @ ensures 0 <= idx && idx <= len(arr)
 // @ ensures idx > 0 ==> arr[idx-1] < target
 // @ ensures idx < len(arr) ==>  target <= arr[idx]
 ```
 This stronger contract still follows from the loop invariants.
-Let us take a step back and take a look at the contract which has grown quite large:
+Let us take a step back and take a look at the contract, which has grown quite large:
 ``` go
 // @ requires forall i, j int :: {arr[i], arr[j]} 0 <= i && i < j && j < len(arr) ==> arr[i] <= arr[j]
 // @ ensures 0 <= idx && idx <= len(arr)

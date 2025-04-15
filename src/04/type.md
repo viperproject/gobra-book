@@ -24,10 +24,10 @@ Dynamic value might not be a subtype of the target type.
 
 By assigning a second variable `i, ok := v.(T)`, the type assertion no longer panics.
 If `ok` is `true` then `i` is the underlying value.
-Otherwise if `ok` is `false`, `i` is the zero value of type `T`.
+Otherwise, if `ok` is `false`, `i` is the zero value of type `T`.
 <!-- [[1]](https://go.dev/tour/methods/15). -->
 
-As an example, consider the implementation of the `Model` interface for the `alpha16Model`, which converts a color to the `Alpha16` color model.
+Consider the implementation of the `Model` interface for the `alpha16Model`, which converts a color to the `Alpha16` color model.
 By using a type assertion, we can return the argument if it is already an `Alpha16` color:
 ``` go verifies
 {{#include ./type.go:alpha16Model}}
@@ -40,7 +40,7 @@ Note that to implement the `Model` interface, the return type must be `Color`, n
 ``` go
 // @ ensures typeOf(res) == type[Alpha16]
 ```
-We must wrap the type `T` with `type[T]` to refer to it.
+To refer to it, we must wrap the type `T` with `type[T]`.
 With this postcondition, the following client code verifies:
 ``` go verifies
 {{#include ./type.go:ConvertClient}}

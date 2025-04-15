@@ -1,9 +1,9 @@
 # Slices
 
 Slices provide an abstraction over a contiguous sequence of data.
-A slice has a length, a capacity, and uses an underlying array as storage.
+A slice has a length and a capacity and uses an underlying array as storage.
 
-In the following example, a constant `n` is added to all elements of a slice.
+A constant `n` is added to all slice elements in the following example.
 Note that the functions `len` and `cap` may be used in contracts.
 Access to slice elements is specified using [quantified permissions](./quantified-permission.md).
 We obtain permission to the slice elements on allocation, here with `make`.
@@ -51,7 +51,7 @@ s1 := []int{0, 1, 1, 2, 3, 5}
 A slice can be created from another slice or array by slicing it, in general with an expression of the form `a[i:j:k]`.
 To check slicing does not panic, Gobra checks as part of the contract of the slicing operation that `0 <= i && i <= j && j <= k && k <= cap(a)` holds.
 
-We may create two overlapping slices `l` and `r` but run into a permission error:
+We may create two overlapping slices, `l` and `r,` but run into a permission error:
 ``` go does_not_verify
 func overlappingFail() {
 	s := make([]int, 3)
@@ -65,9 +65,8 @@ func overlappingFail() {
 ERROR Assert might fail. 
 Permission to r might not suffice.
 ```
-While we cannot assert `acc(l) && acc(r)`,
-to call `addToSlice` we only need permission for either of the slices, and it should be possible to assert `acc(l)` and `acc(r)` separately.
-In order to get permission for the slice `r`, we must explicitly assert how the addresses to the elements of `r` relate to those of `s`:
+While we cannot assert `acc(l) && acc(r)`, to call `addToSlice` we only need permission for either of the slices, and it should be possible to assert `acc(l)` and `acc(r)` separately.
+To get permission for the slice `r`, we must explicitly assert how the addresses to the elements of `r` relate to those of `s`:
 ``` gobra
 assert forall i int :: {&r[i]} 0 <= i && i < len(r) ==> &r[i] == &s[i+1]
 ```
@@ -91,7 +90,7 @@ Go includes the `copy` and `append` built-in functions.
 
 We give the contracts for `copy` and `append` for a generic type `T` (Gobra does not yet support generics).
 In Gobra, we must pass an additional ghost parameter that specifies the permission amount required to read the elements of `src`.
-This allows the functions to generally be used independent of the exact permission amount
+This allows the functions to be used independent of the exact permission amount generally
 ``` gobra
 requires p > 0
 requires forall i int :: {&src[i]} 0 <= i && i < len(src) ==> acc(&src[i])
@@ -104,8 +103,8 @@ ensures forall i int :: {&res[i]} len(src) <= i && i < len(res) ==> res[i] === x
 func append[T any](ghost p perm, src []T, xs ...T) (res []T)
 ```
 
-Note that since `append` is variadic, the permission amount must be the first argument.
-The permission to `src` is lost, as the underlying array could be reallocated if the capacity is not sufficient to append the new elements.
+Since `append` is variadic, the permission amount must be the first argument.
+The permission to `src` is lost, as the underlying array could be reallocated if the capacity is insufficient to append the new elements.
 `s = append(s, 42)` is a common pattern in Go, and this way permissions to `s` are preserved.
 
 `copy` copies the elements from `src` to `dst`.
@@ -147,7 +146,7 @@ var s2 []int
 // @ assert s2 == nil && len(s2) == 0 && cap(s2) == 0
 ```
 
-In Go it is possible to append a slice to itself.
+In Go, it is possible to append a slice to itself.
 The contract of `append` forbids this.
 ``` go does_not_verify
 s1 := []int{1, 2}
@@ -158,7 +157,7 @@ ERROR Precondition of call append(  perm(1/64),  s1, s1...) might not hold.
 Permission to append(  perm(1/64),  s1, s2...) might not suffice
 ```
 
-Similarly, in Go the behavior of `copy` is independent of whether the underlying memory of the slices overlaps.
+Similarly, in Go, the behavior of `copy` is independent of whether the underlying memory of the slices overlaps.
 Again, Gobra's contract of `copy` forbids this:
 ``` go does_not_verify
 s := []int{1, 2, 3, 4}
@@ -189,8 +188,8 @@ func addToSlice(s []int, n int) {
 }
 ```
 
-Note that we added the precondition `len(s) > 0`.
-Otherwise there is the error: 
+We added the precondition `len(s) > 0`.
+Otherwise, there is the error: 
 ``` text
 ERROR Loop invariant might not be established. 
 Permission to s[k] might not suffice.
@@ -222,7 +221,7 @@ We conclude this section by revisiting the [binary search example](../01/loops-b
 Now we can perform a `BinarySearch` sorted slices of arbitrary length for a target value.
 This version is more efficient because no arrays need to be copied.
 
-We define a `pure` and `ghost` function `isSliceSorted`, to use in the contract of `BinarySearch`.
+We define a `pure` and `ghost` function `isSliceSorted` to use in the contract of `BinarySearch`.
 Unlike `BinarySearchArr`, we add a condition to handle the empty slice and specify access to the slice elements.
 
 ``` go verifies

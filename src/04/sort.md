@@ -12,7 +12,7 @@ We extend the interface with a `View` method, abstracting the collection to a se
 ``` go
 {{#include ./sort.go:Interface}}
 ```
-A pure and ghost analogue, `LessSpec`, of the `Less` method is defined so that we can use it in specifications.
+We define a pure and ghost analogue, `LessSpec,` of the `Less` method so that we can use it in specifications.
 To couple them together, the result of calling `Less` is equivalent to the result of calling `LessSpec` in that state (`res == old(LessSpec(i, j))`).
 
 
@@ -28,9 +28,9 @@ The `ghost` methods `LessIsTransitive` and `LessIsCoTransitive` formalize the re
 ``` go
 {{#include ./sort.go:LessDoc}}
 ```
-Furthermore, the ordering described by `Less` must be _irreflexive_ (no element must be sorted before itself) and _asymmetric_ (if an element `a` must sort before another element `b` then the element `b` must not also sort before `a`).
+Furthermore, the ordering described by `Less` must be _irreflexive_ (no element must be sorted before itself) and _asymmetric_ (if an element `a` must sort before another element `b`, then the element `b` must not also sort before `a`).
 
-To implement the interface, one must implement these ghost methods, or equivalently prove the lemmas that together imply that the relation described by `Less` is a [strict weak ordering](https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings).
+To implement the interface, one must implement these ghost methods or equivalently prove the lemmas that together imply that the relation described by `Less` is a [strict weak ordering](https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings).
 
 ``` go
 {{#include ./sort.go:InterfaceLessIsTransitive}}
@@ -66,7 +66,7 @@ No proof annotations are required for this.
 ```
 
 The abstraction function `View` converts the slice to a sequence.
-With the helper function `viewAux` we recursively construct the sequence while building up the postcondition that we have already converted the current prefix.
+With the helper function `viewAux`, we recursively construct the sequence while building up the postcondition that we have already converted the current prefix.
 <!-- - (must use unfolding there) -->
 ``` go
 {{#include ./sort.go:IntSliceView}}
@@ -100,6 +100,6 @@ Having implemented `Interface`, we may now call `IsSorted(x)` with `IntSlice` va
 ```
 
 <!-- [^1]: A -->
-<!-- [strict weak ordering](https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings) is often defined as a strict partial order where the incomparability relation forms a equivalence relation. -->
+<!-- [strict weak ordering](https://en.wikipedia.org/wiki/Weak_ordering#Strict_weak_orderings) is often defined as a strict partial order where the incomparability relation forms an equivalence relation. -->
 <!-- Transitive, CoTransitive, Irreflexive, Asymmetric -->
 <!-- (not minimal) -->

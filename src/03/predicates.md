@@ -2,8 +2,8 @@
 
 <!-- similar to gobra tutorial -->
 Predicates abstract over assertions, i.e., giving a name to a parametrized assertion.
-Predicates can be used for representing memory access to data structures of possibly unbounded size, such as linked lists or binary trees.
-While quantified permissions are often used to specify pointwise access, e.g. to elements of a slice, predicates are suitable to denote access to recursive data structures.
+Predicates can represent memory access to data structures of possibly unbounded size, such as linked lists or binary trees.
+While quantified permissions are often used to specify pointwise access, e.g., to elements of a slice, predicates are suitable for denoting access to recursive data structures.
 
 ## Running example: `List`
 Throughout the sections of this chapter, we will follow the example of a `List` data structure for storing integer values,
@@ -42,7 +42,7 @@ func (l *List) Length() (length int)
 ```
 
 In a first step, we focus only on specifying memory access.
-Then in the second step, the contracts are completed for functional correctness.
+Then, the contracts are completed for functional correctness in the second step.
 The following client code will be verified in the final example:
 ``` go
 {{#include list.go:client}}
@@ -50,7 +50,7 @@ The following client code will be verified in the final example:
 
 
 ## Declaring predicates
-Here we define the predicate `elements` to represent access to all elements in a list `l`:
+Here, we define the predicate `elements` to represent access to all elements in a list `l`:
 ``` go
 {{#include list.go:type}}
 
@@ -59,7 +59,7 @@ Here we define the predicate `elements` to represent access to all elements in a
 Predicates are defined with the keyword `pred` and possibly with parameters.
 The body is a single self-framing assertion. <!-- only parameters as variables? -->
 
-Note that `elements` is recursive, and represents access not only to `acc(&l.Value) && acc(&l.next)`, but also to the elements in its tail.
+Note that `elements` is recursive and represents access to `acc(&l.Value) && acc(&l.next)` and to the elements in its tail.
 
 A predicate instance is not equivalent to its body
 and we must explicitly exchange between the two with the `fold` and `unfold` statements, which we study next.
@@ -67,9 +67,9 @@ and we must explicitly exchange between the two with the `fold` and `unfold` sta
 
 ## Creating predicate instances with `fold`
 The `fold` statement exchanges the body of a predicate for a predicate instance.
-In the following example we allocate a new list and highlight with `assert`s that the assertion from the body of `elements` holds for `l`.
-With the statement `fold elements(l)` we exchange these for the predicate instance `elements(l)` as a token representing access to the list.
-However, `acc(&l.Value)` has been exhaled and we may no longer access `l.Value`:
+In the following example, we allocate a new list and highlight with `assert`s that the assertion from the body of `elements` holds for `l`.
+With the statement `fold elements(l)`, we exchange these for the predicate instance `elements(l)` as a token representing access to the list.
+However, `acc(&l.Value)` has been exhale, and and we may no longer access `l.Value`:
 ``` go does_not_verify
 {{#include list.go:fold}}
 ```
@@ -112,8 +112,8 @@ Permission to elements(l) might not suffice.
 Predicates can be recursive, as seen with `elements`.
 In the following example, we build a list with 3 elements, always folding the permissions.
 `elements(l3)` abstracts access to the full list and has the predicate instances `elements(l2)` and `elements(l1)` folded within it.
-We could continue this process, and handle a list of possibly unbounded size.
-To recover the concrete permissions, we `unfold` the predicates in the reverse order.
+We could continue this process and handle a list of possibly unbounded size.
+We `unfold` the predicates in the reverse order to recover the concrete permissions.
 ``` go verifies
 {{#include list.go:fold3}}
 ```
