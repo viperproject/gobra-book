@@ -2,7 +2,7 @@
 
 Interfaces in Go are defined as a set of method signatures.
 In Gobra, we can add signatures and contracts to the interface definitions.
-It must be proven that the implementation is a *behavioral subtype* of the interface, i.e., it provides not only at least the same methods, but also at least the same behavior:
+It must be proven that the implementation is a *behavioral subtype* of the interface, i.e., it provides not only at least the same methods but also at least the same behavior:
 - The precondition of each interface method must imply the precondition of each corresponding implementation method
 - The postcondition of each implementation method must imply the postcondition of each corresponding interface method.
 
@@ -21,8 +21,9 @@ The type `Alpha16` represents a 16-bit alpha color:
 ``` go
 {{#include ./behavioral.go:Alpha16}}
 ```
-In Go, interface implementation is implicit, i.e., the `Color` interface is implemented by defining an `RGBA` method.
-For Gobra, any ghost methods such as `Valid` must be implemented as well.
+Go uses [structural subtyping](https://en.wikipedia.org/wiki/Structural_type_system), and interface implementation is implicit.
+For example, the `Color` interface is implemented by defining an `RGBA` method.
+For Gobra, any ghost methods, such as `Valid`, must also be implemented.
 
 ``` go
 {{#include ./behavioral.go:Alpha16Valid}}
@@ -30,7 +31,7 @@ For Gobra, any ghost methods such as `Valid` must be implemented as well.
 Gobra checks that `Alpha16` is a behavioral subtype of `Color` only when needed, that is, when an value of interface type has `Alpha16` as its underlying type.
 For example, this occurs when we assign a value to a variable of interface type or pass an argument to a function with an in-parameter of interface type.
 
-The following client verifies since the postcondition of `Alpha16`'s `RGBA` is equivalent to the postcondition of the interface method.
+The following client verifies because the postcondition of `Alpha16`'s `RGBA` is equivalent to the postcondition of the interface method.
 ``` go verifies
 {{#include ./behavioral.go:client1}}
 ```
@@ -75,7 +76,7 @@ ERROR Generated implementation proof (Fail2 implements interface{ RGBA }) failed
 Assertion a <= 0xffff might not hold.
 ```
 
-In the above example, the postcondition `a <= 0xffff` is missing from the contract of the implementation.
+In the above example, the postcondition `a <= 0xffff` is missing from the implementation's contract.
 It does not follow from the given postcondition:
 ``` go
 // @ ensures 0 <= r && r <= a && 0 <= g && g <= a && 0 <= b && b <= a
