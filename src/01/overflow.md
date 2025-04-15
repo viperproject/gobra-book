@@ -6,12 +6,12 @@ You may encounter bugs and observe unexpected results.
 
 ## Usage
 By default, Gobra performs no overflow checking.
-On the command line, you can enable overflow checking with the `--overflow` or `-o` flag.
+You can enable overflow checking on the command line with the `--overflow` or `-o` flag.
 The size of `int` is [implementation-specific](https://go.dev/ref/spec#Numeric_types)  in Go and either 32 or 64 bits.
 For overflow checking, Gobra assumes that `int`s have 64 bits by default.
-We may change the behavior of Gobra to consider `int`s with 32 bits by passing the `--int32` flag.
+By passing the '-- int32 ' flag, we may change Gobra's behavior to consider `int`s with 32 bits.
 In a file, we can enable overflow checking by adding the following line:
-```go
+``` go
 // ##(--overflow)
 ```
 
@@ -59,7 +59,7 @@ Expression (low + high) / 2 might cause integer overflow.
 ```
 <!-- TODO if it works without error use: `return low, low < len(arr) && arr[low] == target` otherwise explain why not
 Relevant issue: https://github.com/viperproject/gobra/issues/816 -->
-For example, for `low = N/2` and `high = N`, the sum `low + high` cannot be represented by an `int` and the result will be negative.
+For example, for `low = N/2` and `high = N`, the sum `low + high` cannot be represented by an `int`, and the result will be negative.
 The solution is to replace the offending statement `mid = (low + high) / 2` with:
 ``` go
 mid = (high-low)/2 + low
@@ -68,7 +68,7 @@ The subtraction does not overflow since `high >= low` and `low >= 0` holds.
 After this change, Gobra reports no errors.
 
 
-If we tweak the `const N` that denotes the array length to `1<<31` which is larger than `MaxInt32`, we get an error when checking with `--int32 --overflow`.
+If we tweak the `const N` that denotes the array length to `1<<31` larger than `MaxInt32`, we get an error when checking with `--int32 --overflow`.
 Verification succeeds when only check with `--overflow`.
 
 A similar bug was present in Java's standard library ([Read All About It: Nearly All Binary Searches and Mergesorts are Broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)).
