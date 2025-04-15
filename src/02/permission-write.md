@@ -2,8 +2,8 @@
 
 Permissions allow us to reason about aliased data in a modular way.
 Reading from and writing to a location is permitted based on the permission amount held.
-Write access is _exclusive_, i.e. permission to write to a location can only be held once.
-Permissions can be transferred between functions/methods, loop iterations, and they are gained on allocation.
+Write access is _exclusive_, i.e., permission to write to a location can only be held once.
+Permissions can be transferred between functions/methods and loop iterations, and they are gained on allocation.
 
 Consider the following program.
 Should the assertion `snapshotX == *x` pass?
@@ -14,8 +14,8 @@ Should the assertion `snapshotX == *x` pass?
 If `x` and `y` were aliases, `*x` might be modified.
 Even if they are not aliases, we could not exclude the possibility that `*x` could somehow get modified since the body of `inc` is unknown when modularly verifying `client`.
 
-Therefore it is important that the contract of a function specifies what might be modified by this function.
-In particular, this tells us what does not change without us having to explicitly specify it.
+Therefore, the contract of a function must specify what might be modified by this function.
+In particular, this tells us what does not change without us having to specify it explicitly.
 Given `x != y` and that `inc(y)` might only modify `*y`, the assertion `snapshotX == *x` shall hold before and after the call `inc(y)`.
 
 So far, the program is rejected by Gobra:
@@ -27,7 +27,7 @@ Permission to *x might not suffice.
 ERROR Assignment might fail. 
 Permission to *p might not suffice.
 ```
-In order to read and write the value stored at the memory address `x`, we must hold full access to this location.
+We must hold full access to this location to read and write the value stored at the memory address `x`.
 This is denoted by the accessibility predicate `acc(x)`.
 ``` go verifies
 {{#include frame.go:inc_full}}
@@ -40,11 +40,8 @@ In the function `client`, the permissions `acc(x)` and `acc(y)` are held from th
 `acc(y)` is transferred when calling `inc(y)`.
 Because `acc(x)` is kept, and write permission is exclusive, we can _frame_ the condition `snapshotX == *x` holds across the call `inc(y)`.
 
-<!-- - As write permission is exclusive, the case where `x` and `y` are aliases is -->
-<!-- e.g. with *x = y , and alternative body: **p += 1; *p+=1 -->
 
 ## Permission for pointers
-<!-- The following chapter will also introduce access to predicates but for now, we are concerned only with pointers. -->
 Permissions are held for _resources_.
 For now, we only consider pointers.
 Having access `acc(x)` to a pointer `x` implies `x != nil`, so reading (e.g. `tmp := *x`) and writing (e.g. `*x = 1`) do not panic.
@@ -106,7 +103,7 @@ In our example, permissions `acc(x)` and `acc(y)` are obtained in `client` when 
 then transferred when calling `swap(x, y)`.
 With `assert acc(x)`, we can check whether the permission is held.
 We add the postcondition `acc(x) && acc(y)` to transfer the permissions back to the caller when the function returns.
-Otherwise the permissions are leaked (lost).
+Otherwise, the permissions are leaked (lost).
 
 ## `old` state
 To specify the behavior of `swap`, we have to refer to the values `*x` and `*y` before any modifications.
@@ -123,8 +120,8 @@ func swap(x *int, y *int) {
 ```
 
 ## Exclusivity and aliasing
-Clients may want to call `swap` with the same argument, e.g. `swap(x, x)`.
-So far, our specification forbids this and we get the error:
+Clients may want to call `swap` with the same argument, e.g., `swap(x, x)`.
+So far, our specification forbids this, and we get the error:
 ``` go does_not_verify
 // @ requires acc(x) && acc(y)
 // @ ensures acc(x) && acc(y)
@@ -148,7 +145,7 @@ func client2() {
 Precondition of call swap(x, x) might not hold. 
 Permission to y might not suffice.
 ```
-Having `acc(x) && acc(y)` implies `x != y` since we are not allowed to have write access to the same location.
+Having `acc(x) && acc(y)` implies `x != y` since we are not allowed write access to the same location.
 As a result, the precondition prevents us from calling `swap(x, x)`.
 
 One possibility is to perform a case distinction in the specification on `x == y`.
@@ -166,7 +163,7 @@ func swap(x *int, y *int) {
 	*y = tmp
 }
 ```
-1. `acc(x)` is needed in any case, hence it can be factored out
+1. `acc(x)` is needed in any case. Hence, it can be factored out
     ``` go
     // @ requires x == y ==> acc(x)
     // @ requires x != y ==> acc(x) && acc(y)
@@ -191,8 +188,8 @@ func swap(x *int, y *int) {
     ```
     where the assertion is unchanged for the case `x != y` and we see it is equivalent for the case `x == y` by substituting `y` with `x`.
 
-In the following subsection we additionally reduce the specification.
-At the end of this section you can find the final contract which allows calling swap even in cases where `x` and `y` are aliases.
+In the following subsection, we additionally reduce the specification.
+The final contract, which allows calling swap even in cases where `x` and `y` are aliases, is found at the end of this section.
 
 ## Preserving memory access (`preserves`)
 It is a common pattern that a function requires and ensures the same permissions.
