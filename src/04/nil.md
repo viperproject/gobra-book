@@ -6,7 +6,7 @@ For example, the variable `c` of type `Color` is not assigned a concrete value.
 {{#include ./nil.go:fail1}}
 ```
 Go panics with a run-time error if a method is called on a `nil` interface value.
-Since it holds no concrete type, there is no way to look up which concrete `RGBA` method to call.
+Since it holds no concrete type, there is no way to determine which concrete `RGBA` method to call.
 ``` text
 panic: runtime error: invalid memory address or nil pointer dereference
 ```
@@ -32,7 +32,7 @@ Assertion s != nil might not hold.
 ```
 
 ## Full section example
-Gobra is expected to find 2 errors.
+Gobra is expected to find two errors.
 ``` go does_not_verify
 {{#include ./nil.go:all}}
 ```
