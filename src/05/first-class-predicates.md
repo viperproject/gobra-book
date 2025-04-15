@@ -1,10 +1,10 @@
 # First-class predicates
 <!-- Based on tutorial.md  -->
-Gobra has support for first-class predicates, i.e., expressions with a predicate type.
+Gobra supports first-class predicates, i.e., expressions with a predicate type.
 A first-class predicate of type `pred(T1, ..., Tn)` has arity `n` with corresponding parameter types `T1, ..., Tn`.
 
-This section serves as a prerequisite for the next section where we associate a predicate as the invariant of a lock.
-First-class predicates enables us to use predicates as parameters or return values of functions or methods.
+This section serves as a prerequisite for the next section, where we associate a predicate as the invariant of a lock.
+First-class predicates enable us to use predicates as parameters or return values of functions or methods.
 
 ## Predicate constructors `P!<...!>`
 To instantiate a first-class predicate, Gobra provides _predicate constructors_.
@@ -16,7 +16,7 @@ For example, consider the declared predicate `Mem`:
 ``` go
 {{#include ./first-class-predicates.go:Pred}}
 ```
-The predicate constructor `Mem!<new(int8), _!>` has type `pred(*uint32)`, since the first argument is applied and the second is not.
+The predicate constructor `Mem!<new(int8), _!>` has type `pred(*uint32)` since the first argument is applied and the second is not.
 Conversely, `Mem!<_, new(uint32)!>` has type `pred(*int8)`.
 Finally, `Mem!<new(int8), new(uint32)!>` and `Mem!< _, _!>` have types `pred()` and `pred(*int8, *uint32)`, respectively.
 
@@ -44,11 +44,11 @@ Assertion OtherMem!<a, c!> == Mem!<a, c!> might not hold.
 
 ## `fold` and `unfold` first-class predicates
 The body of the predicate `P!<d1, ..., dn!>` is the body of `P` with the arguments applied accordingly.
-Like with other [predicates](../03/predicates.md), the first-class predicate `P!<d1, ..., dn!>` can be instantiated and its instances may occur in assertions and in `fold` and `unfold` statements.
+Like with other [predicates](../03/predicates.md), the first-class predicate `P!<d1, ..., dn!>` can be instantiated, and its instances may occur in assertions and in `fold` and `unfold` statements.
 The `fold` statement `fold P!<d1, ..., dk!>(e1, ..., en)` exchanges the first-class predicate instance with its body.
 The `unfold` statement does the reverse.
 
-In the following example, we fold and unfold a first-class predicate instance as opposed a normal predicate instance `Mem(x, y)`.
+In the following example, we fold and unfold a first-class predicate instance instead of a normal predicate instance `Mem(x, y)`.
 ``` go
 {{#include ./first-class-predicates.go:fold}}
 ```
