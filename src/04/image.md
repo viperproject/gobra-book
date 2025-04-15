@@ -9,4 +9,4 @@
   - Renamed, e.g., `Alpha16Image` instead of `Alpha16` to not clash with the color `Alpha16`
 - Small syntactic changes. 
   - For example, to insert `fold` statements before/after `return`
-  - Color models not dynamically defined
+  
