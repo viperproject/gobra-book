@@ -14,7 +14,7 @@ property error: got b that is not effective addressable
 ```
 To reference local variables, they must be marked as _shared_ by appending the ampersand symbol to a variable name.
 Then, Gobra uses permissions to track access to this location.
-For a variable `b`, we either write `b /*@@@*/` using an inline annotation, or equivalently as `b@` in `.gobra` files.
+For a variable `b`, we either write `b /*@@@*/` using an inline annotation or `b@` equivalently in `.gobra` files.
 
 ``` go verifies
 func main() {
@@ -43,7 +43,7 @@ An example with _shared arrays_ is shown in a [following section](./quantified-p
 The fields of structs can be addressed individually.
 For example, access can be specified to the field `x` of a shared struct `c` with `acc(&c.x)`.
 
-In the following example, we use structs representing 2D coordinates and implement a method `Scale` to multiply them by a scalar factor.
+In the following example, we use structs representing 2D coordinates and implement a method, `Scale,` to multiply them by a scalar factor.
 ``` go does_not_verify
 {{#include shared_struct.go:Scale}}
 
@@ -86,7 +86,7 @@ ERROR Scale requires a shared receiver ('share' or '@' annotations might be miss
 	c2.Scale(-1)
     ^
 ```
-Parameters of a function or method can be shared with the `share` statement at the beginning of the body.
+The parameters of a function or method can be shared with the `share` statement at the beginning of the body.
 ``` go verifies
 {{#include shared_struct.go:client3}}
 ```
