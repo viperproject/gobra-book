@@ -1,9 +1,8 @@
 # `defer` statements
 
-A `defer` statement invokes a function whose execution is deferred to the moment the surrounding function returns
- ([spec](https://go.dev/ref/spec#Defer_statements)).
+A `defer` statement invokes a function whose execution is deferred to the moment the surrounding function returns ([spec](https://go.dev/ref/spec#Defer_statements)).
  
-Defer statements are not directly related to concurrency but we include them in this chapter because they frequently occur in concurrent code.
+Defer statements are not directly related to concurrency, but we include them in this chapter because they frequently occur in concurrent code.
 For example, a common pattern is to defer the call of the `Unlock` method for a mutex.
 Here, we augment the [SafeCounter example](./mutex.md) with a method `Get`:
 ``` go
@@ -12,7 +11,7 @@ Here, we augment the [SafeCounter example](./mutex.md) with a method `Get`:
 ```
 We use `defer` three times, once deferring `c.mu.Unlock()` and in ghost code to defer folding the predicates `mutexInvariant` and `c.Mem`.
 
-At the point `defer` executes, only the function and parameters are evaluated.
+At the point of the `defer` statement, only the function and its parameters are evaluated, but the call is not yet evaluated.
 Deferred functions or methods are executed in the reverse order they were deferred.
 Gobra checks the contracts when they are executed.
 
