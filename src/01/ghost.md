@@ -1,15 +1,9 @@
 # Ghost code
 
-Often, it is useful to introduce _ghost state_ and _ghost code_, i.e., additional state and code that is used for specification and verification purposes, but which is not meant to be compiled and executed.
+Often, it is useful to introduce _ghost state_ and _ghost code_, i.e., additional state and code that is used for specification and verification purposes, but which is not compiled and executed.
 Ghost code cannot change the visible behavior of a program, i.e., it cannot assign to non-ghost variables or cause the program to not terminate.
-<!-- "it cannot cause the program to not terminate." also the reverse, cannot cause a  -->
-
-Ghost code is considered by Gobra but it is ignored during compilation.
+Ghost code is considered by Gobra, but it is ignored during compilation.
 When writing Gobra annotations in Go source files, the syntax `// @` makes it clear that the line is treated as a comment by Go and is not included in the program.
-
-<!-- ## TODO Ghost functions -->
-<!-- limitation: no error if we call ghost function in go code -->
-<!-- but error "Found call to non-ghost impure function in ghost code" -->
 
 ## Ghost parameters
 Consider the function `Max` that returns the maximum element of an array, with the signature:
@@ -22,15 +16,13 @@ Verifying this function would be challenging because of the existential quantifi
 Additionally, the postcondition gives clients only the maximal value.
 
 With a `ghost` out parameter `idx`, we can return the index of the maximal value.
-The updated contract specifies, that the maximal value is at index `idx`.
+The updated contract specifies that the maximal value is at index `idx`.
 We update `idx` with a ghost statement to maintain the invariant that it is the index of the maximal value in the prefix of the array already iterated over.
 As `Max` has two out parameters now, clients  must assign the ghost return value to a ghost location.
 ``` go verifies
 {{#include max.go}}
 ```
-
 <!-- todo if not declared before, it is inferred automatically for the := assignment -->
-
 
 ## Ghost erasure property
 Recall that ghost code cannot change the visible behavior of a program.
@@ -44,16 +36,10 @@ var x int
 ``` text
 ERROR ghost error: only ghost locations can be assigned to in ghost code
 ```
-<!-- TODO Limitation: if the statement is not made ghost, there is no error but it updates the variable!
-    var x int
-    // @ x = 1
-    // @ assert x == 1
-    // @ assert x == 0  // ERROR
--->
 
 To make a statement ghost, add `ghost` before it.
-Although not all statements can appear in ghost code.
-For example, there is no ghost `return` statement, because it can change the visible behavior of a program:
+However, not all statements can appear in ghost code.
+For example, there is no ghost `return` statement because it can change the visible behavior of a program:
 ``` go does_not_verify
 func loop() {
     // @ ghost return
@@ -63,7 +49,6 @@ func loop() {
 ``` text
 ERROR ghost error: expected ghostifiable statement
 ```
-
 
 ## Termination of `ghost` functions
 Ghost functions must be proven to terminate.
@@ -89,8 +74,6 @@ ERROR loop occurring in ghost context does not have a termination measure
  ^
 ```
 
-    
-
 ## More ghost entities
 <!-- from tutorial.md -->
 In general, Gobra allows marking the following entities as ghost:
@@ -98,7 +81,6 @@ In general, Gobra allows marking the following entities as ghost:
 - functions and methods where all in- and out-parameters are implicitly ghost
 - variables `ghost var x int = 42` 
 - statements <!--  (if-then-else, loops) -->
-<!-- - ghost types (e.g. sequences, sets, multisets) -->
 
 We will continue using `ghost` code in the following chapters.
 
