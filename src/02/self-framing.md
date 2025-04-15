@@ -5,8 +5,8 @@ This includes the fact that array indices in specifications must be in bounds.
 Operations like division have conditions under which they are well-defined.
 For `a / b` to be well-defined, `b != 0` must hold.
 In the context of permissions, we get a new requirement that assertions are _self-framing_,
-i.e. access to all locations being read is required.
-Gobra checks that assertions are self-framing, and reports an error otherwise.
+i.e., access to all locations being read is required.
+Gobra checks that assertions are self-framing and reports an error otherwise.
 
 This also applies to contracts.
 In the following example, there is an error since `*x` and `*y` are accessed in the postcondition of `swap`,
@@ -39,7 +39,7 @@ func swap(x *int, y *int) {
 
 
 Note that the order of the pre- and postconditions matters.
-The contract is checked from top to bottom and permission must be held before accessing.
+The contract is checked from top to bottom, and permission must be held before accessing.
 For example, if we exchange the postconditions of `swap`, we get the same error again:
 ``` go does_not_verify
 // @ requires acc(x) && acc(y)
