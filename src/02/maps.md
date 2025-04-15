@@ -5,7 +5,7 @@ Go provides the built-in map data structure implementing a hash table.
 watched := make(map[string]bool, 10) // optional capacity
 // @ assert acc(watched) && len(watched) == 0
 ```
-Permission to a map is obtained on allocation, e.g. from `make`.
+Permission to a map is obtained on allocation, e.g., from `make`.
 The accessibility predicate `acc(watched)` is for the entire map.
 Individual elements, as in slices, are not addressable.
 
@@ -29,7 +29,7 @@ elem, ok := watched["Dune"]
 
 ## `nil` map
 A `nil` map is obtained with `new` or by not initializing a map variable.
-No permission is held for the `nil` map and no elements can be added.
+No permission is held for the `nil` map, and no elements can be added.
 Otherwise, it behaves like an empty map.
 ``` go verifies
 var rating map[string]int
@@ -60,12 +60,12 @@ func client() {
 -->
 
 ## Range clause for maps
-Range loops iterate over the keys and values for a map.
-A `with` clause must be added (e.g. `range m /*@ with visited @*/`).
+Range loops iterate over the keys and values of a map.
+A `with` clause must be added (e.g., `range m /*@ with visited @*/`).
 The ghost variable `visited` is a mathematical set (introduced in the next chapter) that contains the keys already visited.
-In the following snippet, we build a map literal, with keys representing identifiers and `Movie` structs as values.
+In the following snippet, we build a map literal with keys representing identifiers and `Movie` structs as values.
 The function `avgRating` computes the average rating of all movies in a map.
-We focus on the loop and omit the full functional specification for simplicity.
+We focus on the loop for simplicity and omit the full functional specification.
 
 <!-- TODO change after https://github.com/viperproject/gobra/issues/808 -->
 
@@ -162,7 +162,7 @@ Permission to m might not suffice.
 ```
 
 ## `delete` and `clear`
-At the moment, Gobra does not support Go's built-in function `delete` for removing map entries or `clear` for removing all map entries.
+At the moment, Gobra does not support Go's built-in functions `delete` to remove map entries or `clear` to remove all map entries.
 
 
 [^1]: [https://go.dev/ref/spec#For_range](https://go.dev/ref/spec#For_range) 
