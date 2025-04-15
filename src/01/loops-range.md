@@ -6,7 +6,7 @@ We show how to reason about for-range loops that iterate over [slices](../02/sli
 These data structures pose additional challenges, as they may be concurrently accessed, and thus, we need to employ permissions when reasoning about them.
 Gobra does not support range clauses for integers, strings, and functions.
 
-Here we refactor the `LinearSearch` example from the section on [loop invariants](./loops-invariant.md) to use a for-range loop.
+Here, we refactor the `LinearSearch` example from the section on [loop invariants](./loops-invariant.md) to use a for-range loop.
 The contract is left unchanged, but Gobra reports an error:
 ``` go does_not_verify
 const N = 10
@@ -28,17 +28,16 @@ func LinearSearch(arr [N]int, target int) (idx int, found bool) {
 ERROR Postcondition might not hold. 
 Assertion !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target might not hold.
 ```
-We have come across the pattern where the negation of the loop condition, combined with the invariant, often implies the postcondition.
+We have encountered a pattern in which the negation of the loop condition, combined with the invariant, often implies the postcondition.
 In a standard for loop, we can deduce that `i == len(arr)` holds after the final iteration.
-In the range version, however, `i` equals `len(arr) - 1` during the last iteration.
-Since the range version has no explicit loop condition, Gobra only _knows_ that `0 <= i && i < len(arr)` holds during the after iteration, which is insufficient to prove the postcondition.
+However, since the range version has no explicit loop condition, Gobra only _knows_ that `0 <= i && i < len(arr)` holds during and after iteration, which is insufficient to prove the postcondition.
 
 ## Helper loop variable from a `with` clause
 We can specify an additional loop variable `i0` defined using `with i0` after a `range` clause.
 The invariant `0 <= i0 && i0 <= len(arr)` holds, as does `i0 < len(arr) ==> i == i0`.
 Additionally, `i0` will be equal to `len(arr)` at the end of the loop.
 Thus, if we replace `i` with `i0` in the second invariant, Gobra can verify the postcondition.
-The invariant `0 <= i && i < len(arr)` can be removed, as it is implicitly understood by Gobra.
+The invariant `0 <= i && i < len(arr)` can even be omitted now.
 Our final verifying version is:
 ``` go verifies
 package main
