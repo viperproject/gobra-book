@@ -96,6 +96,7 @@ func client2(a, b int32) {
 ``` text
 ERROR Precondition of call Abs(MinInt32) might not hold. 
 Assertion x != -2147483648 might not hold.
+
 ERROR Precondition of call Abs(b) might not hold. 
 Assertion x != MinInt32 might not hold.
 ```
