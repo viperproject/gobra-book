@@ -61,13 +61,11 @@ Expression a might be negative.
 ## Permission arithmetic
 We may convert a fraction to a permission amount and perform calculations with it: 
 ``` gobra verifies
-func main() {
-	assert perm(1/2) + perm(1/2) == writePerm
-	assert perm(1) - 1/2 == perm(1/2)
-	assert perm(1/2) * 0 == noPerm
-	assert perm(1) / 2 != writePerm
-	assert perm(1/3) == 1/3
-	assert perm(perm(1/3)) == perm(1/3)
-}
+assert perm(1/2) + perm(1/2) == writePerm
+assert perm(1) - 1/2 == perm(1/2)
+assert perm(1/2) * 0 == noPerm
+assert perm(1) / 2 != writePerm
+assert perm(1/3) == 1/3
+assert perm(perm(1/3)) == perm(1/3)
 ```
 Note that for access predicates, we can and have been using the shorthand `acc(p, 1/2)` instead of `acc(p, perm(1/2))`.

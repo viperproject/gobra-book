@@ -10,7 +10,6 @@ func Cube(x int) int {
 // @ requires n >= 0
 func client(n int) {
 	// @ assert 8 == Cube(2)
-	// @ assert Cube(2) >= 8 && Cube(2) <= 8
 	r := Cube(2)
 	// @ assert Cube(n) >= 0
 }

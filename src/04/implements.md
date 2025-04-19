@@ -15,7 +15,6 @@ With the implementation of `Bounds` and the predicate `Mem`,
 ``` go
 {{#include ./implements.go:Alpha16ImageImpl}}
 ```
-<!-- TODO: rename Alpha16Image to not confuse? Maybe simplify struct and Mem pred -->
 
 The statement `T implements I` checks whether the type `T` is a behavioral subtype of the interface type `I`. Gobra tries an auto-generated proof, which may fail as seen in the following snippet:
 ``` go does_not_verify

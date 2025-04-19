@@ -10,14 +10,14 @@ The statement `exhale ASSERTION`
 3. removes all permissions mentioned by `ASSERTION`
 
 Exhale is similar to `assert`, with the difference that `assert` does not remove any permissions:
-``` gobra does_not_verify
-requires acc(x, 1)
+``` go does_not_verify
+// @ requires acc(x, 1)
 func breatheOut(x *int) {
-	assert acc(x, 1)
-	exhale acc(x, 1/4)
-	assert acc(x, 3/4)
-	assert acc(x, 3/4) // no permission removed
-	exhale acc(x, 1) // error
+	// @ assert acc(x, 1)
+	// @ exhale acc(x, 1/4)
+	// @ assert acc(x, 3/4)
+	// @ assert acc(x, 3/4) // no permission removed
+	// @ exhale acc(x, 1) // error
 }
 ```
 ``` text
@@ -36,37 +36,22 @@ Inhaling can result in an inconsistent state.
 Do not use it without a good reason, except for debugging and learning.
 </div>
 
-``` gobra verifies
-requires acc(x, 1/2)
+``` go verifies
+// @ requires acc(x, 1/2)
 func breatheIn(x *int) {
-	assert acc(x, 1/2)
-	inhale acc(x, 1/2)
-	assert acc(x, 1/1)
+	// @ assert acc(x, 1/2)
+	// @ inhale acc(x, 1/2)
+	// @ assert acc(x, 1/1)
 }
 ```
 
 By inhaling a permission amount of 1 for the pointer `x` while already holding `acc(x, 1/2)`, we reach an inconsistent state, and `false` can be asserted:
-``` gobra verifies
-requires acc(x, 1/2)
+``` go verifies
+// @ requires acc(x, 1/2)
 func breatheMore(x *int) {
-	inhale acc(x, 1)
-	assert acc(x, 3/2)
-	assert false
+	// @ inhale acc(x, 1)
+	// @ assert acc(x, 3/2)
+	// @ assert false
 }
 ```
 
-<!-- we did postpone introducing `assume` -->
-<!--
-Inhale is similar to `assume`, with the difference that `assume` does not add any permissions.
-Assuming permission is held in a state where it is not yields a contradiction:
-``` gobra
-func contradiction(x *int) {
-	assert acc(x, 0)
-	assume acc(x, 1/2)
-	assert false
-}
-```
--->
-
-<!-- ## References -->
-<!-- [Viper Tutorial](https://viper.ethz.ch/tutorial/#inhale-and-exhale) -->

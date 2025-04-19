@@ -14,8 +14,8 @@ Let us explore the concept of partial correctness further.
 The function `infiniteZero` contains an infinite loop, so it will not terminate.
 It is still partially correct with respect to its contract since the postcondition `false` must only be proven to hold when it returns, which it does not.
 
-``` gobra verifies
-ensures false
+``` go verifies
+// @ ensures false
 func infiniteZero() res {
     for {}
     return 0
@@ -23,7 +23,7 @@ func infiniteZero() res {
 
 func main() {
     r := infiniteZero()
-    assert r == 1
+    // @ assert r == 1
 }
 ```
 When the function `main` is verified, whether `infiniteZero` terminates is unknown.
@@ -37,7 +37,7 @@ It must come right before the function/loop after any preconditions/postconditio
 Sometimes, this suffices, and a termination measure can be automatically inferred. 
 For example, for simple functions like `Abs` that terminate immediately:
 ``` go verifies
-decreases
+// @ decreases
 func Abs(x int) (res int) {
     if x < 0 {
        return -x 
@@ -155,7 +155,6 @@ func client() {
 }
 
 ```
-
 The use of the wildcard measure can be justified when termination is proven by other means, such as leveraging a different tool.
 Another use case is _gradual verification_ where it can be useful to assume termination of functions in a codebase, that have not yet been verified.
 
@@ -225,8 +224,8 @@ A tuple termination measure decreases based on the [lexicographical order](https
 
 For `BinarySearchArr`, we used `decreases high - low`.
 Alternatively, we could use:
-``` gobra 
-decreases high, len(arr) - low
+``` go
+// @ decreases high, len(arr) - low
 ```
 
 ## TODO Conditional termination with `if` clauses
@@ -255,21 +254,4 @@ But when the condition held for a tuple measure, this measure must decrease for 
 
 {{#quiz ../../quizzes/termination.toml}}
 
-<!-- In the next section, we discuss why `pure` and `ghost` functions must have termination measures. -->
 
-<!--
-If you could find a termination measure for the function `Collatz`, you would solve a
-[famous mathematical problem](https://en.wikipedia.org/wiki/Collatz_conjecture).
-``` go
-// @ requires n >= 1
-func Collatz(n int) int {
-    if n == 1 {
-        return 1
-    } else if n % 2 == 0 {
-        return Collatz(n / 2)
-    } else {
-        return Collatz(3 * n + 1)
-    }
-}
-```
--->

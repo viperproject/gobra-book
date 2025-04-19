@@ -15,9 +15,6 @@ Additionally, `c.mu.LockInv() == mutexInvariant!<&c.count!>` specifies the invar
 If we unlock, we will gain access to an instance of this predicate, which will allow us to modify `&c.count`.
 To lock, we will have to give up this predicate instance again.
 
-<!-- TODO get the permissions only between Lock and Unlock -->
-<!-- first-class predicate comparison -->
-
 When we import the `sync` package, Gobra provides predefined specs for this package.
 All predefined specs included in Gobra can be found [here](https://github.com/viperproject/gobra/tree/master/src/main/resources/stubs).
 

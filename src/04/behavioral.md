@@ -91,6 +91,6 @@ In a following section, we show how to provide our own [implementation proofs](.
 
 
 ## Full section example
-``` go
+``` go verifies
 {{#include ./behavioral.go:all}}
 ```

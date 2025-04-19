@@ -121,8 +121,6 @@ ensures forall i int :: {&dst[i]} (0 <= i && i < len(src) && i < len(dst)) ==> d
 ensures forall i int :: {&dst[i]} (len(src) <= i && i < len(dst)) ==> dst[i] === old(dst[i])
 func copy[T any](dst, src []T, ghost p perm) (res int)
  ```
-<!-- TODO why, in the permission type section it works with 1/2 only?! -->
-<!-- as is allowed in the access predicate. -->
 The permissions amount must be explicitly passed as `perm(1/2)` instead of only `1/2`.
 This simple example shows the usage of `copy` and `append`:
 ``` go verifies

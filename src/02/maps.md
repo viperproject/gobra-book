@@ -103,7 +103,6 @@ func critique() {
 Go does not specify the iteration order over maps (see [^1]).
 An entry added during iteration may either be produced or skipped.
 Gobra prohibits the mutation of maps while iterating.
-<!-- TODO connect/motivate -->
 ``` go does_not_verify
 package main
 

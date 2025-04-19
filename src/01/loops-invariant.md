@@ -56,7 +56,7 @@ func client() {
 ```
 Gobra cannot track all possible values for the loop variable `i` over all iterations, and we must help by specifying bounds for `i` with:
 ``` gobra
-invariant 0 <= i && i <= len(arr)
+// @ invariant 0 <= i && i <= len(arr)
 ```
 Without this invariant, Gobra reports the error:
 ``` text
@@ -69,8 +69,8 @@ Let us check manually whether this invariant holds:
 
 <br/>
 
-``` gobra
-invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
+``` go
+// @ invariant forall j int :: 0 <= j && j < i ==> arr[j] != target
 ```
 Without this second invariant, Gobra cannot prove a postcondition:
 ``` text

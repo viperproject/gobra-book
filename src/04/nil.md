@@ -1,7 +1,7 @@
 # `nil` interface values
 
 A `nil` interface value holds neither a value nor a concrete type [[1]](https://go.dev/tour/methods/13).
-For example, the variable `c` of type `Color` is not assigned a concrete value.
+For example, the variable `c` of type `Color` is not assigned a concrete value:
 ``` go panics
 {{#include ./nil.go:fail1}}
 ```

@@ -158,9 +158,9 @@ By now, we know that `pure` functions can be used in specifications.
 Since they do not have side effects or non-determinism, they can be thought of as mathematical functions.
 To prevent inconsistencies, termination measures must be provided for `pure` functions:
 
-``` gobra does_not_verify
-pure
-ensures res != 0
+``` go does_not_verify
+// @ pure
+// @ ensures res != 0
 func incons(x int) (res int) {
     return 2 * incons(x)
 }
@@ -172,19 +172,19 @@ pure
 Next, we show why having non-terminating specification functions is a bad idea and derive `assert false`.
 For this, we assume that `incons` terminates by giving it the wildcard termination measure `decreases _`.
 
-``` gobra verifies
-pure
-decreases _ // assuming termination
-ensures res != 0
+``` go verifies
+// @ pure
+// @ decreases _ // assuming termination
+// @ ensures res != 0
 func incons(x int) (res int) {
     return 2 * incons(x)
 }
 
 func foo() {
-    assert incons(1) == 2 * incons(1) // (1)
-    assert incons(1) / incons(1) == 2 // (2)
-    assert 1 == 2                     // (3)
-    assert false
+    // @ assert incons(1) == 2 * incons(1) // (1)
+    // @ assert incons(1) / incons(1) == 2 // (2)
+    // @ assert 1 == 2                     // (3)
+    // @ assert false
 }
 ```
 The assertions all pass since

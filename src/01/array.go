@@ -1,6 +1,7 @@
 package main
 
 // ANCHOR: readArrFinal
+// @ requires 0 <= i && i < len(a)
 // ANCHOR: readArr
 func readArr(a [5]int, i int) int {
 	b := a[i]

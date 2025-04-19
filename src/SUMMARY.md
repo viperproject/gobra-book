@@ -4,7 +4,7 @@
 
 # Getting Started with Specifications and Verification
 - [Introduction]()
-- [Installation]()
+- [Installation](./installation.md)
 <!-- - [Getting started]() -->
 - [Basic specifications](./01/basic-specs.md)
   <!-- - [`assert` and `assume`](./assert-assume.md) -->
