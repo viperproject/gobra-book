@@ -17,7 +17,7 @@ Additionally, the postcondition gives clients only the maximal value.
 
 With a `ghost` out parameter `idx`, we can return the index of the maximal value.
 The updated contract specifies that the maximal value is at index `idx`.
-We update `idx` with a ghost statement to maintain the invariant that it is the index of the maximal value in the prefix of the array already iterated over.
+We update `idx` with a ghost statement to maintain the invariant that it is the index of the maximal value in the prefix of the array already traversed.
 As `Max` has two out parameters now, clients  must assign the ghost return value to a ghost location.
 ``` go verifies
 {{#include max.go}}

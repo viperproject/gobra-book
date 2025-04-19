@@ -62,7 +62,7 @@ Relevant issue: https://github.com/viperproject/gobra/issues/816 -->
 For example, for `low = N/2` and `high = N`, the sum `low + high` cannot be represented by an `int`, and the result will be negative.
 The solution is to replace the offending statement `mid = (low + high) / 2` with:
 ``` go
-mid = (high-low)/2 + low
+mid = (high-low) / 2 + low
 ```
 The subtraction does not overflow since `high >= low` and `low >= 0` holds.
 After this change, Gobra reports no errors.
