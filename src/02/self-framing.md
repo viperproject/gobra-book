@@ -58,12 +58,12 @@ Permission to *x might not suffice.
 
 Conjunctions are evaluated from left to right.
 As a result, 
-``` gobra
-ensures acc(x) && acc(y) && *x == old(*y)
+``` go
+// @ ensures acc(x) && acc(y) && *x == old(*y)
 ```
 is self-framing, while the following is not:
-``` gobra
-ensures *x == old(*y) && acc(x) && acc(y)
+``` go
+// @ ensures *x == old(*y) && acc(x) && acc(y)
 ```
 
 As an exception, the assertion from an `assert` statement must not be self-framing.

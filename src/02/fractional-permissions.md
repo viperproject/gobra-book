@@ -131,12 +131,11 @@ For a pointer `x`, for any positive permission amount `p`, `acc(x, p)` implies `
 But `acc(x1, 1/2) && acc(x2, 1/2)` does no longer imply `x1 != x2`.
 If we have `2/3` fractional permission to `x1` instead, we can now infer `x1 != x2` 
 since permission amounts to the same location are added together:
-``` gobra verifies
-requires acc(x1, 2/3) && acc(x2, 1/2)
-ensures x1 != x2
-func lemma(x1, x2 *int) {}
+``` go verifies
+// @ requires acc(x1, 2/3) && acc(x2, 1/2)
+// @ ensures x1 != x2
+func fact(x1, x2 *int) {}
 ```
-<!-- (`x1 == x2 ==> acc(x1, 7/6)`) -->
 
 ## Access predicates are not duplicable
 In classical logic, if the proposition \\( P \\) holds, then clearly, the proposition \\( P \land P\\) holds as well.

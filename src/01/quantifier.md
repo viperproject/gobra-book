@@ -53,6 +53,11 @@ Note that we can quantify `i` and `j` at the same time instead of using two `for
 // @ requires forall i int :: forall j int ::  0 <= i && i < j && j < len(res) ==> res[i] <= res[j]
 ```
 
+=======
+<!--
+In general, the syntax
+`forall IDENTIFIER [,IDENTIFIER]* T :: ASSERTION` -->
+
 ## Efficient verification with triggers
 While a universal quantifier states that an assertion holds for all instantiations of a variable, proofs often require knowing the body of a quantifier for concrete instantiations.
 Triggers are syntactical patterns that, when matched, trigger Gobra to learn the body of a quantifier with concrete instantiations.
