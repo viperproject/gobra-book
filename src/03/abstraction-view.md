@@ -27,7 +27,6 @@ For example, `New` corresponds to concatenating a single element to a sequence.
 The table below gives the preconditions and postconditions we add to the contracts.
 The abstraction function is heap-dependent, and we can evaluate it in the `old` state to get the original representation.
 For example, the method `Get` must return the `i`th element of the sequence corresponding to the list `old(l.View()[i])` index the index is within bounds ( `0 <= i && i < len(l.View())`).
-<!-- TODO heap dependent (there is no heap in Go spec!) -->
 
 | name      | `requires`                    | `ensures`                                                          |
 |-----------|-------------------------------|--------------------------------------------------------------------|

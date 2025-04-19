@@ -33,7 +33,6 @@ This is denoted by the accessibility predicate `acc(x)`.
 {{#include frame.go:inc_full}}
 {{#include frame.go:client_full}}
 ```
-<!-- TODO which problem https://en.wikipedia.org/wiki/Frame_problem -->
 Permissions are a solution to the problem described above.
 Now `inc` requires `acc(p)`, which gives us an upper bound on what could be modified after the call.
 In the function `client`, the permissions `acc(x)` and `acc(y)` are held from the precondition.
