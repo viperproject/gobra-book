@@ -9,7 +9,7 @@ Equivalently, we can write `acc(l.Mem())` or `acc(l.Mem(), 1)` using the access 
 <!-- {{#include list.go:mem}} -->
 <!-- ``` -->
 
-We may specify a permission amount' p` for `fold`, `unfold`, and `unfolding`.
+We may specify a permission amount `p` for `fold`, `unfold`, and `unfolding`.
 In this case, any permission amount in the body of the predicate is multiplied by `p`.
 For example, the body of `l.Mem()` contains `acc(l)` and `l.next.Mem()`.
 After `unfold acc(l.Mem())`, only `acc(l, 1/2)` and `acc(l.next.Mem(), 1/2)` are held.
