@@ -16,7 +16,7 @@ It is still partially correct with respect to its contract since the postconditi
 
 ``` go verifies
 // @ ensures false
-func infiniteZero() res {
+func infiniteZero() (res int) {
     for {}
     return 0
 }
