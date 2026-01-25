@@ -164,14 +164,14 @@ Another use case is _gradual verification_ where it can be useful to assume term
 ## Termination of binary search
 Let us look again at the [binary search](./loops-binarysearch.md) example.
 This time, we introduce an implementation error:
-`low` is updated to `low = mid` instead of `low = mid + 1`.
+`lowElement` is updated to `lowElement = mid` instead of `lowElement = mid + 1`.
 `BinarySearchArr` could loop forever, for example, with `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 8)`.
 The function would still verify without `decreases` since only partial correctness is checked.
 <!-- 
 For example for `N=3`, `BinarySearchArr([N]int{1, 2, 3}, 2)` does not terminate.
 	arr := [N]int{1, 2, 3}
 	i := BinarySearchArr(arr, 2)
-low mid high
+lowElement mid highElement
  0 1 3
  1 1 2
     -->
@@ -183,23 +183,23 @@ low mid high
 // @ ensures found == (idx < len(arr) && arr[idx] == target)
 // @ decreases  // <--- added for termination checking
 func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
-    low := 0
-    high := len(arr)
+    lowElement := 0
+    highElement := len(arr)
     mid := 0
-    // @ invariant 0 <= low && low <= high && high <= len(arr)
+    // @ invariant 0 <= lowElement && lowElement <= highElement && highElement <= len(arr)
     // @ invariant 0 <= mid && mid < len(arr)
-    // @ invariant low > 0 ==> arr[low-1] < target
-    // @ invariant high < len(arr) ==> target <= arr[high]
-    // @ decreases high - low   // <-- added for termination checking
-    for low < high {
-        mid = (low + high) / 2
+    // @ invariant lowElement > 0 ==> arr[lowElement-1] < target
+    // @ invariant highElement < len(arr) ==> target <= arr[highElement]
+    // @ decreases highElement - lowElement   // <-- added for termination checking
+    for lowElement < highElement {
+        mid = (lowElement + highElement) / 2
         if arr[mid] < target {
-            low = mid // <--- Implementation Error, should be low=mid+1
+            lowElement = mid // <--- Implementation Error, should be lowElement=mid+1
         } else {
-            high = mid
+            highElement = mid
         }
     }
-    return low, low < len(arr) && arr[low] == target
+    return lowElement, lowElement < len(arr) && arr[lowElement] == target
 }
 
 ```
@@ -208,12 +208,12 @@ ERROR Function might not terminate.
 Required termination condition might not hold.
 ```
 
-We might be tempted to try `decreases high` or `decreases len(arr)-low` as termination measures for the loop.
+We might be tempted to try `decreases highElement` or `decreases len(arr)-lowElement` as termination measures for the loop.
 However, this is insufficient since the termination measure must decrease every iteration.
-In iterations where we update `low`, `high` does not decrease, and vice versa.
-The solution is to combine the two as `decreases high - low`.
+In iterations where we update `lowElement`, `highElement` does not decrease, and vice versa.
+The solution is to combine the two as `decreases highElement - lowElement`.
 This measure coincides with the length of the subarray that has not been searched yet.
-If we change back to `low=mid+1`, the program verifies again.
+If we change back to `lowElement=mid+1`, the program verifies again.
 
 
 ## Decreases tuple
@@ -222,10 +222,10 @@ Generally, one can specify a list of expressions with `decreases E1, E2, ..., EN
 
 A tuple termination measure decreases based on the [lexicographical order](https://en.wikipedia.org/wiki/Lexicographic_order) of the tuple elements.
 
-For `BinarySearchArr`, we used `decreases high - low`.
+For `BinarySearchArr`, we used `decreases highElement - lowElement`.
 Alternatively, we could use:
 ``` go
-// @ decreases high, len(arr) - low
+// @ decreases highElement, len(arr) - lowElement
 ```
 
 ## TODO Conditional termination with `if` clauses
