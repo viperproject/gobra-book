@@ -45,7 +45,7 @@ For the case where `target` is found, `idx` gives its position:
 This contract does not yet capture that `idx` must be the first index where `target` is found or else the position where `target` would appear in the sort order.
 
 Here is the first implementation of `BinarySearchArr`.
-The elements with an index between `low` and `high` denote the parts of the array that remain to be searched for `target`.
+The elements with an index between `lowElement` and `highElement` denote the parts of the array that remain to be searched for `target`.
 We must add several loop invariants until this function satisfies its contract.
 ``` go does_not_verify
 ~const N = 1000
@@ -54,18 +54,18 @@ We must add several loop invariants until this function satisfies its contract.
 // @ ensures !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] != target
 // @ ensures found ==> 0 <= idx && idx < len(arr) && arr[idx] == target
 func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
-	low := 0
-	high := len(arr)
+	lowElement := 0
+	highElement := len(arr)
 	mid := 0
-	for low < high {
-		mid = (low + high) / 2
+	for lowElement < highElement {
+		mid = (lowElement + highElement) / 2
 		if arr[mid] < target {
-			low = mid + 1
+			lowElement = mid + 1
 		} else {
-			high = mid
+			highElement = mid
 		}
 	}
-	return low, low < len(arr) && arr[low] == target
+	return lowElement, lowElement < len(arr) && arr[lowElement] == target
 }
 ```
 ``` text
@@ -73,38 +73,38 @@ ERROR Conditional statement might fail.
 Index mid into arr[mid] might be negative.
 ```
 
-The variable `mid` is computed as the average of `low` and `high`.
+The variable `mid` is computed as the average of `lowElement` and `highElement`.
 After comparing `target` with the element `arr[mid]`, we can half the search range:
-If `target` is larger, we search between `mid+1` and `high` in the upper half.
-Otherwise, we search between `low` and `mid` in the lower half.
+If `target` is larger, we search between `mid+1` and `highElement` in the upper half.
+Otherwise, we search between `lowElement` and `mid` in the lower half.
 For this, we need the invariant that `mid` remains a valid index for `arr`:
 ``` go
 	// @ invariant 0 <= mid && mid < len(arr)
 ```
 Let us check whether this invariant works:
 1. Before the first iteration, `mid` is initialized to `0`. Therefore, `0 <= mid && mid < N` trivially holds.
-2. For an arbitrary iteration, assume that the invariant `0 <= mid && mid < N` held before this iteration. Now we must show that after updating `mid = (low + high) / 2`, the invariant still holds (since the rest of the body does not influence `mid`).
-However, this cannot be proven without establishing bounds for `low` and `high`.
+2. For an arbitrary iteration, assume that the invariant `0 <= mid && mid < N` held before this iteration. Now we must show that after updating `mid = (lowElement + highElement) / 2`, the invariant still holds (since the rest of the body does not influence `mid`).
+However, this cannot be proven without establishing bounds for `lowElement` and `highElement`.
 
-We know that `low` and `high` stay between `0` and `len(arr)`,
-and `low` should be smaller than `high`, right?
+We know that `lowElement` and `highElement` stay between `0` and `len(arr)`,
+and `lowElement` should be smaller than `highElement`, right?
 ``` go
-	// @ invariant 0 <= low && low < high && high <= len(arr)
+	// @ invariant 0 <= lowElement && lowElement < highElement && highElement <= len(arr)
 	// @ invariant 0 <= mid && mid < len(arr)
 ```
 ``` text
 ERROR Loop invariant might not be preserved. 
-Assertion low < high might not hold.
+Assertion lowElement < highElement might not hold.
 ```
-The condition `low < high` holds before the first iteration and for every iteration except the last.
+The condition `lowElement < highElement` holds before the first iteration and for every iteration except the last.
 However, an invariant must hold after every iteration, including the last.
-We weaken the condition `low < high` to `low <= high` to address this.
+We weaken the condition `lowElement < highElement` to `lowElement <= highElement` to address this.
 
-Note that after exiting the loop, the loop condition gives `!(low < high)`, while the invariant ensures `low <= high`.
-Together, these imply `low == high`.
+Note that after exiting the loop, the loop condition gives `!(lowElement < highElement)`, while the invariant ensures `lowElement <= highElement`.
+Together, these imply `lowElement == highElement`.
 
 Our next challenge is to find invariants that describe which parts of the array have already been searched and are guaranteed not to contain `target`.
-These invariants, combined with `low == high`, should be sufficient to prove the postcondition by the final iteration.
+These invariants, combined with `lowElement == highElement`, should be sufficient to prove the postcondition by the final iteration.
 Currently, we get the error:
 ``` text
 ERROR Postcondition might not hold. 
@@ -113,30 +113,30 @@ Assertion !found ==> forall i int :: {arr[i]} 0 <= i && i < len(arr) ==> arr[i] 
 
 To help us find the invariant, let us exemplify the execution of binary search with concrete arguments `BinarySearchArr([7]int{0, 1, 1, 2, 3, 5, 8}, 4)`.
 The following expressions are evaluated at the beginning of the loop and once after the loop:
-| `low` | `high` | `arr[:low]` | `arr[low:high]` | `arr[high:]` |
+| `lowElement` | `highElement` | `arr[:lowElement]` | `arr[lowElement:highElement]` | `arr[highElement:]` |
 |-------|--------|-------------|-------------------|----------------|
 | 0     | 7      | []          | [0 1 1 2 3 5 8]   | []             |
 | 4     | 7      | [0 1 1 2]   | [3 5 8]           | []             |
 | 4     | 5      | [0 1 1 2]   | [3 5]             | [8]            |
 | 5     | 5      | [0 1 1 2 3] | []               | [5 8]            |
 
-We observe a pattern: the slice `arr[low:high]` denotes the part of the array we still have to search for.
-All elements in the prefix `arr[:low]` are smaller than `target`, and all elements in the suffix `arr[high:]` are greater than or equal to `target`.
+We observe a pattern: the slice `arr[lowElement:highElement]` denotes the part of the array we still have to search for.
+All elements in the prefix `arr[:lowElement]` are smaller than `target`, and all elements in the suffix `arr[highElement:]` are greater than or equal to `target`.
 Translating this into invariants gives:
 ``` go
-	// @ invariant forall i int :: {arr[i]} 0 <= i && i < low ==> arr[i] < target
-	// @ invariant forall j int :: {arr[j]} high <= j && j < len(arr) ==>  target <= arr[j]
+	// @ invariant forall i int :: {arr[i]} 0 <= i && i < lowElement ==> arr[i] < target
+	// @ invariant forall j int :: {arr[j]} highElement <= j && j < len(arr) ==>  target <= arr[j]
 ```
 
 Since the array is still known to be sorted, we can simplify this further by relating `target` to the elements
-`arr[low-1]` and `arr[high]`, while ensuring the indices remain within bounds.
+`arr[lowElement-1]` and `arr[highElement]`, while ensuring the indices remain within bounds.
 ``` go
-	// @ invariant low > 0 ==> arr[low-1] < target
-	// @ invariant high < len(arr) ==>  target <= arr[high]
+	// @ invariant lowElement > 0 ==> arr[lowElement-1] < target
+	// @ invariant highElement < len(arr) ==>  target <= arr[highElement]
 ```
 
-When exiting the loop, we know that `low == high`.
-If `target` is contained in `arr`, it must be located at index `low`, which we check for with `arr[low] == target`.
+When exiting the loop, we know that `lowElement == highElement`.
+If `target` is contained in `arr`, it must be located at index `lowElement`, which we check for with `arr[lowElement] == target`.
 By combining all invariants, the postcondition can be proven now.
 However, clients still fail to assert some desired properties.
 
@@ -214,22 +214,22 @@ func FinalClient() {
 // @ ensures idx < len(arr) ==> target <= arr[idx]
 // @ ensures found == (idx < len(arr) && arr[idx] == target)
 func BinarySearchArr(arr [N]int, target int) (idx int, found bool) {
-	low := 0
-	high := len(arr)
+	lowElement := 0
+	highElement := len(arr)
 	mid := 0
-	// @ invariant 0 <= low && low <= high && high <= len(arr)
+	// @ invariant 0 <= lowElement && lowElement <= highElement && highElement <= len(arr)
 	// @ invariant 0 <= mid && mid < len(arr)
-	// @ invariant low > 0 ==> arr[low-1] < target
-	// @ invariant high < len(arr) ==> target <= arr[high]
-	for low < high {
-		mid = (low + high) / 2
+	// @ invariant lowElement > 0 ==> arr[lowElement-1] < target
+	// @ invariant highElement < len(arr) ==> target <= arr[highElement]
+	for lowElement < highElement {
+		mid = (lowElement + highElement) / 2
 		if arr[mid] < target {
-			low = mid + 1
+			lowElement = mid + 1
 		} else {
-			high = mid
+			highElement = mid
 		}
 	}
-	return low, low < len(arr) && arr[low] == target
+	return lowElement, lowElement < len(arr) && arr[lowElement] == target
 }
 ```
 

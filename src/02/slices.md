@@ -245,23 +245,23 @@ func BinarySearch(s []int, target int) (idx int, found bool) {
 	if len(s) == 0 {
 		return 0, false
 	}
-	low := 0
-	high := len(s)
+	lowElement := 0
+	highElement := len(s)
 	mid := 0
 	// @ invariant forall i int :: {&s[i]} 0 <= i && i < len(s) ==> acc(&s[i], 1/2)
-	// @ invariant 0 <= low && low <= high && high <= len(s)
+	// @ invariant 0 <= lowElement && lowElement <= highElement && highElement <= len(s)
 	// @ invariant 0 <= mid && mid < len(s)
-	// @ invariant low > 0 ==> s[low-1] < target
-	// @ invariant high < len(s) ==> target <= s[high]
-	for low < high {
-		mid = (low + high) / 2
+	// @ invariant lowElement > 0 ==> s[lowElement-1] < target
+	// @ invariant highElement < len(s) ==> target <= s[highElement]
+	for lowElement < highElement {
+		mid = (lowElement + highElement) / 2
 		if s[mid] < target {
-			low = mid + 1
+			lowElement = mid + 1
 		} else {
-			high = mid
+			highElement = mid
 		}
 	}
-	return low, low < len(s) && s[low] == target
+	return lowElement, lowElement < len(s) && s[lowElement] == target
 }
 
 func client() {

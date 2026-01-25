@@ -31,40 +31,40 @@ const N = MaxInt64
 // @ ensures idx < len(arr) ==> target <= arr[idx]
 // @ ensures found == (idx < len(arr) && arr[idx] == target)
 func BinarySearchOverflow(arr [N]int, target int) (idx int, found bool) {
-	low := 0
-	high := len(arr)
+	lowElement := 0
+	highElement := len(arr)
 	mid := 0
-	// @ invariant 0 <= low && low <= high && high <= len(arr)
+	// @ invariant 0 <= lowElement && lowElement <= highElement && highElement <= len(arr)
 	// @ invariant 0 <= mid && mid < len(arr)
-	// @ invariant low > 0 ==> arr[low-1] < target
-	// @ invariant high < len(arr) ==> target <= arr[high]
-	for low < high {
-		mid = (low + high) / 2  // <--- problematic expression
+	// @ invariant lowElement > 0 ==> arr[lowElement-1] < target
+	// @ invariant highElement < len(arr) ==> target <= arr[highElement]
+	for lowElement < highElement {
+		mid = (lowElement + highElement) / 2  // <--- problematic expression
 		if arr[mid] < target {
-			low = mid + 1
+			lowElement = mid + 1
 		} else {
-			high = mid
+			highElement = mid
 		}
 	}
-	if low < len(arr) {
-	 	return low, arr[low] == target
+	if lowElement < len(arr) {
+	 	return lowElement, arr[lowElement] == target
 	} else {
-	 	return low, false
+	 	return lowElement, false
 	}
 }
 ```
 ``` text
 ERROR Expression may cause integer overflow.
-Expression (low + high) / 2 might cause integer overflow.
+Expression (lowElement + highElement) / 2 might cause integer overflow.
 ```
-<!-- TODO if it works without error use: `return low, low < len(arr) && arr[low] == target` otherwise explain why not
+<!-- TODO if it works without error use: `return lowElement, lowElement < len(arr) && arr[lowElement] == target` otherwise explain why not
 Relevant issue: https://github.com/viperproject/gobra/issues/816 -->
-For example, for `low = N/2` and `high = N`, the sum `low + high` cannot be represented by an `int`, and the result will be negative.
-The solution is to replace the offending statement `mid = (low + high) / 2` with:
+For example, for `lowElement = N/2` and `highElement = N`, the sum `lowElement + highElement` cannot be represented by an `int`, and the result will be negative.
+The solution is to replace the offending statement `mid = (lowElement + highElement) / 2` with:
 ``` go
-mid = (high-low) / 2 + low
+mid = (highElement-lowElement) / 2 + lowElement
 ```
-The subtraction does not overflow since `high >= low` and `low >= 0` holds.
+The subtraction does not overflow since `highElement >= lowElement` and `lowElement >= 0` holds.
 After this change, Gobra reports no errors.
 
 
