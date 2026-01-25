@@ -13,18 +13,18 @@ Holding write permissions, we can add entries.
 In specifications, we can check with `in` if a key is contained in the map.
 ``` go verifies
 watched["Blade Runner"] = true
-// @ assert "Blade Runner" in watched && len(watched) == 1
+// @ assert "Blade Runner" elem watched && len(watched) == 1
 ```
 
 The values can be retrieved with their keys.
 Note that key elements must be comparable.
 For example, one cannot use other maps, slices, and functions as keys.
 ``` go verifies
-elem, ok := watched["Blade Runner"]
-// @ assert ok && elem
+element, ok := watched["Blade Runner"]
+// @ assert ok && element
 // non-existing key
-elem, ok := watched["Dune"]
-// @ assert !ok && !elem
+element, ok := watched["Dune"]
+// @ assert !ok && !element
 ```
 
 ## `nil` map
