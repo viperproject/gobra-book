@@ -66,7 +66,7 @@ is self-framing, while the following is not:
 // @ ensures *x == old(*y) && acc(x) && acc(y)
 ```
 
-As an exception, the assertion from an `assert` statement must not be self-framing.
+As an exception, the assertion from an `assert` statement need not be self-framing.
 For example, we can write `*x == 1` instead of `acc(x) && *x == 1`.
 However, Gobra reports an error if `acc(x)` is not held in the state.
 ``` go verifies
