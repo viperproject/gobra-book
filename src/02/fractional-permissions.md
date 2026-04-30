@@ -129,10 +129,10 @@ with the postcondition `p.left == old(p.left) && p.right == old(p.right)`.
 ## Fractional permissions and pointers
 For a pointer `x`, for any positive permission amount `p`, `acc(x, p)` implies `x != nil`.
 But `acc(x1, 1/2) && acc(x2, 1/2)` does no longer imply `x1 != x2`.
-If we have `2/3` fractional permission to `x1` instead, we can now infer `x1 != x2` 
+If we have `2/3` fractional permission to `x1` and `x2` instead, we can now infer `x1 != x2` 
 since permission amounts to the same location are added together:
 ``` go verifies
-// @ requires acc(x1, 2/3) && acc(x2, 1/2)
+// @ requires acc(x1, 2/3) && acc(x2, 2/3)
 // @ ensures x1 != x2
 func fact(x1, x2 *int) {}
 ```
