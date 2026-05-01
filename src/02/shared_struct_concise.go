@@ -1,10 +1,10 @@
 package sharedstruct
 
-// ANCHOR: Scale
 type Coord struct {
 	x, y int
 }
 
+// ANCHOR: Scale
 // @ preserves acc(c) // changed
 // @ ensures   c.x == old(c.x) * factor
 // @ ensures   c.y == old(c.y) * factor
