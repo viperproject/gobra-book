@@ -1,7 +1,6 @@
 [book]
 authors = ["Ali Gottschall", "João Pereira"]
 language = "en"
-multilingual = false
 src = "src"
 title = "Practical Program Verification in Go with Gobra (alpha)"
 

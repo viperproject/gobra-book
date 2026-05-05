@@ -19,7 +19,7 @@ This assumes you have [Rust's package manager cargo installed](https://doc.rust-
 
 Install `mdbook` with
 ``` sh
-cargo install mdbook
+cargo install mdbook --locked --version 0.4.40
 ```
 
 For the interactive quizzes we need the `mdbook-quiz` preprocessor and the preprocessor to check all links.

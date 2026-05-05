@@ -40,10 +40,10 @@ In this section, we specifically look at _shared structs_.
 An example with _shared arrays_ is shown in a [following section](./quantified-permission.md).
 
 ## Shared structs
-The fields of structs can be addressed individually.
+The fields of structs must be addressed individually.
 For example, access can be specified to the field `x` of a shared struct `c` with `acc(&c.x)`.
 
-In the following example, we use structs representing 2D coordinates and implement a method, `Scale,` to multiply them by a scalar factor.
+In the following example, we use structs representing 2D coordinates and implement a method, `Scale`, to multiply them by a scalar factor.
 ``` go does_not_verify
 {{#include shared_struct.go:Scale}}
 
@@ -68,6 +68,13 @@ We may reference them directly without errors:
 ``` go verifies
 {{#include shared_struct.go:client2}}
 ```
+
+Since one often specifies permissions for all fields of a shared struct `c`, Gobra provides the shorthand `acc(c)`, which is syntactic sugar for `acc(&c.x) && acc(&c.y)` if `x` and `y` are this struct's only fields.
+Thus, `Scale` can be specified more concisely in the following way:
+``` go verifies
+{{#include shared_struct_concise.go:Scale}}
+```
+
 
 ## Shared parameters (`share`)
 It is not possible to mark parameters with `@`, as whether a parameter is shared is local to the function and should not be exposed in its signature.
