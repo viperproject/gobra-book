@@ -40,7 +40,7 @@ In this section, we specifically look at _shared structs_.
 An example with _shared arrays_ is shown in a [following section](./quantified-permission.md).
 
 ## Shared structs
-The fields of structs can be addressed individually.
+The fields of structs must be addressed individually.
 For example, access can be specified to the field `x` of a shared struct `c` with `acc(&c.x)`.
 
 In the following example, we use structs representing 2D coordinates and implement a method, `Scale`, to multiply them by a scalar factor.
