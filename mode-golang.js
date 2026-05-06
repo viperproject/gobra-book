@@ -71,7 +71,7 @@ ace.define(
     var GolangHighlightRules = function () {
       var gobra_keywords =
         "invariant|requires|ensures|preserves|trusted|share|opaque|reveal|outline|pred|pure|exists|forall|assume|apply|inhale|exhale|assert|refute|ghost|implements|unfolding|let|fold|unfold|decreases|as|domain|axiom|adt|match|shared|exclusive|predicate|writePerm|noPerm|initEnsures|importRequires|proof|with|backend";
-      var gobra_operators = "==>|::|in|===|!==|@|--*|#|<!|!>"; // .. ?
+      var gobra_operators = "==>|::|in|elem|===|!==|@|--*|#|<!|!>"; // .. ?
       var gobra_types = "seq|set|mset|dict|option|gpointer";
       var gobra_functions = "acc|old|before|some|get|none|typeOf|isComparable";
 

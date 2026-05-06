@@ -9,7 +9,7 @@ func sequences()  {
 	// Constructing from a literal
 	s := seq[int]{0, 1, 1, 2, 3}
 	// Membership check
-	assert 1 in s && !(4 in s)
+	assert 1 elem s && !(4 elem s)
 	// Lookup
 	assert s[4] == 3
 	// Integer sequence shorthand
@@ -61,7 +61,7 @@ func sets() {
 	// Conversion from a set
 	s4 := set(s1)
 	// Membership
-	assert 1 in set[int]{1, 2} && !(0 in set[int]{1, 2})
+	assert 1 elem set[int]{1, 2} && !(0 elem set[int]{1, 2})
 	// Set operations
 	assert set[int]{0, 2} subset set[int]{0, 1, 2}
 	assert set[int]{0, 2} union set[int]{1} == set[int]{0, 1, 2}

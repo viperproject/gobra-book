@@ -10,7 +10,7 @@ The accessibility predicate `acc(watched)` is for the entire map.
 Individual elements, as in slices, are not addressable.
 
 Holding write permissions, we can add entries.
-In specifications, we can check with `in` if a key is contained in the map.
+In specifications, we can check with `elem` if a key is contained in the map.
 ``` go verifies
 watched["Blade Runner"] = true
 // @ assert "Blade Runner" elem watched && len(watched) == 1
