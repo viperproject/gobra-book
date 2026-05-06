@@ -12,7 +12,7 @@ The type `seq[T]` represents finite sequences with elements of type `T`.
 | `x ++ y`       | `seq[T]`    | `seq[T]`    | `seq[T]`           | concatenation                                                                      |
 | `x[i]`         | `seq[T]`    |             | `T`                | lookup the element at index `i` [^1]                                               |
 | `x == y`       | `seq[T]`    | `seq[T]`    | `bool`             | equality                                                                           |
-| `x in y`       | `T`         | `seq[T]`    | `bool`             | `true` if and only if `x` is an element of `y`                                     |
+| `x elem y`     | `T`         | `seq[T]`    | `bool`             | `true` if and only if `x` is an element of `y`                                     |
 | `seq[T]{}`     |             |             | `seq[T]`           | empty sequence                                                                     |
 | `seq[T]{x, y}` | `T`         | `T`         | `seq[T]`           | literal[^2]                                                                        |
 | `seq[x..y]`    | `I`         | `I`         | `seq[I]` [^3]      | integer sequence \\( [x, x+1, \ldots, y-1] \\)                                     |
@@ -52,7 +52,7 @@ The type `set[T]` represents [mathematical sets](https://en.wikipedia.org/wiki/S
 | `x setminus y`     | `set[T]`    | `set[T]`    | `set[T]`           | \\( x \setminus y\\)                           |
 | `x subset y`       | `set[T]`    | `set[T]`    | `bool`             | \\( x \subseteq y\\)                           |
 | `x == y`       | `set[T]`    | `set[T]`    | `bool`             | \\( x = y\\)                           |
-| `x in y`           | `T`         | `set[T]`    | `bool`             | \\( x \in y\\)                                 |
+| `x elem y`         | `T`         | `set[T]`    | `bool`             | \\( x \in y\\)                                 |
 | `len(x)`           | `set[T]`    |             | `int`              | \\( \|x\| \\)                                  |
 | `x # y`            | `T`         | `set[T]`    | int                | 1 if \\(x \in y\\) else 0                      |
 | `set(x)`           | `set[T]`    |             | `set[T]`           | conversion from a set                          |
@@ -85,7 +85,7 @@ The multiset operations respect the multiplicities of the elements.
 | `x setminus y`     | `mset[T]`    | `mset[T]`    | `mset[T]`           |
 | `x subset y`       | `mset[T]`    | `mset[T]`    | `bool`             |
 | `x == y`       | `mset[T]`    | `mset[T]`    | `bool`             | 
-| `x in y`           | `T`         | `mset[T]`    | `bool`             | 
+| `x elem y`         | `T`         | `mset[T]`    | `bool`             |
 | `len(x)`           | `mset[T]`    |             | `int`              |
 | `x # y`            | `T`         | `mset[T]`   | int                | multiplicity of the element `x` in `y` |
 | `mset(x)`           | `mset[T]`    |             | `mset[T]`           | conversion from a multiset                          |
@@ -121,7 +121,7 @@ The type `dict[K]V` represents dictionaries with keys of type `K` and values of 
         m1 := dict[string]int{ "one": 1, "two": 2, "one": -1}
         ^
     ```
-[^6]: Requires `y in domain(x)`. Otherwise, an error is reported:
+[^6]: Requires `y elem domain(x)`. Otherwise, an error is reported:
     ``` go
     m1 := dict[string]int{ "one": 1, "two": 2}
     assert m1["three"] == 3
